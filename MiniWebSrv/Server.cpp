@@ -10,19 +10,26 @@ ConnFilter::AllowAll Server::DefaultConnFilter;
 RespSource::CommonError Server::CommonErrRespSource;
 
 Server::Server(unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
-	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), NextConn(nullptr)
+	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr),
+	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
+	NextConn(nullptr), IsRunning(false)
 {
 	
 }
 
 Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
-	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), NextConn(nullptr)
+	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr),
+	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
+	NextConn(nullptr), IsRunning(false)
 {
 
 }
 
 Server::~Server()
 {
+	for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
+		delete *NowI;
+
 	if (MyConnF!=&DefaultConnFilter)
 		delete MyConnF;
 
@@ -54,6 +61,8 @@ bool Server::Run()
 {
 	if (!RunTh)
 	{
+		IsRunning=true;
+
 		RestartAccept();
 		RestartTimer();
 
@@ -66,7 +75,32 @@ bool Server::Run()
 
 bool Server::Stop(boost::posix_time::time_duration Timeout)
 {
-	return true;
+	if (RunTh)
+	{
+		MyIOS.post(boost::bind(&Server::StopInternal,this));
+		if (!RunTh->timed_join(Timeout))
+		{
+			//Terminate the threads forcefully.
+			MyIOS.stop();
+			//Wait for the last handler invocation to return.
+			RunTh->timed_join(boost::posix_time::seconds(1));
+			delete RunTh;
+			RunTh=nullptr;
+
+			for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
+				delete *NowI;
+
+			ConnLst.clear();
+			try { NextConn->Stop(); delete NextConn; NextConn=nullptr; }
+			catch (...) { }
+
+			return false;
+		}
+		else
+			return true;
+	}
+	else
+		return true;
 }
 
 void Server::OnAccept(const boost::system::error_code &error)
@@ -75,6 +109,7 @@ void Server::OnAccept(const boost::system::error_code &error)
 	{
 		if ((*MyConnF)(PeerEndp.address()))
 		{
+			TotalConnCount++;
 			NextConn->Start(MyRespSource);
 			ConnLst.push_back(NextConn);
 			NextConn=nullptr;
@@ -95,12 +130,19 @@ void Server::OnTimer(const boost::system::error_code &error)
 	if (error)
 		return;
 
+	unsigned int ActiveConnCount=0, CurrRespCount=0;
 	for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
 	{
 		if ((*NowI)->OnStep(StepDurationSeconds))
+		{
+			++ActiveConnCount;
+			CurrRespCount+=(*NowI)->GetResponseCount();
 			++NowI;
+		}
 		else
 		{
+			BaseRespCount+=(*NowI)->GetResponseCount();
+
 			std::list<Connection *>::iterator DelConnI=NowI;
 			++NowI;
 			delete *DelConnI;
@@ -108,20 +150,42 @@ void Server::OnTimer(const boost::system::error_code &error)
 		}
 	}
 
+	ConnCount=ActiveConnCount;
+	TotalRespCount=BaseRespCount + CurrRespCount;
+
 	RestartTimer();
+}
+
+void Server::StopInternal()
+{
+	IsRunning=false;
+	try { MyAcceptor.close(); }
+	catch (...) { }
+
+	try { MyStepTim.cancel(); }
+	catch (...) { }
+
+	for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
+		(*NowI)->Stop();
 }
 
 void Server::RestartAccept()
 {
-	if (!NextConn)
-		NextConn=new Connection(MyIOS,&CommonErrRespSource);
+	if (IsRunning)
+	{
+		if (!NextConn)
+			NextConn=new Connection(MyIOS,&CommonErrRespSource);
 
-	MyAcceptor.async_accept(NextConn->GetSocket(),PeerEndp,
-		boost::bind(&Server::OnAccept,this,boost::asio::placeholders::error));
+		MyAcceptor.async_accept(NextConn->GetSocket(),PeerEndp,
+			boost::bind(&Server::OnAccept,this,boost::asio::placeholders::error));
+	}
 }
 
 void Server::RestartTimer()
 {
-	MyStepTim.expires_from_now(StepDuration);
-	MyStepTim.async_wait(boost::bind(&Server::OnTimer,this,boost::asio::placeholders::error));
+	if (IsRunning)
+	{
+		MyStepTim.expires_from_now(StepDuration);
+		MyStepTim.async_wait(boost::bind(&Server::OnTimer,this,boost::asio::placeholders::error));
+	}
 }

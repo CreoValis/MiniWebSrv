@@ -32,6 +32,10 @@ public:
 	bool Run();
 	bool Stop(boost::posix_time::time_duration Timeout);
 
+	inline unsigned int GetConnCount() { return ConnCount; }
+	inline unsigned int GetTotalConnCount() { return TotalConnCount; }
+	inline unsigned int GetResponseCount() { return TotalRespCount; }
+
 protected:
 	boost::asio::io_service MyIOS;
 	boost::asio::deadline_timer MyStepTim;
@@ -42,10 +46,14 @@ protected:
 	IConnFilter *MyConnF;
 	IRespSource *MyRespSource;
 
+	volatile unsigned int ConnCount;
+	volatile unsigned int TotalConnCount, TotalRespCount;
+	unsigned int BaseRespCount;
 	std::list<Connection *> ConnLst;
 
 	boost::asio::ip::tcp::endpoint PeerEndp;
 	Connection *NextConn;
+	bool IsRunning;
 
 	static ConnFilter::AllowAll DefaultConnFilter;
 	static RespSource::CommonError CommonErrRespSource;
@@ -55,6 +63,7 @@ protected:
 
 	void OnAccept(const boost::system::error_code &error);
 	void OnTimer(const boost::system::error_code &error);
+	void StopInternal();
 
 	void RestartAccept();
 	void RestartTimer();
