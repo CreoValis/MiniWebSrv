@@ -41,7 +41,7 @@ void Connection::Stop()
 bool Connection::OnStep(unsigned int StepInterval)
 {
 	SilentTime+=StepInterval;
-	if (SilentTime<=Config::MaxSilentTime)
+	if (SilentTime>Config::MaxSilentTime)
 	{
 		MySock.close();
 		return !IsDeletable;
@@ -459,6 +459,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 	{
 		while (RespLength)
 		{
+			SilentTime=0;
 			CurrPos=(char *)WriteBuff.Allocate(Config::WriteBuffSize);
 
 			unsigned int ReadLength;
@@ -489,6 +490,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 		while (true)
 		{
+			SilentTime=0;
 			CurrPos=(char *)WriteBuff.Allocate(Config::WriteBuffSize);
 
 			unsigned int ReadLength;
