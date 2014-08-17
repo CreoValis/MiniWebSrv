@@ -24,7 +24,7 @@ public:
 		virtual const char *GetContentTypeCharset() const { return "utf-8"; }
 
 		virtual unsigned long long GetLength() { return ~(unsigned int)0; }
-		virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength);
+		virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength, boost::asio::yield_context &Ctx);
 
 	private:
 		RESPONSECODE RespCode;
@@ -34,11 +34,11 @@ public:
 	};
 
 	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd)
-	{ return CreateFromException(Method,Resource,Query,HeaderA,ContentBuff,ContentBuffEnd,NULL); }
+		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS)
+	{ return CreateFromException(Method,Resource,Query,HeaderA,ContentBuff,ContentBuffEnd,ParentIOS,NULL); }
 
 	IResponse *CreateFromException(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, const std::exception *Ex);
+		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS, const std::exception *Ex);
 
 	inline void SetServerName(const char *NewName) { ServerNameStr=NewName; }
 

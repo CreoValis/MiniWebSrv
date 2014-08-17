@@ -7,7 +7,7 @@
 using namespace HTTP;
 
 Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS) : MyStrand(MyIOS), MySock(MyIOS),
-	SilentTime(0), IsDeletable(true),
+	SilentTime(0), IsDeletable(true), ResponseCount(0),
 	MyRespSource(nullptr), ServerName("MiniWebSrv"),
 	ErrorRS(NewErrorRS),
 	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr), PostHeaderBuffPos(nullptr)
@@ -17,7 +17,8 @@ Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *
 
 Connection::~Connection()
 {
-	MySock.close();
+	try { MySock.close(); }
+	catch (...) { }
 	delete[] PostHeaderBuff;
 
 	CurrQuery.DeleteUploadedFiles();
@@ -29,6 +30,12 @@ void Connection::Start(IRespSource *NewRespSource)
 
 	MyRespSource=NewRespSource;
 	boost::asio::spawn(MyStrand,boost::bind(&Connection::ProtocolHandler,this,_1));
+}
+
+void Connection::Stop()
+{
+	try { MySock.close(); }
+	catch (...) { }
 }
 
 bool Connection::OnStep(unsigned int StepInterval)
@@ -107,6 +114,8 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 		while (IsKeepAlive)
 		{
 			ContinueRead(Yield);
+			if (!IsKeepAlive)
+				return;
 
 			unsigned int RelevantLength;
 			const unsigned char *RelevantBuff=ReadBuff.GetRelevantData(RelevantLength);
@@ -375,22 +384,24 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 
 bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 {
+	ResponseCount++;
+
 	IResponse *CurrResp;
 	try
 	{
 		CurrResp=MyRespSource->Create(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff);
+			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service());
 	}
 	catch (const std::exception &Ex)
 	{
 		(void)Ex;
 		CurrResp=ErrorRS->CreateFromException(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,&Ex);
+			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service(),&Ex);
 	}
 	catch (...)
 	{
 		CurrResp=ErrorRS->Create(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff);
+			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service());
 	}
 
 	char *CurrPos=(char *)WriteBuff.Allocate(Config::MaxHeadersLength);
@@ -451,7 +462,8 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 			CurrPos=(char *)WriteBuff.Allocate(Config::WriteBuffSize);
 
 			unsigned int ReadLength;
-			bool IsFinished=CurrResp->Read((unsigned char *)CurrPos,Config::WriteBuffSize,ReadLength);
+			bool IsFinished=CurrResp->Read((unsigned char *)CurrPos,Config::WriteBuffSize,ReadLength,
+				Yield);
 
 			if (ReadLength<=RespLength)
 				RespLength-=ReadLength;
@@ -480,7 +492,8 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 			CurrPos=(char *)WriteBuff.Allocate(Config::WriteBuffSize);
 
 			unsigned int ReadLength;
-			bool IsFinished=CurrResp->Read((unsigned char *)CurrPos + ChunkHeaderLen,Config::WriteBuffSize - ChunkHeaderLen - ChunkFooterLength,ReadLength);
+			bool IsFinished=CurrResp->Read((unsigned char *)CurrPos + ChunkHeaderLen,Config::WriteBuffSize - ChunkHeaderLen - ChunkFooterLength,ReadLength,
+				Yield);
 			if (ReadLength)
 			{
 				sprintf(CurrPos,"%08x\r\n",ReadLength);

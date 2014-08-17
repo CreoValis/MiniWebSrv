@@ -30,7 +30,8 @@ public:
 		virtual const char *GetContentTypeCharset() const { return NULL; }
 
 		virtual unsigned long long GetLength() { return FileSize; }
-		virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength);
+		virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength,
+			boost::asio::yield_context &Ctx);
 
 	private:
 		static const unsigned long long NotModifiedSize=~(unsigned long long)0;
@@ -44,7 +45,8 @@ public:
 	};
 
 	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd);
+		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+		boost::asio::io_service &ParentIOS);
 
 private:
 	boost::filesystem::path Root;

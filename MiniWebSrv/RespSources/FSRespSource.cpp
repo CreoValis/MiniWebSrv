@@ -50,7 +50,8 @@ bool FS::Response::GetExtraHeader(unsigned int Index,
 		return false;
 }
 
-bool FS::Response::Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength)
+bool FS::Response::Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength,
+		boost::asio::yield_context &Ctx)
 {
 	if (FileSize!=NotModifiedSize)
 	{
@@ -77,7 +78,8 @@ FS::FS(const boost::filesystem::path &NewRoot) : Root(NewRoot)
 }
 
 IResponse *FS::Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd)
+		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+		boost::asio::io_service &ParentIOS)
 {
 	boost::filesystem::path Target;
 	try

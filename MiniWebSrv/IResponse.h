@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/asio/spawn.hpp>
+
 #include "Common.h"
 
 namespace HTTP
@@ -22,7 +24,8 @@ public:
 	@return The length of the response, or ~0, if it's unknown.*/
 	virtual unsigned long long GetLength()=0;
 	/**@return True, if there's more data to read.*/
-	virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength)=0;
+	virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength,
+		boost::asio::yield_context &Ctx)=0;
 };
 
 }; //HTTP

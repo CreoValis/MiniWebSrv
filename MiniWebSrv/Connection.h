@@ -3,7 +3,6 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
-#include <boost/coroutine/all.hpp>
 
 #include "Common/StreamReadBuff.h"
 #include "Common/WriteBuffQueue.h"
@@ -30,10 +29,13 @@ public:
 	~Connection();
 
 	void Start(IRespSource *NewRespSource);
+	/**Closes the connection socket.*/
+	void Stop();
 	/**@return False, if the connection is closed, and it should be deleted.*/
 	bool OnStep(unsigned int StepInterval);
 
 	inline boost::asio::ip::tcp::socket &GetSocket() { return MySock; }
+	inline unsigned int GetResponseCount() const { return ResponseCount; }
 
 protected:
 	boost::asio::strand MyStrand;
@@ -41,6 +43,7 @@ protected:
 
 	unsigned int SilentTime;
 	bool IsDeletable;
+	unsigned int ResponseCount;
 
 	METHOD CurrMethod;
 	std::string CurrResource;
