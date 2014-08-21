@@ -4,6 +4,8 @@
 
 #include "Server.h"
 #include "RespSources/FSRespSource.h"
+#include "RespSources/ZipRespSource.h"
+#include "RespSources/CombinerRespSource.h"
 
 HANDLE MainThreadH=INVALID_HANDLE_VALUE;
 volatile bool IsRunning=true;
@@ -31,7 +33,18 @@ int main(int argc, char* argv[])
 
 	std::cout << "Starting." << std::endl;
 	HTTP::Server MiniWS(8880);
-	MiniWS.SetResponseSource(new HTTP::RespSource::FS("E:"));
+
+	{
+		HTTP::RespSource::Combiner *Combiner=new HTTP::RespSource::Combiner();
+		Combiner->AddRespSource("/daloskonyv",new HTTP::RespSource::Zip("E:\\test.zip"));
+		Combiner->AddRespSource("",new HTTP::RespSource::FS("E:"));
+
+		Combiner->AddSimpleRewrite("/daloskonyv","/daloskonyv/daloskonyv.htm");
+		Combiner->AddSimpleRewrite("/husky","/Download/NewFiles/Husky.jpg");
+
+		MiniWS.SetResponseSource(Combiner);
+	}
+
 	MiniWS.Run();
 	std::cout << "Started." << std::endl;
 	while (IsRunning)
