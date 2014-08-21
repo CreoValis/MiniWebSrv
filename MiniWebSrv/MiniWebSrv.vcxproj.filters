@@ -47,6 +47,9 @@
     <ClInclude Include="RespSources\detail\MimeDB.h">
       <Filter>RespSources\detail</Filter>
     </ClInclude>
+    <ClInclude Include="RespSources\CombinerRespSource.h">
+      <Filter>RespSources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -69,6 +72,9 @@
     </ClCompile>
     <ClCompile Include="RespSources\detail\MimeDB.cpp">
       <Filter>RespSources\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="RespSources\CombinerRespSource.cpp">
+      <Filter>RespSources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

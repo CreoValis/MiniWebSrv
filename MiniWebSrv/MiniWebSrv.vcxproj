@@ -96,6 +96,7 @@
     <ClInclude Include="IResponse.h" />
     <ClInclude Include="IRespSource.h" />
     <ClInclude Include="QueryParams.h" />
+    <ClInclude Include="RespSources\CombinerRespSource.h" />
     <ClInclude Include="RespSources\CommonErrorRespSource.h" />
     <ClInclude Include="RespSources\detail\MimeDB.h" />
     <ClInclude Include="RespSources\detail\ZipArchive.h" />
@@ -110,6 +111,7 @@
     <ClCompile Include="Connection.cpp" />
     <ClCompile Include="MiniWebSrv.cpp" />
     <ClCompile Include="QueryParams.cpp" />
+    <ClCompile Include="RespSources\CombinerRespSource.cpp" />
     <ClCompile Include="RespSources\CommonErrorRespSource.cpp" />
     <ClCompile Include="RespSources\detail\MimeDB.cpp" />
     <ClCompile Include="RespSources\detail\ZipArchive.cpp" />
