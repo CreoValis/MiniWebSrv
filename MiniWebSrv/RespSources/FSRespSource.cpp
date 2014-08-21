@@ -3,13 +3,10 @@
 #include <stdexcept>
 
 #include "CommonErrorRespSource.h"
+#include "detail/MimeDB.h"
 
 using namespace HTTP;
 using namespace HTTP::RespSource;
-
-const char *FS::UnknownMimeType="application/octet-stream";
-boost::unordered_map<std::string,std::string> FS::ExtMimeMap;
-bool FS::IsExtMimeMapInit=InitExtMimeMap();
 
 FS::Response::Response(const boost::filesystem::path &FileName, const char *MimeType, time_t IfModifiedSince) : MyMimeType(MimeType)
 {
@@ -116,34 +113,5 @@ IResponse *FS::Create(METHOD Method, const std::string &Resource, const QueryPar
 
 const char *FS::GetMimeType(const boost::filesystem::path &FileName)
 {
-	boost::unordered_map<std::string,std::string>::const_iterator FindI=ExtMimeMap.find(FileName.extension().string());
-	if (FindI!=ExtMimeMap.end())
-		return FindI->second.data();
-	else
-		return UnknownMimeType;
-}
-
-bool FS::InitExtMimeMap()
-{
-	ExtMimeMap[".gz"]="application/gzip";
-	ExtMimeMap[".js"]="application/javascript";
-	ExtMimeMap[".json"]="application/json";
-	ExtMimeMap[".pdf"]="application/pdf";
-	ExtMimeMap[".rtf"]="application/rtf";
-	ExtMimeMap[".zip"]="application/zip";
-	ExtMimeMap[".xml"]="application/xml";
-
-	ExtMimeMap[".jpg"]="image/jpeg";
-	ExtMimeMap[".jpeg"]="image/jpeg";
-	ExtMimeMap[".png"]="image/png";
-	ExtMimeMap[".gif"]="image/gif";
-	ExtMimeMap[".svg"]="image/svg+xml";
-
-	ExtMimeMap[".css"]="text/css";
-	ExtMimeMap[".csv"]="text/csv";
-	ExtMimeMap[".htm"]="text/html";
-	ExtMimeMap[".html"]="text/html";
-	ExtMimeMap[".txt"]="text/plain";
-
-	return true;
+	return MimeDB::GetMimeType(FileName.extension().string());
 }

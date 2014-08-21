@@ -67,12 +67,7 @@ public:
 private:
 	ZipArchive MyArch;
 
-	static const char *UnknownMimeType;
-	static boost::unordered_map<std::string,std::string> ExtMimeMap;
-	static bool IsExtMimeMapInit;
-
-	static const char *GetMimeType(const boost::filesystem::path &FileName);
-	static bool InitExtMimeMap();
+	static const char *GetMimeType(const std::string &FileName);
 };
 
 }; //RespSource

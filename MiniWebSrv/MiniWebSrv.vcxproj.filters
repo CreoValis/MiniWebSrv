@@ -44,6 +44,9 @@
     <ClInclude Include="RespSources\detail\ZipArchive.h">
       <Filter>RespSources\detail</Filter>
     </ClInclude>
+    <ClInclude Include="RespSources\detail\MimeDB.h">
+      <Filter>RespSources\detail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -62,6 +65,9 @@
       <Filter>RespSources</Filter>
     </ClCompile>
     <ClCompile Include="RespSources\detail\ZipArchive.cpp">
+      <Filter>RespSources\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="RespSources\detail\MimeDB.cpp">
       <Filter>RespSources\detail</Filter>
     </ClCompile>
   </ItemGroup>

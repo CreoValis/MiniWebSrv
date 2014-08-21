@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 #include "CommonErrorRespSource.h"
+#include "detail/MimeDB.h"
 
 using namespace HTTP;
 using namespace HTTP::RespSource;
@@ -17,10 +18,6 @@ unsigned char Zip::Response::GZipHeaderA[10]={
 	2, //XFL
 	255 //OS
 };
-
-const char *Zip::UnknownMimeType="application/octet-stream";
-boost::unordered_map<std::string,std::string> Zip::ExtMimeMap;
-bool Zip::IsExtMimeMapInit=InitExtMimeMap();
 
 Zip::Response::Response(ZipArchive::Stream *ArchS, const char *MimeType, time_t IfModifiedSince) : MyMimeType(MimeType)
 {
@@ -206,36 +203,12 @@ IResponse *Zip::Create(METHOD Method, const std::string &Resource, const QueryPa
 	catch (...) { return new CommonError::Response(Resource,HeaderA,NULL,RC_NOTFOUND); }
 }
 
-const char *Zip::GetMimeType(const boost::filesystem::path &FileName)
+const char *Zip::GetMimeType(const std::string &FileName)
 {
-	boost::unordered_map<std::string,std::string>::const_iterator FindI=ExtMimeMap.find(FileName.extension().string());
-	if (FindI!=ExtMimeMap.end())
-		return FindI->second.data();
+	std::string::size_type DotPos=FileName.rfind('.');
+
+	if (DotPos!=std::string::npos)
+		return MimeDB::GetMimeType(FileName.substr(DotPos));
 	else
-		return UnknownMimeType;
-}
-
-bool Zip::InitExtMimeMap()
-{
-	ExtMimeMap[".gz"]="application/gzip";
-	ExtMimeMap[".js"]="application/javascript";
-	ExtMimeMap[".json"]="application/json";
-	ExtMimeMap[".pdf"]="application/pdf";
-	ExtMimeMap[".rtf"]="application/rtf";
-	ExtMimeMap[".zip"]="application/zip";
-	ExtMimeMap[".xml"]="application/xml";
-
-	ExtMimeMap[".jpg"]="image/jpeg";
-	ExtMimeMap[".jpeg"]="image/jpeg";
-	ExtMimeMap[".png"]="image/png";
-	ExtMimeMap[".gif"]="image/gif";
-	ExtMimeMap[".svg"]="image/svg+xml";
-
-	ExtMimeMap[".css"]="text/css";
-	ExtMimeMap[".csv"]="text/csv";
-	ExtMimeMap[".htm"]="text/html";
-	ExtMimeMap[".html"]="text/html";
-	ExtMimeMap[".txt"]="text/plain";
-
-	return true;
+		return MimeDB::GetMimeType("");
 }

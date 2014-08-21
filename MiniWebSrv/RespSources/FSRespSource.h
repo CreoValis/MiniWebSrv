@@ -53,12 +53,7 @@ public:
 private:
 	boost::filesystem::path Root;
 
-	static const char *UnknownMimeType;
-	static boost::unordered_map<std::string,std::string> ExtMimeMap;
-	static bool IsExtMimeMapInit;
-
 	static const char *GetMimeType(const boost::filesystem::path &FileName);
-	static bool InitExtMimeMap();
 };
 
 }; //RespSource
