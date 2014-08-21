@@ -97,7 +97,9 @@
     <ClInclude Include="IRespSource.h" />
     <ClInclude Include="QueryParams.h" />
     <ClInclude Include="RespSources\CommonErrorRespSource.h" />
+    <ClInclude Include="RespSources\detail\ZipArchive.h" />
     <ClInclude Include="RespSources\FSRespSource.h" />
+    <ClInclude Include="RespSources\ZipRespSource.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -108,8 +110,12 @@
     <ClCompile Include="MiniWebSrv.cpp" />
     <ClCompile Include="QueryParams.cpp" />
     <ClCompile Include="RespSources\CommonErrorRespSource.cpp" />
+    <ClCompile Include="RespSources\detail\ZipArchive.cpp" />
     <ClCompile Include="RespSources\FSRespSource.cpp" />
-    <ClCompile Include="Server.cpp" />
+    <ClCompile Include="RespSources\ZipRespSource.cpp" />
+    <ClCompile Include="Server.cpp">
+      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NoListing</AssemblerOutput>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

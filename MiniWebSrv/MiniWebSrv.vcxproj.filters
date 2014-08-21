@@ -38,6 +38,12 @@
     <ClInclude Include="Common\CoroAsyncHelper.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="RespSources\ZipRespSource.h">
+      <Filter>RespSources</Filter>
+    </ClInclude>
+    <ClInclude Include="RespSources\detail\ZipArchive.h">
+      <Filter>RespSources\detail</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -52,6 +58,12 @@
     <ClCompile Include="RespSources\FSRespSource.cpp">
       <Filter>RespSources</Filter>
     </ClCompile>
+    <ClCompile Include="RespSources\ZipRespSource.cpp">
+      <Filter>RespSources</Filter>
+    </ClCompile>
+    <ClCompile Include="RespSources\detail\ZipArchive.cpp">
+      <Filter>RespSources\detail</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="RespSources">
@@ -62,6 +74,9 @@
     </Filter>
     <Filter Include="Common">
       <UniqueIdentifier>{90e05b22-712a-41e0-b7b8-580ad000df9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RespSources\detail">
+      <UniqueIdentifier>{83f3fc3e-8ce9-4573-97bd-76b5b6aa15e3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
