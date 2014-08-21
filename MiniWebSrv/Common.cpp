@@ -357,6 +357,7 @@ const std::string &Header::GetHeaderName(HEADERNAME Name)
 	case HN_CONTENT_DISPOSITION: { static const std::string HeaderStr("content-disposition"); return HeaderStr; }
 	case HN_CONTENT_TYPE: { static const std::string HeaderStr("content-type"); return HeaderStr; }
 	case HN_CONTENT_LENGTH: { static const std::string HeaderStr("content-length"); return HeaderStr; }
+	case HN_CONTENT_ENCODING: { static const std::string HeaderStr("content-encoding"); return HeaderStr; }
 	case HN_USER_AGENT: { static const std::string HeaderStr("user-agent"); return HeaderStr; }
 	case HN_IF_MOD_SINCE: { static const std::string HeaderStr("if-modified-since"); return HeaderStr; }
 	case HN_LAST_MODIFIED: { static const std::string HeaderStr("last-modified"); return HeaderStr; }
