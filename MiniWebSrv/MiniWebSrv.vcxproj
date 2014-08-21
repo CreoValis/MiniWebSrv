@@ -71,6 +71,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_WIN32_WINNT=0x0501;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,6 +85,7 @@
     <ClInclude Include="BuildConfig.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="Common\BinUtils.h" />
+    <ClInclude Include="Common\CoroAsyncHelper.h" />
     <ClInclude Include="Common\StreamReadBuff.h" />
     <ClInclude Include="Common\StringUtils.h" />
     <ClInclude Include="Common\WriteBuffQueue.h" />

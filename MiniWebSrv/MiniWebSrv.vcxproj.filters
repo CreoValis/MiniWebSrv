@@ -35,6 +35,9 @@
     <ClInclude Include="RespSources\FSRespSource.h">
       <Filter>RespSources</Filter>
     </ClInclude>
+    <ClInclude Include="Common\CoroAsyncHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
