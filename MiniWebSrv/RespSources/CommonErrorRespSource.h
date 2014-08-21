@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../IRespSource.h"
 
 #include <stdexcept>
