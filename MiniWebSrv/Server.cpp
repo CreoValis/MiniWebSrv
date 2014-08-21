@@ -27,15 +27,7 @@ Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort) : MyS
 
 Server::~Server()
 {
-	for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
-		delete *NowI;
-
-	if (MyConnF!=&DefaultConnFilter)
-		delete MyConnF;
-
-	delete MyRespSource;
-
-	delete NextConn;
+	Stop(boost::posix_time::seconds(0));
 }
 
 void Server::SetConnectionFilter(IConnFilter *NewCF)
@@ -78,26 +70,30 @@ bool Server::Stop(boost::posix_time::time_duration Timeout)
 	if (RunTh)
 	{
 		MyIOS.post(boost::bind(&Server::StopInternal,this));
+		bool RetVal;
 		if (!RunTh->timed_join(Timeout))
 		{
 			//Terminate the threads forcefully.
 			MyIOS.stop();
 			//Wait for the last handler invocation to return.
 			RunTh->timed_join(boost::posix_time::seconds(1));
-			delete RunTh;
-			RunTh=nullptr;
 
-			for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
-				delete *NowI;
-
-			ConnLst.clear();
-			try { NextConn->Stop(); delete NextConn; NextConn=nullptr; }
-			catch (...) { }
-
-			return false;
+			RetVal=false;
 		}
 		else
-			return true;
+			RetVal=true;
+
+		delete RunTh;
+		RunTh=nullptr;
+
+		for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; ++NowI)
+			delete *NowI;
+
+		ConnLst.clear();
+		try { NextConn->Stop(); delete NextConn; NextConn=nullptr; }
+		catch (...) { }
+
+		return RetVal;
 	}
 	else
 		return true;
@@ -165,7 +161,7 @@ void Server::StopInternal()
 	try { MyStepTim.cancel(); }
 	catch (...) { }
 
-	for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
+	for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; ++NowI)
 		(*NowI)->Stop();
 }
 
