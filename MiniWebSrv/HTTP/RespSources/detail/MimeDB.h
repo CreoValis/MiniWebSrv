@@ -12,6 +12,7 @@ class MimeDB
 {
 public:
 	static const char *GetMimeType(const std::string &FileExt);
+	static inline const char *GetUnknownMimeType() { return UnknownMimeType; }
 
 private:
 	static const char *UnknownMimeType;
