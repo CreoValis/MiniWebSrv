@@ -137,6 +137,7 @@ public:
 					{
 						//We can safely "append" our newly allocated buffer.
 						LastBuff.Length+=Length;
+						LastBuff.State=BS_ALLOCATED;
 						return RetBuff;
 					}
 				}
