@@ -113,5 +113,5 @@ IResponse *FS::Create(METHOD Method, const std::string &Resource, const QueryPar
 
 const char *FS::GetMimeType(const boost::filesystem::path &FileName)
 {
-	return MimeDB::GetMimeType(FileName.extension().string());
+	return detail::MimeDB::GetMimeType(FileName.extension().string());
 }

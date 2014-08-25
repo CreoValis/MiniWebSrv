@@ -2,10 +2,10 @@
 
 #include <iostream>
 
-#include "Server.h"
-#include "RespSources/FSRespSource.h"
-#include "RespSources/ZipRespSource.h"
-#include "RespSources/CombinerRespSource.h"
+#include "Http/Server.h"
+#include "Http/RespSources/FSRespSource.h"
+#include "Http/RespSources/ZipRespSource.h"
+#include "Http/RespSources/CombinerRespSource.h"
 
 HANDLE MainThreadH=INVALID_HANDLE_VALUE;
 volatile bool IsRunning=true;

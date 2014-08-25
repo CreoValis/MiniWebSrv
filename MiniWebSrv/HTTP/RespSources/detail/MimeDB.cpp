@@ -1,10 +1,10 @@
 #include "MimeDB.h"
 
-const char *HTTP::MimeDB::UnknownMimeType="application/octet-stream";
-boost::unordered_map<std::string,std::string> HTTP::MimeDB::ExtMimeMap;
-bool HTTP::MimeDB::IsExtMimeMapInit=InitExtMimeMap();
+const char *HTTP::detail::MimeDB::UnknownMimeType="application/octet-stream";
+boost::unordered_map<std::string,std::string> HTTP::detail::MimeDB::ExtMimeMap;
+bool HTTP::detail::MimeDB::IsExtMimeMapInit=InitExtMimeMap();
 
-const char *HTTP::MimeDB::GetMimeType(const std::string &FileExt)
+const char *HTTP::detail::MimeDB::GetMimeType(const std::string &FileExt)
 {
 	boost::unordered_map<std::string,std::string>::const_iterator FindI=ExtMimeMap.find(FileExt);
 	if (FindI!=ExtMimeMap.end())
@@ -13,7 +13,7 @@ const char *HTTP::MimeDB::GetMimeType(const std::string &FileExt)
 		return UnknownMimeType;
 }
 
-bool HTTP::MimeDB::InitExtMimeMap()
+bool HTTP::detail::MimeDB::InitExtMimeMap()
 {
 	ExtMimeMap[".gz"]="application/gzip";
 	ExtMimeMap[".js"]="application/javascript";

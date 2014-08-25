@@ -3,91 +3,118 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="IRespSource.h" />
-    <ClInclude Include="Server.h" />
-    <ClInclude Include="Common.h" />
-    <ClInclude Include="IResponse.h" />
-    <ClInclude Include="BuildConfig.h" />
-    <ClInclude Include="QueryParams.h" />
-    <ClInclude Include="IConnFilter.h" />
-    <ClInclude Include="ConnFilters\AllowAllConnFilter.h">
-      <Filter>ConnFilters</Filter>
+    <ClInclude Include="Http\ConnFilters\AllowAllConnFilter.h">
+      <Filter>HTTP\ConnFilters</Filter>
     </ClInclude>
-    <ClInclude Include="ConnFilters\LoopbackOnlyConnFilter.h">
-      <Filter>ConnFilters</Filter>
+    <ClInclude Include="Http\ConnFilters\LoopbackOnlyConnFilter.h">
+      <Filter>HTTP\ConnFilters</Filter>
     </ClInclude>
-    <ClInclude Include="Common\BinUtils.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Http\Common\BinUtils.h">
+      <Filter>HTTP\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\StreamReadBuff.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Http\Common\StreamReadBuff.h">
+      <Filter>HTTP\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Common\WriteBuffQueue.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Http\Common\WriteBuffQueue.h">
+      <Filter>HTTP\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Connection.h" />
-    <ClInclude Include="Common\StringUtils.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Http\Common\StringUtils.h">
+      <Filter>HTTP\Common</Filter>
     </ClInclude>
-    <ClInclude Include="RespSources\CommonErrorRespSource.h">
-      <Filter>RespSources</Filter>
+    <ClInclude Include="Http\RespSources\CommonErrorRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
     </ClInclude>
-    <ClInclude Include="RespSources\FSRespSource.h">
-      <Filter>RespSources</Filter>
+    <ClInclude Include="Http\RespSources\FSRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
     </ClInclude>
-    <ClInclude Include="Common\CoroAsyncHelper.h">
-      <Filter>Common</Filter>
+    <ClInclude Include="Http\Common\CoroAsyncHelper.h">
+      <Filter>HTTP\Common</Filter>
     </ClInclude>
-    <ClInclude Include="RespSources\ZipRespSource.h">
-      <Filter>RespSources</Filter>
+    <ClInclude Include="Http\RespSources\ZipRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
     </ClInclude>
-    <ClInclude Include="RespSources\detail\ZipArchive.h">
-      <Filter>RespSources\detail</Filter>
+    <ClInclude Include="Http\RespSources\detail\ZipArchive.h">
+      <Filter>HTTP\RespSources\detail</Filter>
     </ClInclude>
-    <ClInclude Include="RespSources\detail\MimeDB.h">
-      <Filter>RespSources\detail</Filter>
+    <ClInclude Include="Http\RespSources\detail\MimeDB.h">
+      <Filter>HTTP\RespSources\detail</Filter>
     </ClInclude>
-    <ClInclude Include="RespSources\CombinerRespSource.h">
-      <Filter>RespSources</Filter>
+    <ClInclude Include="Http\RespSources\CombinerRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\BuildConfig.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\Common.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\Connection.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\IConnFilter.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\IResponse.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\IRespSource.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\QueryParams.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="Http\Server.h">
+      <Filter>HTTP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Http\RespSources\CommonErrorRespSource.cpp">
+      <Filter>HTTP\RespSources</Filter>
+    </ClCompile>
+    <ClCompile Include="Http\RespSources\FSRespSource.cpp">
+      <Filter>HTTP\RespSources</Filter>
+    </ClCompile>
+    <ClCompile Include="Http\RespSources\ZipRespSource.cpp">
+      <Filter>HTTP\RespSources</Filter>
+    </ClCompile>
+    <ClCompile Include="Http\RespSources\detail\ZipArchive.cpp">
+      <Filter>HTTP\RespSources\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="Http\RespSources\detail\MimeDB.cpp">
+      <Filter>HTTP\RespSources\detail</Filter>
+    </ClCompile>
+    <ClCompile Include="Http\RespSources\CombinerRespSource.cpp">
+      <Filter>HTTP\RespSources</Filter>
+    </ClCompile>
     <ClCompile Include="MiniWebSrv.cpp" />
-    <ClCompile Include="Server.cpp" />
-    <ClCompile Include="Common.cpp" />
-    <ClCompile Include="QueryParams.cpp" />
-    <ClCompile Include="Connection.cpp" />
-    <ClCompile Include="RespSources\CommonErrorRespSource.cpp">
-      <Filter>RespSources</Filter>
+    <ClCompile Include="Http\Common.cpp">
+      <Filter>HTTP</Filter>
     </ClCompile>
-    <ClCompile Include="RespSources\FSRespSource.cpp">
-      <Filter>RespSources</Filter>
+    <ClCompile Include="Http\Connection.cpp">
+      <Filter>HTTP</Filter>
     </ClCompile>
-    <ClCompile Include="RespSources\ZipRespSource.cpp">
-      <Filter>RespSources</Filter>
+    <ClCompile Include="Http\QueryParams.cpp">
+      <Filter>HTTP</Filter>
     </ClCompile>
-    <ClCompile Include="RespSources\detail\ZipArchive.cpp">
-      <Filter>RespSources\detail</Filter>
-    </ClCompile>
-    <ClCompile Include="RespSources\detail\MimeDB.cpp">
-      <Filter>RespSources\detail</Filter>
-    </ClCompile>
-    <ClCompile Include="RespSources\CombinerRespSource.cpp">
-      <Filter>RespSources</Filter>
+    <ClCompile Include="Http\Server.cpp">
+      <Filter>HTTP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="RespSources">
-      <UniqueIdentifier>{56cfa918-0ddc-4276-9862-87e9bd4e7fc9}</UniqueIdentifier>
+    <Filter Include="HTTP">
+      <UniqueIdentifier>{6169b300-a200-422f-ba88-933d97a4b440}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ConnFilters">
+    <Filter Include="HTTP\ConnFilters">
       <UniqueIdentifier>{c5ad9cbf-343d-42a4-bc68-a41c9c3899c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common">
+    <Filter Include="HTTP\Common">
       <UniqueIdentifier>{90e05b22-712a-41e0-b7b8-580ad000df9c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="RespSources\detail">
+    <Filter Include="HTTP\RespSources">
+      <UniqueIdentifier>{56cfa918-0ddc-4276-9862-87e9bd4e7fc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HTTP\RespSources\detail">
       <UniqueIdentifier>{83f3fc3e-8ce9-4573-97bd-76b5b6aa15e3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

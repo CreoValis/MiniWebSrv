@@ -5,6 +5,9 @@
 namespace HTTP
 {
 
+namespace detail
+{
+
 class MimeDB
 {
 public:
@@ -16,6 +19,8 @@ private:
 	static bool IsExtMimeMapInit;
 
 	static bool InitExtMimeMap();
+};
+
 };
 
 }; //HTTP
