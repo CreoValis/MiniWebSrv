@@ -210,5 +210,5 @@ const char *Zip::GetMimeType(const std::string &FileName)
 	if (DotPos!=std::string::npos)
 		return detail::MimeDB::GetMimeType(FileName.substr(DotPos));
 	else
-		return detail::MimeDB::GetMimeType("");
+		return detail::MimeDB::GetUnknownMimeType();
 }
