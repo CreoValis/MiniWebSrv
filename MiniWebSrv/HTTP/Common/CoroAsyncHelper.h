@@ -6,6 +6,9 @@
 #include <boost/asio/strand.hpp>
 #include <boost/asio/spawn.hpp>
 
+namespace HTTP
+{
+
 class CoroAsyncHelper
 {
 public:
@@ -28,4 +31,6 @@ private:
 	std::shared_ptr<boost::asio::yield_context::callee_type> CoroCallee;
 
 	static void WakeInternal(std::shared_ptr<boost::asio::yield_context::callee_type> CC) { (*CC)(); }
+};
+
 };
