@@ -6,6 +6,7 @@
 #include <boost/asio.hpp>
 
 #include "Common.h"
+#include "Header.h"
 #include "QueryParams.h"
 #include "IResponse.h"
 

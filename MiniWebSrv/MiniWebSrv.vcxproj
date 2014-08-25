@@ -92,6 +92,7 @@
     <ClInclude Include="Http\Connection.h" />
     <ClInclude Include="Http\ConnFilters\AllowAllConnFilter.h" />
     <ClInclude Include="Http\ConnFilters\LoopbackOnlyConnFilter.h" />
+    <ClInclude Include="HTTP\Header.h" />
     <ClInclude Include="Http\IConnFilter.h" />
     <ClInclude Include="Http\IResponse.h" />
     <ClInclude Include="Http\IRespSource.h" />
@@ -109,6 +110,7 @@
   <ItemGroup>
     <ClCompile Include="Http\Common.cpp" />
     <ClCompile Include="Http\Connection.cpp" />
+    <ClCompile Include="HTTP\Header.cpp" />
     <ClCompile Include="MiniWebSrv.cpp" />
     <ClCompile Include="Http\QueryParams.cpp" />
     <ClCompile Include="Http\RespSources\CombinerRespSource.cpp" />

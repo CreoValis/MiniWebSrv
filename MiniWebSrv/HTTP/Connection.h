@@ -9,6 +9,7 @@
 
 #include "BuildConfig.h"
 #include "Common.h"
+#include "Header.h"
 #include "QueryParams.h"
 #include "Connection.h"
 

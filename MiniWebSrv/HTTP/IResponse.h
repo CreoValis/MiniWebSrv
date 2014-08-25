@@ -3,6 +3,7 @@
 #include <boost/asio/spawn.hpp>
 
 #include "Common.h"
+#include "Header.h"
 
 namespace HTTP
 {

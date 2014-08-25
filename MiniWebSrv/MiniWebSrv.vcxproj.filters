@@ -66,6 +66,9 @@
     <ClInclude Include="Http\Server.h">
       <Filter>HTTP</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\Header.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -98,6 +101,9 @@
       <Filter>HTTP</Filter>
     </ClCompile>
     <ClCompile Include="Http\Server.cpp">
+      <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTP\Header.cpp">
       <Filter>HTTP</Filter>
     </ClCompile>
   </ItemGroup>
