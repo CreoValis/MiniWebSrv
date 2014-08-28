@@ -10,7 +10,7 @@ namespace Config
 	const unsigned int MaxPostBodyLength = 16*1024*1024;
 
 	const unsigned int ReadBuffSize = 4*1024;
-	const unsigned int WriteBuffSize = 16*1024;
+	const unsigned int WriteBuffSize = 24*1024;
 	const unsigned int WriteQueueInitSize = 8;
 
 	const unsigned int MaxSilentTime = 30;
