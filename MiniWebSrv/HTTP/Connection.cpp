@@ -233,6 +233,14 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 						}
 						else
 						{
+							//Parse the "Connection" header.
+							for (const Header &CurrHeader : HeaderA)
+								if (CurrHeader.IntName==HN_CONNECTION)
+								{
+									IsKeepAlive=IsKeepAlive && (!CurrHeader.IsConnectionClose());
+									break;
+								}
+
 							/*We've found the end of the headers. We've can either construct the response now, and reset the
 							parser state, or read the request body.*/
 							if (CurrMethod!=METHOD_POST)
