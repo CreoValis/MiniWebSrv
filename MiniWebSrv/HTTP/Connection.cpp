@@ -88,8 +88,8 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 	{
 		struct
 		{
-			unsigned int MethodPos, MethodEndPos, ResPos, ResEndPos, QueryPos, QueryEndPos;
-			void Reset() { MethodPos=MethodEndPos=ResPos=ResEndPos=QueryPos=QueryEndPos=0; }
+			unsigned int MethodPos, MethodEndPos, ResPos, ResEndPos, QueryPos, QueryEndPos, VerBeginPos;
+			void Reset() { MethodPos=MethodEndPos=ResPos=ResEndPos=QueryPos=QueryEndPos=VerBeginPos=0; }
 		} ReqHead;
 		struct
 		{
@@ -184,6 +184,15 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 						CurrQuery=QueryParams();
 						CurrQuery.AddURLEncoded((const char *)(RelevantBuff + PState.ReqHead.QueryPos),(const char *)(RelevantBuff + PState.ReqHead.QueryEndPos));
 
+						if (PState.ReqHead.VerBeginPos+3<=(unsigned int)(InBuff-RelevantBuff))
+						{
+							if (!memcmp(RelevantBuff + PState.ReqHead.VerBeginPos,"1.0",3))
+								//Request is HTTP/1.0, no keepalive.
+								IsKeepAlive=false;
+						}
+						else
+							throw std::runtime_error("Protocol version not found or invalid");
+
 						ReadBuff.Consume(InBuff-RelevantBuff + 1); //Consume this byte, too.
 						ReadBuff.ResetRelevant();
 						RelevantBuff=ReadBuff.GetRelevantData(RelevantLength);
@@ -197,6 +206,8 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 						HeaderA.reserve(HeaderA.size());
 						HeaderA.clear();
 					}
+					else if (CurrVal=='/')
+						PState.ReqHead.VerBeginPos=InBuff-RelevantBuff + 1;
 					break;
 				case HEADER_END:
 					if (CurrVal=='\n')
