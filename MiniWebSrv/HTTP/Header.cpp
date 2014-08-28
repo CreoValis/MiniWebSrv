@@ -350,6 +350,7 @@ const std::string &Header::GetHeaderName(HEADERNAME Name)
 	case HN_USER_AGENT: { static const std::string HeaderStr("user-agent"); return HeaderStr; }
 	case HN_IF_MOD_SINCE: { static const std::string HeaderStr("if-modified-since"); return HeaderStr; }
 	case HN_LAST_MODIFIED: { static const std::string HeaderStr("last-modified"); return HeaderStr; }
+	case HN_LOCATION: { static const std::string HeaderStr("location"); return HeaderStr; }
 	default: { static const std::string HeaderStr(""); return HeaderStr; }
 	}
 }
