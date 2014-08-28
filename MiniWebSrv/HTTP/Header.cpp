@@ -226,6 +226,11 @@ void Header::ParseContentDisposition(std::string &OutName, std::string &OutFileN
 	}
 }
 
+bool Header::IsConnectionClose() const
+{
+	return strcmp(Value,"close")==0;
+}
+
 time_t Header::GetDateTime() const
 {
 	//                       0         1         2
