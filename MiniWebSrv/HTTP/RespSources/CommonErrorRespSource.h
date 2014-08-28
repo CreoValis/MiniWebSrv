@@ -25,7 +25,7 @@ public:
 		virtual const char *GetContentType() const { return "text/html"; }
 		virtual const char *GetContentTypeCharset() const { return "utf-8"; }
 
-		virtual unsigned long long GetLength() { return ~(unsigned int)0; }
+		virtual unsigned long long GetLength() { return ~(unsigned long long)0; }
 		virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength, boost::asio::yield_context &Ctx);
 
 	private:
