@@ -33,7 +33,7 @@ public:
 		virtual const char *GetContentType() const { return MyMimeType; }
 		virtual const char *GetContentTypeCharset() const { return NULL; }
 
-		virtual unsigned long long GetLength() { return FileSize; }
+		virtual unsigned long long GetLength() { return FileSize!=NotModifiedSize ? FileSize : 0; }
 		virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength,
 			boost::asio::yield_context &Ctx);
 
