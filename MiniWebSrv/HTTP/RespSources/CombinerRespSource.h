@@ -47,7 +47,8 @@ public:
 		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
 		boost::asio::io_service &ParentIOS);
 
-	void AddSimpleRewrite(const std::string &Resource, const std::string &Target) { RewriteMap[Resource]=Target; }
+	void AddSimpleRewrite(const std::string &Resource, const std::string &Target) { RewMap[Resource]=RewHolder(Target); }
+	void AddRedirect(const std::string &Resource, const std::string &Target, bool IsPermanent=true) { RewMap[Resource]=RewHolder(Target,IsPermanent); }
 	void AddRespSource(const std::string &Prefix, IRespSource *RespSource) { HolderA.push_back(RSHolder(Prefix,RespSource)); }
 
 protected:
@@ -63,8 +64,18 @@ protected:
 		bool operator()(const std::string &Resource) const;
 	};
 
+	struct RewHolder
+	{
+		inline RewHolder() { }
+		inline RewHolder(const std::string &NewTarget) : Target(NewTarget), IsRedirect(false) { }
+		inline RewHolder(const std::string &NewTarget, bool IsPermRedirect) : Target(NewTarget), IsRedirect(true), IsPermanentRedirect(IsPermRedirect) { }
+
+		std::string Target;
+		bool IsRedirect, IsPermanentRedirect;
+	};
+
 	std::vector<RSHolder> HolderA;
-	boost::unordered_map<std::string,std::string> RewriteMap;
+	boost::unordered_map<std::string,RewHolder> RewMap;
 };
 
 }; //RespSource

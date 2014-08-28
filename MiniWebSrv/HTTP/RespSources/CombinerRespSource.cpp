@@ -44,9 +44,14 @@ IResponse *Combiner::Create(METHOD Method, const std::string &Resource, const Qu
 {
 	const std::string *ResPtr=&Resource;
 	{
-		boost::unordered_map<std::string,std::string>::const_iterator FindI=RewriteMap.find(*ResPtr);
-		if (FindI!=RewriteMap.end())
-			ResPtr=&(FindI->second);
+		boost::unordered_map<std::string,RewHolder>::const_iterator FindI=RewMap.find(*ResPtr);
+		if (FindI!=RewMap.end())
+		{
+			if (FindI->second.IsRedirect)
+				return new RedirectResponse(FindI->second.Target,FindI->second.IsPermanentRedirect);
+			else
+				ResPtr=&(FindI->second.Target);
+		}
 	}
 
 	for (const RSHolder &CurrHolder : HolderA)
