@@ -39,7 +39,8 @@ int main(int argc, char* argv[])
 		Combiner->AddRespSource("/daloskonyv",new HTTP::RespSource::Zip("E:\\test.zip"));
 		Combiner->AddRespSource("",new HTTP::RespSource::FS("E:"));
 
-		Combiner->AddSimpleRewrite("/daloskonyv","/daloskonyv/daloskonyv.htm");
+		Combiner->AddRedirect("/daloskonyv","/daloskonyv/");
+		Combiner->AddSimpleRewrite("/daloskonyv/","/daloskonyv/daloskonyv.htm");
 		Combiner->AddSimpleRewrite("/husky","/Download/NewFiles/Husky.jpg");
 
 		MiniWS.SetResponseSource(Combiner);
