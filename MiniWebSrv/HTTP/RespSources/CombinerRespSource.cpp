@@ -8,6 +8,28 @@ namespace HTTP
 namespace RespSource
 {
 
+Combiner::RedirectResponse::RedirectResponse(const std::string &Target, bool IsPermanent) :
+	RespCode(IsPermanent ? RC_MOVEPERMANENT : RC_TEMP_REDIRECT), TargetLocation(Target)
+{
+}
+
+bool Combiner::RedirectResponse::GetExtraHeader(unsigned int Index,
+	const char **OutHeader, const char **OutHeaderEnd,
+	const char **OutHeaderVal, const char **OutHeaderValEnd)
+{
+	if (Index==0)
+	{
+		const std::string &HName=Header::GetHeaderName(HN_LOCATION);
+		*OutHeader=HName.data();
+		*OutHeaderEnd=HName.data() + HName.size();
+		*OutHeaderVal=TargetLocation.data();
+		*OutHeaderValEnd=TargetLocation.data()+TargetLocation.length();
+		return true;
+	}
+	else
+		return false;
+}
+
 bool Combiner::RSHolder::operator()(const std::string &Resource) const
 {
 	if (Resource.length()>=Prefix.length())
