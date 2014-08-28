@@ -517,7 +517,8 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 				Yield);
 			if (ReadLength)
 			{
-				sprintf(CurrPos,"%08x\r\n",ReadLength);
+				sprintf(CurrPos,"%08x\r",ReadLength);
+				CurrPos[8+1]='\n'; //Replace the '\0' with '\n' in the chunk header.
 
 				CurrPos[ReadLength + ChunkHeaderLen]='\r';
 				CurrPos[ReadLength + ChunkHeaderLen + 1]='\n';
