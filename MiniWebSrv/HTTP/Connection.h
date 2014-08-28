@@ -64,6 +64,7 @@ protected:
 
 	void ContinueRead(boost::asio::yield_context &Yield);
 	void WriteNext(boost::asio::yield_context &Yield);
+	void WriteAll(boost::asio::yield_context &Yield);
 
 	void ProtocolHandler(boost::asio::yield_context Yield);
 	bool ResponseHandler(boost::asio::yield_context &Yield);

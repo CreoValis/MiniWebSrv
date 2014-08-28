@@ -66,6 +66,18 @@ void Connection::WriteNext(boost::asio::yield_context &Yield)
 	if (const unsigned char *WritePos=WriteBuff.Pop(WriteLength))
 	{
 		boost::asio::async_write(MySock,boost::asio::buffer(WritePos,WriteLength),Yield);
+		WriteBuff.Release();
+		SilentTime=0;
+	}
+}
+
+void Connection::WriteAll(boost::asio::yield_context &Yield)
+{
+	unsigned int WriteLength;
+	while (const unsigned char *WritePos=WriteBuff.Pop(WriteLength))
+	{
+		boost::asio::async_write(MySock,boost::asio::buffer(WritePos,WriteLength),Yield);
+		WriteBuff.Release();
 		SilentTime=0;
 	}
 }
@@ -476,6 +488,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 	if (RespLength!=~(unsigned long long)0)
 	{
+		bool RetVal=false;
 		while (RespLength)
 		{
 			SilentTime=0;
@@ -494,12 +507,19 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 			WriteNext(Yield);
 
 			if ((IsFinished) && (!RespLength))
-				return true;
+			{
+				RetVal=true;
+				break;
+			}
 			else if ((IsFinished) || (!RespLength))
-				return false;
+			{
+				RetVal=false;
+				break;
+			}
 		}
 
-		return false;
+		WriteAll(Yield);
+		return RetVal;
 	}
 	else
 	{
@@ -540,7 +560,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		CurrPos=(char *)WriteBuff.Allocate(FinalChunkLength);
 		memcpy(CurrPos,"0\r\n\r\n",FinalChunkLength);
 		WriteBuff.Commit(FinalChunkLength);
-		WriteNext(Yield);
+		WriteAll(Yield);
 
 		return true;
 	}
