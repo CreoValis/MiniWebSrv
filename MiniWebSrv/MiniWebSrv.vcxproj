@@ -104,6 +104,9 @@
     <ClInclude Include="Http\RespSources\FSRespSource.h" />
     <ClInclude Include="Http\RespSources\ZipRespSource.h" />
     <ClInclude Include="Http\Server.h" />
+    <ClInclude Include="HTTP\WebSocket\Common.h" />
+    <ClInclude Include="HTTP\WebSocket\IMsgHandler.h" />
+    <ClInclude Include="HTTP\WebSocket\IMsgSender.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

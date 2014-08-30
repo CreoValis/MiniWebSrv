@@ -69,6 +69,15 @@
     <ClInclude Include="HTTP\Header.h">
       <Filter>HTTP</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\WebSocket\IMsgSender.h">
+      <Filter>HTTP\WebSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\WebSocket\Common.h">
+      <Filter>HTTP\WebSocket</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\WebSocket\IMsgHandler.h">
+      <Filter>HTTP\WebSocket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -122,6 +131,9 @@
     </Filter>
     <Filter Include="HTTP\RespSources\detail">
       <UniqueIdentifier>{83f3fc3e-8ce9-4573-97bd-76b5b6aa15e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HTTP\WebSocket">
+      <UniqueIdentifier>{d715f0ec-1205-49a2-9372-c47fbdc93c4a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
