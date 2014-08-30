@@ -349,8 +349,14 @@ const std::string &Header::GetHeaderName(HEADERNAME Name)
 	case HN_CONTENT_ENCODING: { static const std::string HeaderStr("content-encoding"); return HeaderStr; }
 	case HN_USER_AGENT: { static const std::string HeaderStr("user-agent"); return HeaderStr; }
 	case HN_IF_MOD_SINCE: { static const std::string HeaderStr("if-modified-since"); return HeaderStr; }
+	case HH_ORIGIN: { static const std::string HeaderStr("origin"); return HeaderStr; }
+	case HH_UPGRADE: { static const std::string HeaderStr("upgrade"); return HeaderStr; }
+	case HH_SEC_WEBSOCKET_KEY: { static const std::string HeaderStr("sec-websocket-key"); return HeaderStr; }
+	case HH_SEC_WEBSCOKET_VERSION: { static const std::string HeaderStr("sec-websocket-version"); return HeaderStr; }
+	case HH_SEC_WEBSOCKET_PROTOCOL: { static const std::string HeaderStr("sec-websocket-protocol"); return HeaderStr; }
 	case HN_LAST_MODIFIED: { static const std::string HeaderStr("last-modified"); return HeaderStr; }
 	case HN_LOCATION: { static const std::string HeaderStr("location"); return HeaderStr; }
+	case HH_SEC_WEBSOCKET_ACCEPT: { static const std::string HeaderStr("sec-websocket-accept"); return HeaderStr; }
 	default: { static const std::string HeaderStr(""); return HeaderStr; }
 	}
 }

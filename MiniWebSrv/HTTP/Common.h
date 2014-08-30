@@ -14,6 +14,7 @@ enum METHOD
 
 enum RESPONSECODE
 {
+	RC_SWITCH_PROT  = 101,
 	RC_OK           = 200,
 	RC_MOVEPERMANENT= 301,
 	RC_FOUND        = 302,
