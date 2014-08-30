@@ -62,6 +62,8 @@ protected:
 	UD::Comm::StreamReadBuff<Config::ReadBuffSize> ReadBuff;
 	UD::Comm::WriteBuffQueue<Config::WriteBuffSize,Config::WriteQueueInitSize> WriteBuff;
 
+	static const std::string WebSocketGUID, UpgradeWebSocketVal;
+
 	void ContinueRead(boost::asio::yield_context &Yield);
 	void WriteNext(boost::asio::yield_context &Yield);
 	void WriteAll(boost::asio::yield_context &Yield);

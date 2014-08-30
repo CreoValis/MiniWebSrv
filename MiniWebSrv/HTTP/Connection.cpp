@@ -6,13 +6,16 @@
 
 using namespace HTTP;
 
+const std::string Connection::WebSocketGUID="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+const std::string Connection::UpgradeWebSocketVal="websocket";
+
 Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS) : MyStrand(MyIOS), MySock(MyIOS),
 	SilentTime(0), IsDeletable(true), ResponseCount(0),
 	MyRespSource(nullptr), ServerName("MiniWebSrv"),
 	ErrorRS(NewErrorRS),
 	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr), PostHeaderBuffPos(nullptr)
 {
-	
+
 }
 
 Connection::~Connection()
