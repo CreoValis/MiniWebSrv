@@ -22,6 +22,10 @@ public:
 	/**Sends the previously allocated message.*/
 	virtual bool Send()=0;
 
+	/**Sends a "ping" message. Can only called when there's no allocated space in the send buffer.
+	@see Allocate */
+	virtual bool SendPing()=0;
+
 	/**Explicitly closes the connection with the specified reason code.*/
 	virtual void Close(unsigned int Reason)=0;
 };
