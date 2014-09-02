@@ -15,7 +15,11 @@ class ConnectionBase
 public:
 	inline ConnectionBase(boost::asio::io_service &MyIOS) : MySock(MyIOS), ResponseCount(0) { }
 	inline ConnectionBase(boost::asio::ip::tcp::socket &&SrcSocket) : MySock(std::move(SrcSocket)), ResponseCount(0) { }
-	virtual ~ConnectionBase() { }
+	virtual ~ConnectionBase()
+	{
+		try { MySock.close(); }
+		catch (...) { }
+	}
 
 	virtual void Start(IRespSource *NewRespSource)=0;
 	/**Closes the connection socket.*/

@@ -21,8 +21,6 @@ Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *
 
 Connection::~Connection()
 {
-	try { MySock.close(); }
-	catch (...) { }
 	delete[] PostHeaderBuff;
 
 	CurrQuery.DeleteUploadedFiles();
