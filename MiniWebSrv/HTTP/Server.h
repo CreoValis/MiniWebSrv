@@ -8,7 +8,7 @@
 
 #include "BuildConfig.h"
 #include "Common.h"
-#include "Connection.h"
+#include "ConnectionBase.h"
 
 #include "ConnFilters/AllowAllConnFilter.h"
 #include "RespSources/CommonErrorRespSource.h"
@@ -49,10 +49,10 @@ protected:
 	volatile unsigned int ConnCount;
 	volatile unsigned int TotalConnCount, TotalRespCount;
 	unsigned int BaseRespCount;
-	std::list<Connection *> ConnLst;
+	std::list<ConnectionBase *> ConnLst;
 
 	boost::asio::ip::tcp::endpoint PeerEndp;
-	Connection *NextConn;
+	ConnectionBase *NextConn;
 	bool IsRunning;
 
 	static ConnFilter::AllowAll DefaultConnFilter;

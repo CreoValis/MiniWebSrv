@@ -93,6 +93,7 @@
     <ClInclude Include="Http\ConnFilters\AllowAllConnFilter.h" />
     <ClInclude Include="Http\ConnFilters\LoopbackOnlyConnFilter.h" />
     <ClInclude Include="HTTP\Header.h" />
+    <ClInclude Include="HTTP\ConnectionBase.h" />
     <ClInclude Include="Http\IConnFilter.h" />
     <ClInclude Include="Http\IResponse.h" />
     <ClInclude Include="Http\IRespSource.h" />

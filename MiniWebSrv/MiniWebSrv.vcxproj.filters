@@ -78,6 +78,9 @@
     <ClInclude Include="HTTP\WebSocket\IMsgHandler.h">
       <Filter>HTTP\WebSocket</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\ConnectionBase.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

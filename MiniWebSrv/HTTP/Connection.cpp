@@ -9,11 +9,12 @@ using namespace HTTP;
 const std::string Connection::WebSocketGUID="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 const std::string Connection::UpgradeWebSocketVal="websocket";
 
-Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS) : MyStrand(MyIOS), MySock(MyIOS),
-	SilentTime(0), IsDeletable(true), ResponseCount(0),
+Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS) : ConnectionBase(MyIOS),
+	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
 	MyRespSource(nullptr), ServerName("MiniWebSrv"),
 	ErrorRS(NewErrorRS),
-	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr), PostHeaderBuffPos(nullptr)
+	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr), PostHeaderBuffPos(nullptr),
+	NextConn(nullptr)
 {
 
 }
@@ -25,6 +26,8 @@ Connection::~Connection()
 	delete[] PostHeaderBuff;
 
 	CurrQuery.DeleteUploadedFiles();
+
+	delete NextConn;
 }
 
 void Connection::Start(IRespSource *NewRespSource)
@@ -41,12 +44,21 @@ void Connection::Stop()
 	catch (...) { }
 }
 
-bool Connection::OnStep(unsigned int StepInterval)
+bool Connection::OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn)
 {
+	if (NextConn)
+	{
+		//Release our "next" connection, and immediately time out.
+		*OutNextConn=NextConn;
+		NextConn=nullptr;
+		SilentTime=Config::MaxSilentTime;
+	}
+
 	SilentTime+=StepInterval;
 	if (SilentTime>Config::MaxSilentTime)
 	{
-		MySock.close();
+		try { MySock.close(); }
+		catch (...) { }
 		return !IsDeletable;
 	}
 	else

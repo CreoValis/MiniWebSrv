@@ -3,6 +3,8 @@
 #include "IRespSource.h"
 #include "IConnFilter.h"
 
+#include "Connection.h"
+
 using namespace HTTP;
 
 const boost::posix_time::time_duration Server::StepDuration=boost::posix_time::seconds(StepDurationSeconds);
@@ -86,7 +88,7 @@ bool Server::Stop(boost::posix_time::time_duration Timeout)
 		delete RunTh;
 		RunTh=nullptr;
 
-		for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; ++NowI)
+		for (std::list<ConnectionBase *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; ++NowI)
 			delete *NowI;
 
 		ConnLst.clear();
@@ -126,10 +128,13 @@ void Server::OnTimer(const boost::system::error_code &error)
 	if (error)
 		return;
 
+	std::list<ConnectionBase *> NextConnLst;
+
 	unsigned int ActiveConnCount=0, CurrRespCount=0;
-	for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
+	for (std::list<ConnectionBase *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; )
 	{
-		if ((*NowI)->OnStep(StepDurationSeconds))
+		ConnectionBase *NextConn=nullptr;
+		if ((*NowI)->OnStep(StepDurationSeconds,&NextConn))
 		{
 			++ActiveConnCount;
 			CurrRespCount+=(*NowI)->GetResponseCount();
@@ -139,12 +144,18 @@ void Server::OnTimer(const boost::system::error_code &error)
 		{
 			BaseRespCount+=(*NowI)->GetResponseCount();
 
-			std::list<Connection *>::iterator DelConnI=NowI;
+			std::list<ConnectionBase *>::iterator DelConnI=NowI;
 			++NowI;
 			delete *DelConnI;
 			ConnLst.erase(DelConnI);
 		}
+
+		if (NextConn)
+			NextConnLst.push_back(NextConn);
 	}
+
+	//Append the new connections to the connection list.
+	ConnLst.splice(ConnLst.end(),std::move(NextConnLst));
 
 	ConnCount=ActiveConnCount;
 	TotalRespCount=BaseRespCount + CurrRespCount;
@@ -161,7 +172,7 @@ void Server::StopInternal()
 	try { MyStepTim.cancel(); }
 	catch (...) { }
 
-	for (std::list<Connection *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; ++NowI)
+	for (std::list<ConnectionBase *>::iterator NowI=ConnLst.begin(), EndI=ConnLst.end(); NowI!=EndI; ++NowI)
 		(*NowI)->Stop();
 }
 
@@ -170,6 +181,7 @@ void Server::RestartAccept()
 	if (IsRunning)
 	{
 		if (!NextConn)
+			//Create a new HTTP Connection object.
 			NextConn=new Connection(MyIOS,&CommonErrRespSource);
 
 		MyAcceptor.async_accept(NextConn->GetSocket(),PeerEndp,

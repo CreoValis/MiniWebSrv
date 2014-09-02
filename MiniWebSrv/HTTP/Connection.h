@@ -11,7 +11,7 @@
 #include "Common.h"
 #include "Header.h"
 #include "QueryParams.h"
-#include "Connection.h"
+#include "ConnectionBase.h"
 
 namespace HTTP
 {
@@ -23,28 +23,23 @@ namespace RespSource
 class CommonError;
 };
 
-class Connection
+class Connection : public ConnectionBase
 {
 public:
 	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS);
-	~Connection();
+	virtual ~Connection();
 
-	void Start(IRespSource *NewRespSource);
+	virtual void Start(IRespSource *NewRespSource);
 	/**Closes the connection socket.*/
-	void Stop();
+	virtual void Stop();
 	/**@return False, if the connection is closed, and it should be deleted.*/
-	bool OnStep(unsigned int StepInterval);
-
-	inline boost::asio::ip::tcp::socket &GetSocket() { return MySock; }
-	inline unsigned int GetResponseCount() const { return ResponseCount; }
+	virtual bool OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn);
 
 protected:
 	boost::asio::strand MyStrand;
-	boost::asio::ip::tcp::socket MySock;
 
 	unsigned int SilentTime;
 	bool IsDeletable;
-	unsigned int ResponseCount;
 
 	METHOD CurrMethod;
 	std::string CurrResource;
@@ -61,6 +56,8 @@ protected:
 
 	UD::Comm::StreamReadBuff<Config::ReadBuffSize> ReadBuff;
 	UD::Comm::WriteBuffQueue<Config::WriteBuffSize,Config::WriteQueueInitSize> WriteBuff;
+
+	ConnectionBase *NextConn;
 
 	static const std::string WebSocketGUID, UpgradeWebSocketVal;
 
