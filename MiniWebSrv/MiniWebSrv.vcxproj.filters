@@ -81,6 +81,9 @@
     <ClInclude Include="HTTP\ConnectionBase.h">
       <Filter>HTTP</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\WebSocket\WSConnection.h">
+      <Filter>HTTP\WebSocket</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -117,6 +120,9 @@
     </ClCompile>
     <ClCompile Include="HTTP\Header.cpp">
       <Filter>HTTP</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTP\WebSocket\WSConnection.cpp">
+      <Filter>HTTP\WebSocket</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
