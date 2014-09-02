@@ -16,4 +16,18 @@ namespace Config
 	const unsigned int MaxSilentTime = 30;
 };
 
+namespace WebSocket
+{
+
+namespace Config
+{
+	const unsigned int ReadBuffSize = 4*1024;
+	const unsigned int WriteBuffSize = 4*1024;
+	const unsigned int WriteQueueInitSize = 8;
+
+	const unsigned int MaxSilentTime = 1*60*60;
+};
+
+};
+
 };
