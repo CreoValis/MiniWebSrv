@@ -5,7 +5,7 @@
 
 #include <boost/circular_buffer.hpp>
 
-#include "Common/BinUtils.h"
+#include "BinUtils.h"
 
 namespace UD
 {

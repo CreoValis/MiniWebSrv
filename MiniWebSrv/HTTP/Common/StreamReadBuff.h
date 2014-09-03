@@ -3,7 +3,7 @@
 #include <memory.h>
 #include <string.h>
 
-#include "Common/BinUtils.h"
+#include "BinUtils.h"
 
 namespace UD
 {
