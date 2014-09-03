@@ -26,6 +26,7 @@ namespace Config
 	const unsigned int WriteQueueInitSize = 8;
 
 	const unsigned int MaxSilentTime = 1*60*60;
+	const unsigned int MaxPingInterval = 30;//5*60;
 };
 
 };
