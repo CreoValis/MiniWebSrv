@@ -2,11 +2,13 @@
 
 #include <boost/bind.hpp>
 
+#include "../Common/BinUtils.h"
+
 using namespace HTTP::WebSocket;
 
 Connection::Connection(boost::asio::ip::tcp::socket &&SrcSocket) : HTTP::ConnectionBase(std::move(SrcSocket)),
 	SafeStates(SAFE_ALL),
-	SilentTime(0)
+	SilentTime(0), CurrFrameLength(UnknownFrameLength)
 {
 	//Start reading for incoming messages.
 	ClearSafeState<SAFE_READ>();
@@ -38,6 +40,7 @@ void Connection::OnRead(const boost::system::error_code &error, std::size_t byte
 	{
 		ReadBuff.OnNewData(bytes_transferred);
 		SilentTime=0;
+		ProcessIncoming();
 	}
 	else
 	{
@@ -57,6 +60,88 @@ void Connection::OnWrite(const boost::system::error_code &error, std::size_t byt
 	else
 	{
 		//TODO: handle write error!!!
+	}
+}
+
+void Connection::ProcessIncoming()
+{
+	while (true)
+	{
+		unsigned int DataLength;
+		const unsigned char *DataBuff=ReadBuff.GetAvailableData(DataLength);
+		if (CurrFrameLength==UnknownFrameLength)
+		{
+			//Try to determine the length of the frame. At least 2 bytes is a must.
+			if (DataLength<2)
+			{
+				ReadBuff.RequestData(2);
+				return;
+			}
+
+			unsigned char LengthMarker=DataBuff[1] & 0x7F;
+			if (LengthMarker<126)
+				CurrFrameLength=LengthMarker + 2;
+			else if (LengthMarker==126)
+			{
+				//Length field is 16 bit wide.
+				if (DataLength<2+2)
+				{
+					ReadBuff.RequestData(2+2);
+					return;
+				}
+
+				CurrFrameLength=GET_BIGENDIAN_UNALIGNED2(DataBuff+2) + 2 + 2;
+			}
+			else //if (LengthMarker==127)
+			{
+				//Length field is 64 bit wide.
+				if (DataLength<2+8)
+				{
+					ReadBuff.RequestData(2+8);
+					return;
+				}
+
+				CurrFrameLength=GET_BIGENDIAN_UNALIGNED8(DataBuff+2) + 2 + 8;
+			}
+
+			if (DataBuff[1] & FLAG_MASK)
+				CurrFrameLength+=4; //Include the length of the mask byte, too.
+		}
+
+		//At this point, we have determined the full frame length, or exited the function.
+		if (DataLength<CurrFrameLength)
+		{
+			ReadBuff.RequestData((unsigned int)CurrFrameLength);
+			return;
+		}
+
+		ProcessFrame(DataBuff,CurrFrameLength);
+
+		ReadBuff.Consume(CurrFrameLength);
+	}
+}
+
+void Connection::ProcessFrame(const unsigned char *Buff, unsigned int Length)
+{
+	bool IsFin=(*Buff & FLAG_FIN)!=0, IsMask=(Buff[1] & FLAG_MASK)!=0;
+	OPCODENAME OpCode=(OPCODENAME)(*Buff & OCN_MASK);
+
+	unsigned int MaskKey;
+	const unsigned char *PayloadPos;
+	{
+		unsigned char LengthMarker=Buff[1] & 0x7F;
+		if (LengthMarker<126)
+			PayloadPos=Buff+2;
+		else if (LengthMarker==126)
+			PayloadPos=Buff+2+2;
+		else //if (LengthMarker==127)
+			PayloadPos=Buff+2+8;
+
+		if (IsMask)
+		{
+			MaskKey=GET_BIGENDIAN_UNALIGNED4(PayloadPos);
+			PayloadPos+=4;
+		}
 	}
 }
 
