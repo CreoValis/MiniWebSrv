@@ -11,6 +11,7 @@
 #include "../ConnectionBase.h"
 
 #include "Common.h"
+#include "IMsgSender.h"
 
 namespace HTTP
 {
@@ -20,10 +21,10 @@ namespace WebSocket
 
 class IMsgHandler;
 
-class Connection : public HTTP::ConnectionBase
+class Connection : public HTTP::ConnectionBase, public IMsgSender
 {
 public:
-	Connection(boost::asio::ip::tcp::socket &&SrcSocket);
+	Connection(boost::asio::ip::tcp::socket &&SrcSocket, IMsgHandler *MsgHandler);
 	virtual ~Connection();
 
 	virtual void Start(IRespSource *NewRespSource) { }
