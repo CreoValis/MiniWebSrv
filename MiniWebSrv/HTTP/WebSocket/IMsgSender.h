@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/thread/mutex.hpp>
+
 #include "Common.h"
 
 namespace HTTP
@@ -13,6 +15,9 @@ connection.*/
 class IMsgSender
 {
 public:
+
+	/**Retrieves the send mutex, which must be held while calling the methods of this class.*/
+	virtual boost::mutex &GetSendMutex()=0;
 	/**Allocates space for the websocket message in the send buffer, and prepares the frame header.
 	There can be only one allocated message in the send buffer at a time.
 	@return Pointer where the message should be written, or nullptr, if there was an error.*/
@@ -27,7 +32,7 @@ public:
 	virtual bool SendPing()=0;
 
 	/**Explicitly closes the connection with the specified reason code.*/
-	virtual void Close(unsigned int Reason)=0;
+	virtual void Close(unsigned short Reason)=0;
 };
 
 }; //WebSocket

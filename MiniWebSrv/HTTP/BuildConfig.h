@@ -27,6 +27,8 @@ namespace Config
 
 	const unsigned int MaxSilentTime = 1*60*60;
 	const unsigned int MaxPingInterval = 30;//5*60;
+	const unsigned int MaxFrameSize = 16*1024*10244;
+	const unsigned int MaxFragmentedSize = 16*1024*10244;
 };
 
 };

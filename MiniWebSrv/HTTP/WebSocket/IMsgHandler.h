@@ -17,7 +17,7 @@ public:
 	virtual void OnMessage(MESSAGETYPE Type, const unsigned char *Msg, unsigned long long MsgLength)=0;
 	/**Called when the peer closes the websocket connection. After this call, no more messages could be sent.
 	As this method will be called on the HTTPd thread, it should not block for long.*/
-	virtual void OnClose(unsigned int ReasonCode)=0;
+	virtual void OnClose(unsigned short ReasonCode)=0;
 };
 
 }; //WebSocket
