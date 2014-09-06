@@ -28,6 +28,7 @@ public:
 	virtual bool OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn)=0;
 
 	inline boost::asio::ip::tcp::socket &GetSocket() { return MySock; }
+	inline boost::asio::ip::tcp::socket &&MoveSocket() { return std::move(MySock); }
 	inline unsigned int GetResponseCount() const { return ResponseCount; }
 
 protected:

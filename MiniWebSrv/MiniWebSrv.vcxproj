@@ -109,6 +109,7 @@
     <ClInclude Include="HTTP\WebSocket\IMsgHandler.h" />
     <ClInclude Include="HTTP\WebSocket\IMsgSender.h" />
     <ClInclude Include="HTTP\WebSocket\WSConnection.h" />
+    <ClInclude Include="HTTP\WebSocket\WSRespSource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -117,6 +118,7 @@
     <ClCompile Include="Http\Connection.cpp" />
     <ClCompile Include="HTTP\Header.cpp" />
     <ClCompile Include="HTTP\WebSocket\WSConnection.cpp" />
+    <ClCompile Include="HTTP\WebSocket\WSRespSource.cpp" />
     <ClCompile Include="MiniWebSrv.cpp" />
     <ClCompile Include="Http\QueryParams.cpp" />
     <ClCompile Include="Http\RespSources\CombinerRespSource.cpp" />
