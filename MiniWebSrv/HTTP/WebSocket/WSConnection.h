@@ -25,7 +25,7 @@ class Connection : public HTTP::ConnectionBase, public IMsgSender
 {
 public:
 	Connection(boost::asio::ip::tcp::socket &&SrcSocket, IMsgHandler *MsgHandler);
-	virtual ~Connection();
+	virtual ~Connection() { }
 
 	virtual void Start(IRespSource *NewRespSource) { }
 	virtual void Stop();
