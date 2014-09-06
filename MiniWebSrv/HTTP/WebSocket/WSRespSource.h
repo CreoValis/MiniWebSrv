@@ -27,7 +27,7 @@ public:
 			const char *SubProtocol);
 		virtual ~WSResponse() { }
 
-		virtual unsigned int GetExtraHeaderCount() { return SubProtocol.empty() ? 1 : 2; }
+		virtual unsigned int GetExtraHeaderCount() { return SubProtocol.empty() ? 3 : 4; }
 		virtual bool GetExtraHeader(unsigned int Index,
 			const char **OutHeader, const char **OutHeaderEnd,
 			const char **OutHeaderVal, const char **OutHeaderValEnd);
@@ -62,9 +62,10 @@ protected:
 		selected subprotocol name in the vector after the call. Otherwise, no subprotocol will be selected.
 	@return A new message handler, which will be used after servicing the upgrade request. If nulptr, then the
 		connection can't be upgraded.*/
-	virtual IMsgHandler *CreateMsgHandler(const std::string &Resource, const QueryParams &Query, std::vector<std::string> &SubProtocolA,
+	virtual IMsgHandler *CreateMsgHandler(const std::string &Resource, const HTTP::QueryParams &Query, std::vector<std::string> &SubProtocolA,
 		const char *Origin=nullptr)=0;
 
+	static const std::string ConnUpgradeVal;
 	static const std::string WebSocketGUID, UpgradeWebSocketVal;
 };
 

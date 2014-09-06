@@ -21,6 +21,12 @@ void Connection::Stop()
 {
 	try { MySock.close(); }
 	catch (...) { }
+
+	if (MyHandler)
+	{
+		MyHandler->OnClose(CR_CONN_ERROR);
+		MyHandler=nullptr;
+	}
 }
 
 bool Connection::OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn)

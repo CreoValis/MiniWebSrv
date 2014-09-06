@@ -5,6 +5,7 @@
 #include <boost/uuid/sha1.hpp>
 
 #include "../ConnectionBase.h"
+#include "../Common/BinUtils.h"
 #include "../Common/StringUtils.h"
 #include "../RespSources/CommonErrorRespSource.h"
 
@@ -13,6 +14,7 @@
 
 using namespace HTTP::WebSocket;
 
+const std::string WSRespSource::ConnUpgradeVal="upgrade";
 const std::string WSRespSource::WebSocketGUID="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 const std::string WSRespSource::UpgradeWebSocketVal="websocket";
 
@@ -116,9 +118,14 @@ WSRespSource::WSResponse::WSResponse(IMsgHandler *NewHandler,
 		Hash.process_bytes(AuthRespBase.data(),AuthRespBase.length());
 		Hash.get_digest(AuthHash);
 
-		unsigned char EncStr[28];
-		EncStr[27]='\0';
-		Base64Encode((const unsigned char *)AuthHash,(const unsigned char *)AuthHash+20,EncStr);
+		AuthHash[0]=FROM_BIGENDIAN4(AuthHash[0]);
+		AuthHash[1]=FROM_BIGENDIAN4(AuthHash[1]);
+		AuthHash[2]=FROM_BIGENDIAN4(AuthHash[2]);
+		AuthHash[3]=FROM_BIGENDIAN4(AuthHash[3]);
+		AuthHash[4]=FROM_BIGENDIAN4(AuthHash[4]);
+
+		unsigned char EncStr[32];
+		EncStr[Base64Encode((const unsigned char *)AuthHash,(const unsigned char *)AuthHash+20,EncStr)]='\0';
 
 		SecWebSocketAccept.assign((const char *)EncStr);
 	}
@@ -138,7 +145,27 @@ bool WSRespSource::WSResponse::GetExtraHeader(unsigned int Index,
 
 		return true;
 	}
-	else if ((Index==1) && (!SubProtocol.empty()))
+	if (Index==1)
+	{
+		const std::string &HName=Header::GetHeaderName(HN_CONNECTION);
+		*OutHeader=HName.data();
+		*OutHeaderEnd=HName.data()+HName.length();
+		*OutHeaderVal=WSRespSource::ConnUpgradeVal.data();
+		*OutHeaderValEnd=WSRespSource::ConnUpgradeVal.data()+WSRespSource::ConnUpgradeVal.length();
+
+		return true;
+	}
+	if (Index==2)
+	{
+		const std::string &HName=Header::GetHeaderName(HH_UPGRADE);
+		*OutHeader=HName.data();
+		*OutHeaderEnd=HName.data()+HName.length();
+		*OutHeaderVal=WSRespSource::UpgradeWebSocketVal.data();
+		*OutHeaderValEnd=WSRespSource::UpgradeWebSocketVal.data()+WSRespSource::UpgradeWebSocketVal.length();
+
+		return true;
+	}
+	else if ((Index==3) && (!SubProtocol.empty()))
 	{
 		const std::string &HName=Header::GetHeaderName(HH_SEC_WEBSOCKET_PROTOCOL);
 		*OutHeader=HName.data();
@@ -193,7 +220,7 @@ HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Re
 	std::vector<std::string> SubProtA;
 	IMsgHandler *NewHandler;
 	if ((UpgradeHdr) && (strcmp(UpgradeHdr->Value,UpgradeWebSocketVal.data())==0) &&
-		(ConnHdr) && (strcmp(ConnHdr->Value,"upgrade")==0) &&
+		//(ConnHdr) && (strcmp(ConnHdr->Value,"upgrade")==0) &&
 		(WSKeyHdr) &&
 		(WSVerHdr) && (atoi(WSVerHdr->Value)==13))
 	{
@@ -204,6 +231,8 @@ HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Re
 		NewHandler=CreateMsgHandler(Resource,Query,
 			SubProtA,OriginHdr ? OriginHdr->Value : nullptr);
 	}
+	else
+		NewHandler=nullptr;
 
 	if (NewHandler)
 		return new WSResponse(NewHandler,WSKeyHdr->Value,SubProtA.size()==1 ? SubProtA[0].data() : "");
