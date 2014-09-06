@@ -257,13 +257,19 @@ CLOSEREASON Connection::ProcessFrame(const unsigned char *Buff, unsigned int Len
 	{
 		//Unmask the received data in-place.
 		unsigned char *ProcessPos=(unsigned char *)PayloadPos, *EndPos=ProcessPos+Length;
-		if (Length>4)
+		if (Length>=4)
 		{
-			for ( ; ProcessPos<EndPos; ProcessPos+=4)
-				*(unsigned int *)ProcessPos=*(unsigned int *)ProcessPos ^ MaskKey;
-
-			if (ProcessPos>EndPos)
-				ProcessPos-=4;
+			while (true)
+			{
+				unsigned char *NextProcPos=ProcessPos+4;
+				if (NextProcPos<EndPos)
+				{
+					*(unsigned int *)ProcessPos=*(unsigned int *)ProcessPos ^ MaskKey;
+					ProcessPos=NextProcPos;
+				}
+				else
+					break;
+			}
 		}
 
 		while (ProcessPos!=EndPos)
