@@ -10,7 +10,8 @@ using namespace HTTP::WebSocket;
 
 Connection::Connection(boost::asio::ip::tcp::socket &&SrcSocket, IMsgHandler *MsgHandler) : HTTP::ConnectionBase(std::move(SrcSocket)),
 	SafeStates(SAFE_ALL),
-	SilentTime(0), CurrFrameLength(UnknownFrameLength), MyHandler(MsgHandler)
+	SilentTime(0), CurrFrameLength(UnknownFrameLength), FragOpCode(OCN_CONTINUATION),
+	MyHandler(MsgHandler)
 {
 	//Start reading for incoming messages.
 	ClearSafeState<SAFE_READ>();
