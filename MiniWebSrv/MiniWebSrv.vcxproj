@@ -103,6 +103,7 @@
     <ClInclude Include="Http\RespSources\detail\MimeDB.h" />
     <ClInclude Include="Http\RespSources\detail\ZipArchive.h" />
     <ClInclude Include="Http\RespSources\FSRespSource.h" />
+    <ClInclude Include="HTTP\RespSources\WSEchoRespSource.h" />
     <ClInclude Include="Http\RespSources\ZipRespSource.h" />
     <ClInclude Include="Http\Server.h" />
     <ClInclude Include="HTTP\WebSocket\Common.h" />
@@ -117,6 +118,7 @@
     <ClCompile Include="Http\Common.cpp" />
     <ClCompile Include="Http\Connection.cpp" />
     <ClCompile Include="HTTP\Header.cpp" />
+    <ClCompile Include="HTTP\RespSources\WSEchoRespSource.cpp" />
     <ClCompile Include="HTTP\WebSocket\WSConnection.cpp" />
     <ClCompile Include="HTTP\WebSocket\WSRespSource.cpp" />
     <ClCompile Include="MiniWebSrv.cpp" />

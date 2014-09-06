@@ -87,6 +87,9 @@
     <ClInclude Include="HTTP\WebSocket\WSRespSource.h">
       <Filter>HTTP\WebSocket</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\RespSources\WSEchoRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -129,6 +132,9 @@
     </ClCompile>
     <ClCompile Include="HTTP\WebSocket\WSRespSource.cpp">
       <Filter>HTTP\WebSocket</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTP\RespSources\WSEchoRespSource.cpp">
+      <Filter>HTTP\RespSources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

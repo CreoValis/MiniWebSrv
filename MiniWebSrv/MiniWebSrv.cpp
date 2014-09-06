@@ -5,6 +5,7 @@
 #include "Http/Server.h"
 #include "Http/RespSources/FSRespSource.h"
 #include "Http/RespSources/ZipRespSource.h"
+#include "Http/RespSources/WSEchoRespSource.h"
 #include "Http/RespSources/CombinerRespSource.h"
 
 HANDLE MainThreadH=INVALID_HANDLE_VALUE;
@@ -37,6 +38,7 @@ int main(int argc, char* argv[])
 	{
 		HTTP::RespSource::Combiner *Combiner=new HTTP::RespSource::Combiner();
 		Combiner->AddRespSource("/daloskonyv",new HTTP::RespSource::Zip("E:\\test.zip"));
+		Combiner->AddRespSource("/echo",new HTTP::WebSocket::EchoRespSource());
 		Combiner->AddRespSource("",new HTTP::RespSource::FS("E:"));
 
 		Combiner->AddRedirect("/daloskonyv","/daloskonyv/");
