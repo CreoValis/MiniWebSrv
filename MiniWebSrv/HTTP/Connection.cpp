@@ -485,9 +485,9 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 			if (NameLen+ValueLen+2+2<(unsigned int)(CurrPosEnd-CurrPos))
 			{
 				memcpy(CurrPos,Name,NameLen); CurrPos+=NameLen;
-				memcpy(CurrPos,": ",2); CurrPos+=2;
+				*CurrPos++=':'; *CurrPos++=' ';
 				memcpy(CurrPos,Value,ValueLen); CurrPos+=ValueLen;
-				memcpy(CurrPos,"\r\n",2); CurrPos+=2;
+				*CurrPos++='\r'; *CurrPos++='\n';
 			}
 		}
 	}
