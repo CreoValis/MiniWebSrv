@@ -222,6 +222,7 @@ CLOSEREASON Connection::ProcessIncoming()
 
 		CLOSEREASON RetVal=ProcessFrame(DataBuff,(unsigned int)CurrFrameLength);
 		ReadBuff.Consume((unsigned int)CurrFrameLength);
+		CurrFrameLength=UnknownFrameLength;
 
 		return RetVal;
 	}
