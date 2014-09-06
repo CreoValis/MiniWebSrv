@@ -1,85 +1,10 @@
 #include "Connection.h"
 
-#include <boost/uuid/sha1.hpp>
-
 #include "IRespSource.h"
 
 #include "RespSources/CommonErrorRespSource.h"
 
 using namespace HTTP;
-
-const std::string Connection::WebSocketGUID="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-const std::string Connection::UpgradeWebSocketVal="websocket";
-
-namespace
-{
-
-unsigned char Bin6ToBase64(unsigned char Src)
-{
-	if (Src<26)
-		return 'A' + Src;
-	else if (Src<52)
-		return 'a' - 26 + Src;
-	else if (Src<62)
-		return '0' - 52 + Src;
-	else if (Src==62)
-		return '+';
-	else //if (Src==63)
-		return '/';
-	//else
-		//return '?';
-}
-
-unsigned int Base64Encode(const unsigned char *SrcBuff, const unsigned char *SrcBuffEnd,
-		unsigned char *TargetBuff)
-{
-	unsigned char *OrigTarget=TargetBuff;
-
-	unsigned char Acc=0;
-	unsigned int Mod3=-1;
-	for (unsigned int x=0, SrcLength=SrcBuffEnd-SrcBuff; x!=SrcLength; ++x)
-	{
-		++Mod3;
-		unsigned char CurrVal=*SrcBuff;
-		switch (Mod3)
-		{
-		case 3:
-			Mod3=0;
-		case 0:
-			*TargetBuff++=Bin6ToBase64(CurrVal >> 2);
-			Acc=(CurrVal & 0x3) << 4;
-			break;
-		case 1:
-			Acc|=(CurrVal & 0xF0) >> 4;
-			*TargetBuff++=Bin6ToBase64(Acc);
-			Acc=(CurrVal & 0xF) << 2;
-			break;
-		case 2:
-			Acc|=(CurrVal & 0xC0) >> 6;
-			*TargetBuff++=Bin6ToBase64(Acc);
-			*TargetBuff++=Bin6ToBase64(CurrVal & 0x3F);
-			break;
-		}
-
-		SrcBuff++;
-	}
-
-	if (Mod3!=2)
-	{
-		*TargetBuff++=Bin6ToBase64(Acc);
-		if (!Mod3)
-		{
-			*TargetBuff++='=';
-			*TargetBuff++='=';
-		}
-		else
-			*TargetBuff++='=';
-	}
-
-	return TargetBuff-OrigTarget;
-}
-
-};
 
 Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS) : ConnectionBase(MyIOS),
 	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
@@ -494,27 +419,14 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 	{
 	}
 
-	MySock.close();
+	try { MySock.close(); }
+	catch (...) { }
 	IsDeletable=true;
 }
 
-bool Connection::ResponseHandler(boost::asio::yield_context &Yield,
-	const Header *Upgrade,
-	const Header *WebSocketKey, const Header *WebSocketProtocol, const Header *WebSocketVersion)
+bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 {
 	ResponseCount++;
-
-	//Check if we are required to upgrade the connection to a websocket one.
-	bool UpgradeClose=0;
-	if ((Upgrade) && (UpgradeWebSocketVal==Upgrade->Value) && (WebSocketKey) && (WebSocketVersion))
-	{
-		if (WebSocketResponseHandler(Yield,strtoul(WebSocketVersion->Value,nullptr,10),WebSocketKey->Value,
-			WebSocketProtocol ? WebSocketProtocol->Value : ""))
-		{
-			/*A websocket connection was created and a response sent. This connection should be destroyed.*/
-			return false;
-		}
-	}
 
 	IResponse *CurrResp;
 	try
@@ -618,7 +530,11 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield,
 		}
 
 		WriteAll(Yield);
-		return RetVal;
+
+		NextConn=CurrResp->Upgrade(this);
+		delete CurrResp;
+
+		return RetVal && !NextConn;
 	}
 	else
 	{
@@ -661,29 +577,10 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield,
 		WriteBuff.Commit(FinalChunkLength);
 		WriteAll(Yield);
 
-		return true;
-	}
-}
+		NextConn=CurrResp->Upgrade(this);
+		delete CurrResp;
 
-bool Connection::WebSocketResponseHandler(boost::asio::yield_context &Yield,
-	unsigned int Version, const char *Key, const char *SubProtocols)
-{
-	if (Version!=13)
-		//Unknown version.
-		return false;
-
-	{
-		std::string AuthRespBase=Key;
-		AuthRespBase+=WebSocketGUID;
-
-		unsigned int AuthHash[5];
-		boost::uuids::detail::sha1 Hash;
-		Hash.process_bytes(AuthRespBase.data(),AuthRespBase.length());
-		Hash.get_digest(AuthHash);
-
-		unsigned char EncStr[28];
-		EncStr[27]='\0';
-		Base64Encode((const unsigned char *)AuthHash,(const unsigned char *)AuthHash+20,EncStr);
+		return !NextConn;
 	}
 }
 

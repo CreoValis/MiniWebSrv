@@ -8,6 +8,8 @@
 namespace HTTP
 {
 
+class ConnectionBase;
+
 /**Base class for response reader classes.*/
 class IResponse
 {
@@ -27,6 +29,12 @@ public:
 	/**@return True, if there's more data to read.*/
 	virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength,
 		boost::asio::yield_context &Ctx)=0;
+
+	/**Upgrades the speified connection to another type.
+	This method will be called after the response was successfully sent.
+	@param CurrConn The connection to upgrade. This is the connection that sent this response.
+	@return A new ConnectionBase object, or nullptr, if the connection shouldn't be upgraded.*/
+	virtual ConnectionBase *Upgrade(ConnectionBase *CurrConn) { return NULL; }
 };
 
 }; //HTTP

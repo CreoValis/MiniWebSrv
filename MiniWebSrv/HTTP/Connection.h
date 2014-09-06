@@ -59,17 +59,12 @@ protected:
 
 	ConnectionBase *NextConn;
 
-	static const std::string WebSocketGUID, UpgradeWebSocketVal;
-
 	void ContinueRead(boost::asio::yield_context &Yield);
 	void WriteNext(boost::asio::yield_context &Yield);
 	void WriteAll(boost::asio::yield_context &Yield);
 
 	void ProtocolHandler(boost::asio::yield_context Yield);
-	bool ResponseHandler(boost::asio::yield_context &Yield, const Header *Upgrade=nullptr,
-		const Header *WebSocketKey=nullptr, const Header *WebSocketProtocol=nullptr, const Header *WebSocketVersion=nullptr);
-	bool WebSocketResponseHandler(boost::asio::yield_context &Yield,
-		unsigned int Version, const char *Key, const char *SubProtocols);
+	bool ResponseHandler(boost::asio::yield_context &Yield);
 
 	void CreatePostHeaderBuff();
 	char *AddPostHeader(const unsigned char *Begin, const unsigned char *End);
