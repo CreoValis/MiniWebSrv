@@ -268,7 +268,7 @@ CLOSEREASON Connection::ProcessFrame(const unsigned char *Buff, unsigned int Len
 
 		while (ProcessPos!=EndPos)
 		{
-			*ProcessPos=*ProcessPos ^ (MaskKey & 0xFF);
+			*ProcessPos++=*ProcessPos ^ (MaskKey & 0xFF);
 			MaskKey>>=8;
 		}
 	}
