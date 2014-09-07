@@ -41,11 +41,6 @@ public:
 
 	IResponse *CreateFromException(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
 		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS, const std::exception *Ex);
-
-	inline void SetServerName(const char *NewName) { ServerNameStr=NewName; }
-
-protected:
-	std::string ServerNameStr;
 };
 
 }; //RespSource
