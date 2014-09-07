@@ -20,6 +20,8 @@ Connection::Connection(boost::asio::ip::tcp::socket &&SrcSocket, IMsgHandler *Ms
 
 void Connection::Stop()
 {
+	OnProtocolError(CR_EXIT);
+
 	try { MySock.close(); }
 	catch (...) { }
 
