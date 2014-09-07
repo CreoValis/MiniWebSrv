@@ -452,7 +452,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 	{
 		unsigned int RespCode=CurrResp->GetResponseCode();
-		CurrPos+=sprintf(CurrPos,"HTTP/1.1 %d %s\r\nServer: %s\r\nConnection: keep-alive\r\n",
+		CurrPos+=sprintf(CurrPos,"HTTP/1.1 %d %s\r\nServer: %s\r\n",
 			RespCode,GetResponseName((RESPONSECODE)RespCode),ServerName);
 	}
 
