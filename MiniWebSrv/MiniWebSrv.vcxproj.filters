@@ -90,6 +90,15 @@
     <ClInclude Include="HTTP\RespSources\WSEchoRespSource.h">
       <Filter>HTTP\RespSources</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\IServerLog.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\ServerLogs\OStreamServerLog.h">
+      <Filter>HTTP\ServerLogs</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\ServerLogs\DummyServerLog.h">
+      <Filter>HTTP\ServerLogs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -136,6 +145,9 @@
     <ClCompile Include="HTTP\RespSources\WSEchoRespSource.cpp">
       <Filter>HTTP\RespSources</Filter>
     </ClCompile>
+    <ClCompile Include="HTTP\ServerLogs\OStreamServerLog.cpp">
+      <Filter>HTTP\ServerLogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="HTTP">
@@ -155,6 +167,9 @@
     </Filter>
     <Filter Include="HTTP\WebSocket">
       <UniqueIdentifier>{d715f0ec-1205-49a2-9372-c47fbdc93c4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HTTP\ServerLogs">
+      <UniqueIdentifier>{339aed22-fcb9-450c-b493-324ab8b7af13}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -12,12 +12,14 @@
 
 #include "ConnFilters/AllowAllConnFilter.h"
 #include "RespSources/CommonErrorRespSource.h"
+#include "ServerLogs/DummyServerLog.h"
 
 namespace HTTP
 {
 
 class IConnFilter;
 class IRespSource;
+class IServerLog;
 
 class Server
 {
@@ -28,6 +30,7 @@ public:
 
 	void SetConnectionFilter(IConnFilter *NewCF);
 	void SetResponseSource(IRespSource *NewRS);
+	void SetServerLog(IServerLog *NewLog);
 	void SetName(const std::string &NewName);
 
 	bool Run();
@@ -46,6 +49,7 @@ protected:
 	boost::thread *RunTh;
 	IConnFilter *MyConnF;
 	IRespSource *MyRespSource;
+	IServerLog *MyLog;
 	std::string MyName;
 
 	volatile unsigned int ConnCount;
@@ -59,6 +63,7 @@ protected:
 
 	static ConnFilter::AllowAll DefaultConnFilter;
 	static RespSource::CommonError CommonErrRespSource;
+	static ServerLog::Dummy DefaultServerLog;
 
 	static const unsigned int StepDurationSeconds = 1;
 	static const boost::posix_time::time_duration StepDuration;

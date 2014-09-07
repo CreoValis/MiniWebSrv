@@ -10,9 +10,10 @@ using namespace HTTP;
 const boost::posix_time::time_duration Server::StepDuration=boost::posix_time::seconds(StepDurationSeconds);
 ConnFilter::AllowAll Server::DefaultConnFilter;
 RespSource::CommonError Server::CommonErrRespSource;
+ServerLog::Dummy Server::DefaultServerLog;
 
 Server::Server(unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
-	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyName("EmbeddedHTTPd"),
+	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog), MyName("EmbeddedHTTPd"),
 	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
 	NextConn(nullptr), IsRunning(false)
 {
@@ -20,7 +21,7 @@ Server::Server(unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::as
 }
 
 Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
-	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr),
+	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog),
 	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
 	NextConn(nullptr), IsRunning(false)
 {
@@ -31,7 +32,12 @@ Server::~Server()
 {
 	Stop(boost::posix_time::seconds(0));
 	delete MyRespSource;
-	delete MyConnF;
+
+	if (MyConnF!=&DefaultConnFilter)
+		delete MyConnF;
+
+	if (MyLog!=&DefaultServerLog)
+		delete MyLog;
 }
 
 void Server::SetConnectionFilter(IConnFilter *NewCF)
@@ -51,6 +57,19 @@ void Server::SetResponseSource(IRespSource *NewRS)
 {
 	delete MyRespSource;
 	MyRespSource=NewRS;
+}
+
+void Server::SetServerLog(IServerLog *NewLog)
+{
+	if (NewLog)
+	{
+		if (MyLog!=&DefaultServerLog)
+			delete MyLog;
+
+		MyLog=NewLog;
+	}
+	else
+		MyLog=&DefaultServerLog;
 }
 
 void Server::SetName(const std::string &NewName)
@@ -114,13 +133,17 @@ void Server::OnAccept(const boost::system::error_code &error)
 	{
 		if ((*MyConnF)(PeerEndp.address()))
 		{
+			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_ulong(),true);
+
 			TotalConnCount++;
-			NextConn->Start(MyRespSource);
+			NextConn->Start(MyRespSource,MyLog);
 			ConnLst.push_back(NextConn);
 			NextConn=nullptr;
 		}
 		else
 		{
+			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_ulong(),false);
+
 			NextConn->GetSocket().close();
 			delete NextConn; //Lazy.
 			NextConn=nullptr;

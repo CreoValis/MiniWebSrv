@@ -27,7 +27,7 @@ public:
 	Connection(boost::asio::ip::tcp::socket &&SrcSocket, IMsgHandler *MsgHandler);
 	virtual ~Connection() { Stop(); }
 
-	virtual void Start(IRespSource *NewRespSource) { }
+	virtual void Start(IRespSource *NewRespSource, IServerLog *NewLog) { }
 	virtual void Stop();
 	virtual bool OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn);
 

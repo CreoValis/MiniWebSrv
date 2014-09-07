@@ -1,6 +1,7 @@
 #include "Connection.h"
 
 #include "IRespSource.h"
+#include "IServerLog.h"
 
 #include "RespSources/CommonErrorRespSource.h"
 
@@ -8,7 +9,7 @@ using namespace HTTP;
 
 Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, const char *NewServerName) : ConnectionBase(MyIOS),
 	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
-	MyRespSource(nullptr), ServerName(NewServerName),
+	MyRespSource(nullptr), MyLog(nullptr), ServerName(NewServerName),
 	ErrorRS(NewErrorRS),
 	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr), PostHeaderBuffPos(nullptr),
 	NextConn(nullptr)
@@ -18,6 +19,9 @@ Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *
 
 Connection::~Connection()
 {
+	if (MyLog)
+		MyLog->OnConnectionFinished(this);
+
 	delete[] PostHeaderBuff;
 
 	CurrQuery.DeleteUploadedFiles();
@@ -25,11 +29,12 @@ Connection::~Connection()
 	delete NextConn;
 }
 
-void Connection::Start(IRespSource *NewRespSource)
+void Connection::Start(IRespSource *NewRespSource, IServerLog *NewLog)
 {
 	IsDeletable=false;
 
 	MyRespSource=NewRespSource;
+	MyLog=NewLog;
 	boost::asio::spawn(MyStrand,boost::bind(&Connection::ProtocolHandler,this,_1));
 }
 
@@ -450,8 +455,8 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 	char *CurrPosBegin=CurrPos;
 	char *CurrPosEnd=CurrPos+Config::MaxHeadersLength - 2; //Leave room for the final "\r\n".
 
+	unsigned int RespCode=CurrResp->GetResponseCode();
 	{
-		unsigned int RespCode=CurrResp->GetResponseCode();
 		CurrPos+=sprintf(CurrPos,"HTTP/1.1 %d %s\r\nServer: %s\r\n",
 			RespCode,GetResponseName((RESPONSECODE)RespCode),ServerName);
 	}
@@ -499,6 +504,8 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 	if (RespLength!=~(unsigned long long)0)
 	{
+		unsigned long long TotalWriteLength=0;
+
 		bool RetVal=false;
 		while (RespLength)
 		{
@@ -515,6 +522,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 				RespLength=0;
 
 			WriteBuff.Commit(ReadLength);
+			TotalWriteLength+=ReadLength;
 			WriteNext(Yield);
 
 			if ((IsFinished) && (!RespLength))
@@ -534,6 +542,10 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		NextConn=CurrResp->Upgrade(this);
 		delete CurrResp;
 
+		MyLog->OnRequest(this,CurrMethod,CurrResource,CurrQuery,
+			HeaderA,ContentBuff,ContentEndBuff,
+			RespCode,TotalWriteLength,NextConn);
+
 		return RetVal && !NextConn;
 	}
 	else
@@ -542,6 +554,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		static const unsigned int ChunkFooterLength=2;
 		static const unsigned int FinalChunkLength=1 + 2 + 2;
 
+		unsigned long long TotalWriteLength=0;
 		while (true)
 		{
 			SilentTime=0;
@@ -559,6 +572,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 				CurrPos[ReadLength + ChunkHeaderLen + 1]='\n';
 
 				WriteBuff.Commit(ReadLength + ChunkHeaderLen + ChunkFooterLength);
+				TotalWriteLength+=ReadLength;
 			}
 			else
 			{
@@ -579,6 +593,10 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 		NextConn=CurrResp->Upgrade(this);
 		delete CurrResp;
+
+		MyLog->OnRequest(this,CurrMethod,CurrResource,CurrQuery,
+			HeaderA,ContentBuff,ContentEndBuff,
+			RespCode,TotalWriteLength,NextConn);
 
 		return !NextConn;
 	}

@@ -7,6 +7,7 @@
 #include "Http/RespSources/ZipRespSource.h"
 #include "Http/RespSources/WSEchoRespSource.h"
 #include "Http/RespSources/CombinerRespSource.h"
+#include "Http/ServerLogs/OStreamServerLog.h"
 
 HANDLE MainThreadH=INVALID_HANDLE_VALUE;
 volatile bool IsRunning=true;
@@ -47,6 +48,8 @@ int main(int argc, char* argv[])
 		Combiner->AddSimpleRewrite("/husky","/Download/NewFiles/Husky.jpg");
 
 		MiniWS.SetResponseSource(Combiner);
+
+		MiniWS.SetServerLog(new HTTP::ServerLog::OStream(std::cout));
 	}
 
 	MiniWS.Run();
@@ -54,7 +57,7 @@ int main(int argc, char* argv[])
 	while (IsRunning)
 	{
 		boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-		std::cout << "\rAct: " << MiniWS.GetConnCount() << "; Total: " << MiniWS.GetTotalConnCount() << "; Resp: " << MiniWS.GetResponseCount();
+		//std::cout << "\rAct: " << MiniWS.GetConnCount() << "; Total: " << MiniWS.GetTotalConnCount() << "; Resp: " << MiniWS.GetResponseCount();
 	}
 
 	std::cout << "Stopping." << std::endl;

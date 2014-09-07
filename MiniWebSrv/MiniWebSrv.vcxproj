@@ -97,6 +97,7 @@
     <ClInclude Include="Http\IConnFilter.h" />
     <ClInclude Include="Http\IResponse.h" />
     <ClInclude Include="Http\IRespSource.h" />
+    <ClInclude Include="HTTP\IServerLog.h" />
     <ClInclude Include="Http\QueryParams.h" />
     <ClInclude Include="Http\RespSources\CombinerRespSource.h" />
     <ClInclude Include="Http\RespSources\CommonErrorRespSource.h" />
@@ -106,6 +107,8 @@
     <ClInclude Include="HTTP\RespSources\WSEchoRespSource.h" />
     <ClInclude Include="Http\RespSources\ZipRespSource.h" />
     <ClInclude Include="Http\Server.h" />
+    <ClInclude Include="HTTP\ServerLogs\DummyServerLog.h" />
+    <ClInclude Include="HTTP\ServerLogs\OStreamServerLog.h" />
     <ClInclude Include="HTTP\WebSocket\Common.h" />
     <ClInclude Include="HTTP\WebSocket\IMsgHandler.h" />
     <ClInclude Include="HTTP\WebSocket\IMsgSender.h" />
@@ -119,6 +122,7 @@
     <ClCompile Include="Http\Connection.cpp" />
     <ClCompile Include="HTTP\Header.cpp" />
     <ClCompile Include="HTTP\RespSources\WSEchoRespSource.cpp" />
+    <ClCompile Include="HTTP\ServerLogs\OStreamServerLog.cpp" />
     <ClCompile Include="HTTP\WebSocket\WSConnection.cpp" />
     <ClCompile Include="HTTP\WebSocket\WSRespSource.cpp" />
     <ClCompile Include="MiniWebSrv.cpp" />

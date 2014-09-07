@@ -17,6 +17,7 @@ namespace HTTP
 {
 
 class IRespSource;
+class IServerLog;
 
 namespace RespSource
 {
@@ -29,7 +30,7 @@ public:
 	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, const char *NewServerName);
 	virtual ~Connection();
 
-	virtual void Start(IRespSource *NewRespSource);
+	virtual void Start(IRespSource *NewRespSource, IServerLog *NewLog);
 	/**Closes the connection socket.*/
 	virtual void Stop();
 	/**@return False, if the connection is closed, and it should be deleted.*/
@@ -49,6 +50,7 @@ protected:
 
 	const char *ServerName;
 	IRespSource *MyRespSource;
+	IServerLog *MyLog;
 
 	RespSource::CommonError *ErrorRS;
 

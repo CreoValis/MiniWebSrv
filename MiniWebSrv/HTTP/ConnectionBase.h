@@ -10,6 +10,8 @@
 namespace HTTP
 {
 
+class IServerLog;
+
 class ConnectionBase
 {
 public:
@@ -21,7 +23,7 @@ public:
 		catch (...) { }
 	}
 
-	virtual void Start(IRespSource *NewRespSource)=0;
+	virtual void Start(IRespSource *NewRespSource, IServerLog *NewLog)=0;
 	/**Closes the connection socket.*/
 	virtual void Stop()=0;
 	/**@return False, if the connection is closed, and it should be deleted.*/
