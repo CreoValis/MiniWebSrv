@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
 
 	std::cout << "Starting." << std::endl;
 	HTTP::Server MiniWS(8880);
+	MiniWS.SetName("MiniWebServer/v0.2.0");
 
 	{
 		HTTP::RespSource::Combiner *Combiner=new HTTP::RespSource::Combiner();
