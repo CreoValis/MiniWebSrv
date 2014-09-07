@@ -12,7 +12,7 @@ ConnFilter::AllowAll Server::DefaultConnFilter;
 RespSource::CommonError Server::CommonErrRespSource;
 
 Server::Server(unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
-	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr),
+	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyName("EmbeddedHTTPd"),
 	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
 	NextConn(nullptr), IsRunning(false)
 {
@@ -49,6 +49,11 @@ void Server::SetResponseSource(IRespSource *NewRS)
 {
 	delete MyRespSource;
 	MyRespSource=NewRS;
+}
+
+void Server::SetName(const std::string &NewName)
+{
+	MyName=NewName;
 }
 
 bool Server::Run()
@@ -182,7 +187,7 @@ void Server::RestartAccept()
 	{
 		if (!NextConn)
 			//Create a new HTTP Connection object.
-			NextConn=new Connection(MyIOS,&CommonErrRespSource);
+			NextConn=new Connection(MyIOS,&CommonErrRespSource,MyName.data());
 
 		MyAcceptor.async_accept(NextConn->GetSocket(),PeerEndp,
 			boost::bind(&Server::OnAccept,this,boost::asio::placeholders::error));

@@ -26,7 +26,7 @@ class CommonError;
 class Connection : public ConnectionBase
 {
 public:
-	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS);
+	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, const char *NewServerName);
 	virtual ~Connection();
 
 	virtual void Start(IRespSource *NewRespSource);

@@ -6,9 +6,9 @@
 
 using namespace HTTP;
 
-Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS) : ConnectionBase(MyIOS),
+Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, const char *NewServerName) : ConnectionBase(MyIOS),
 	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
-	MyRespSource(nullptr), ServerName("MiniWebSrv"),
+	MyRespSource(nullptr), ServerName(NewServerName),
 	ErrorRS(NewErrorRS),
 	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr), PostHeaderBuffPos(nullptr),
 	NextConn(nullptr)

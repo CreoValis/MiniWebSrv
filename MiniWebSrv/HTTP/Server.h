@@ -28,6 +28,7 @@ public:
 
 	void SetConnectionFilter(IConnFilter *NewCF);
 	void SetResponseSource(IRespSource *NewRS);
+	void SetName(const std::string &NewName);
 
 	bool Run();
 	bool Stop(boost::posix_time::time_duration Timeout);
@@ -45,6 +46,7 @@ protected:
 	boost::thread *RunTh;
 	IConnFilter *MyConnF;
 	IRespSource *MyRespSource;
+	std::string MyName;
 
 	volatile unsigned int ConnCount;
 	volatile unsigned int TotalConnCount, TotalRespCount;
