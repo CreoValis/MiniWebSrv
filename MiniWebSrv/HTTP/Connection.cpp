@@ -336,12 +336,16 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 						{
 							CurrQuery.AppendFormMultipart((char *)InBuff,(char *)InBuffEnd);
 
+							ReadBuff.Consume(InBuffEnd-InBuff);
+
 							PState.Content.RemLength-=InBuffEnd-InBuff;
 							InBuff=InBuffEnd-1;
 						}
 						else
 						{
 							CurrQuery.AppendFormMultipart((char *)InBuff,(char *)InBuff+PState.Content.RemLength);
+
+							ReadBuff.Consume(PState.Content.RemLength);
 
 							InBuff+=PState.Content.RemLength-1;
 							PState.Content.RemLength=0;
