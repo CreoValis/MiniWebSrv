@@ -30,6 +30,8 @@ Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort) : MyS
 Server::~Server()
 {
 	Stop(boost::posix_time::seconds(0));
+	delete MyRespSource;
+	delete MyConnF;
 }
 
 void Server::SetConnectionFilter(IConnFilter *NewCF)
