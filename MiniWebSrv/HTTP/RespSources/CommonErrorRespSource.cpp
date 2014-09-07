@@ -20,6 +20,16 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 {
 	switch (RespCode)
 	{
+	case RC_BADREQUEST:
+		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
+			"<head><title>Err: %d - %s</title></head>\n"
+			"<body>\n"
+			"<h1>401 Bad request</h1>\n"
+			"Your browser sent a request that this server didn't understand. Resource: <b>%s</b><br />\n"
+			"</body>",
+			RespCode,Res.data(),
+			Res.data());
+		break;
 	case RC_UNAUTHORIZED:
 		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
 			"<head><title>Err: %d - %s</title></head>\n"
@@ -50,7 +60,7 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 			RespCode,Res.data(),
 			Res.data());
 		break;
-	default:
+	case RC_SERVERERROR:
 		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
 			"<head><title>Err: %d - %s</title></head>\n"
 			"<body>\n"
@@ -62,6 +72,20 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 			"</ul>\n"
 			"</body>",
 			RespCode,Res.data(),
+			Res.data(),ExType.data(),ExMsg.data());
+		break;
+	default:
+		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
+			"<head><title>Err: %d - %s</title></head>\n"
+			"<body>\n"
+			"<h1>[%d]</h1>\n"
+			"Caught an exception while creating a response for <b>%s</b>:\n"
+			"<ul>\n"
+			"<li>Type: <pre>%s</pre></li>\n"
+			"<li>Message: %s</li>\n"
+			"</ul>\n"
+			"</body>",
+			RespCode,Res.data(),RespCode,
 			Res.data(),ExType.data(),ExMsg.data());
 		break;
 	}
