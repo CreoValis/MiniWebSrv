@@ -9,8 +9,8 @@ using namespace HTTP;
 
 Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, const char *NewServerName) : ConnectionBase(MyIOS),
 	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
-	MyRespSource(nullptr), MyLog(nullptr), ServerName(NewServerName),
-	ErrorRS(NewErrorRS),
+	MyRespSource(nullptr), MyLog(nullptr), ContentLength(0), ContentBuff(nullptr), ContentEndBuff(nullptr),
+	ServerName(NewServerName), ErrorRS(NewErrorRS),
 	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr), PostHeaderBuffPos(nullptr),
 	NextConn(nullptr)
 {
@@ -125,10 +125,10 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 		} Header;
 		struct
 		{
-			unsigned int TotalLength, RemLength;
+			unsigned int RemLength;
 			CONTENTTYPE Type;
 
-			void Reset() { TotalLength=RemLength=~(unsigned int)0; Type=CT_NOTUSED; }
+			void Reset() { RemLength=~(unsigned int)0; Type=CT_NOTUSED; }
 			inline bool IsValid() const { return (RemLength!=~(unsigned int)0) && (Type!=CT_NOTUSED); }
 		} Content;
 	} PState;
@@ -302,7 +302,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 								for (const Header &CurrHeader : HeaderA)
 								{
 									if (CurrHeader.IntName==HN_CONTENT_LENGTH)
-										PState.Content.TotalLength=PState.Content.RemLength=(unsigned int)CurrHeader.GetULongLong();
+										ContentLength=PState.Content.RemLength=(unsigned int)CurrHeader.GetULongLong();
 									else if (CurrHeader.IntName==HN_CONTENT_TYPE)
 									{
 										PState.Content.Type=CurrHeader.GetContentType(CurrQuery.GetBoundaryStr());
@@ -395,7 +395,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 							RelevantBuff=ReadBuff.GetRelevantData(RelevantLength);
 						}
 						break;
-					}
+					} //END switch (PState.Content.Type)
 
 					if (!PState.Content.RemLength)
 					{
@@ -404,6 +404,8 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 						CurrQuery.DeleteUploadedFiles();
 						PState.ReqHead.Reset();
 						CurrState=REQUEST_METHOD_END;
+						ContentBuff=nullptr;
+						ContentEndBuff=nullptr;
 					}
 
 					break;

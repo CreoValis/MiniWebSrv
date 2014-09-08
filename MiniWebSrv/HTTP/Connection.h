@@ -45,6 +45,7 @@ protected:
 	METHOD CurrMethod;
 	std::string CurrResource;
 	QueryParams CurrQuery;
+	unsigned long long ContentLength; //Only valid when the client sent some data.
 	const unsigned char *ContentBuff, *ContentEndBuff; //Only valid if the current content type is unknown.
 	std::vector<Header> HeaderA;
 
