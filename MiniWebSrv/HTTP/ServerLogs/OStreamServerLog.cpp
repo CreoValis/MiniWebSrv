@@ -53,17 +53,23 @@ void OStream::OnRequest(void *Connection, HTTP::METHOD Method, const std::string
 	unsigned long long ContentLength, const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
 	unsigned int ResponseCode, unsigned long long ResponseLength, void *UpgradeConn)
 {
-	ConnDataHolder &CurrHolder=ConnMap[Connection];
+	boost::unordered_map<void *,ConnDataHolder>::iterator FindI=ConnMap.find(Connection);
 
-	TargetS <<
-		CurrHolder.SourceAddr << " " <<
-		GetMethodName(Method) << " " <<
-		Resource << " (" << ContentLength << "): "
-		<< ResponseCode << " (" << ResponseLength << ")" <<
-		std::endl;
+	if (FindI!=ConnMap.end())
+	{
+		TargetS <<
+			FindI->second.SourceAddr << " " <<
+			GetMethodName(Method) << " " <<
+			Resource << " (" << ContentLength << "): "
+			<< ResponseCode << " (" << ResponseLength << ")" <<
+			std::endl;
 
-	if ((UpgradeConn) && (CurrHolder.IsWebSocket))
-		ConnMap[UpgradeConn]=CurrHolder;
+		if ((UpgradeConn) && (FindI->second.IsWebSocket))
+		{
+			ConnMap[UpgradeConn]=FindI->second;
+			ConnMap.erase(FindI);
+		}
+	}
 }
 
 void OStream::OnWebSocket(void *Connection, const std::string &Resource, bool IsSuccess, const char *Origin, const char *SubProtocol)
