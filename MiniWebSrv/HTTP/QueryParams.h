@@ -65,6 +65,8 @@ public:
 	const Param &Get(const std::string &Name) const;
 	const Param Get(const std::string &Name, const std::string &Default="") const;
 
+	static void DecodeURLEncoded(std::string &Target, const char *Begin, const char *End);
+
 protected:
 	enum
 	{

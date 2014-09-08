@@ -205,8 +205,10 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 					{
 						//We've got to the end of the request line. Parse it's parts.
 						CurrMethod=ParseMethod(RelevantBuff + PState.ReqHead.MethodPos,RelevantBuff + PState.ReqHead.MethodEndPos);
-						CurrResource.assign((const std::string::value_type *)(RelevantBuff + PState.ReqHead.ResPos),
-							PState.ReqHead.ResEndPos-PState.ReqHead.ResPos);
+
+						CurrResource.clear();
+						QueryParams::DecodeURLEncoded(CurrResource,(const char *)(RelevantBuff + PState.ReqHead.ResPos),
+							(const char *)(RelevantBuff +  PState.ReqHead.ResEndPos));
 
 						CurrQuery=QueryParams();
 						CurrQuery.AddURLEncoded((const char *)(RelevantBuff + PState.ReqHead.QueryPos),(const char *)(RelevantBuff + PState.ReqHead.QueryEndPos));

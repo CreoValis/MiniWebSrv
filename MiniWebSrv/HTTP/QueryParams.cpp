@@ -160,6 +160,26 @@ const QueryParams::Param QueryParams::Get(const std::string &Name, const std::st
 		return Param(Default);
 }
 
+void QueryParams::DecodeURLEncoded(std::string &Target, const char *Begin, const char *End)
+{
+	while (Begin!=End)
+	{
+		char CurrVal=*Begin++;
+
+		if (CurrVal=='+')
+			Target.append((std::string::size_type)1,' ');
+		else if ((CurrVal=='%') && (End-Begin>0))
+		{
+			Target.append((std::string::size_type)1,(std::string::value_type)(
+				(GetHexVal(*Begin) << 4) |
+				GetHexVal(*(Begin+1)) ) );
+			Begin+=2;
+		}
+		else
+			Target.append((std::string::size_type)1,CurrVal);
+	}
+}
+
 void QueryParams::OnBoundaryParsed()
 {
 	BoundaryStr="\r\n--" + BoundaryStr;
