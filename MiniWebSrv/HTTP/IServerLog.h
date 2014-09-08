@@ -29,7 +29,7 @@ public:
 	@param UpgradeConn If the response upgraded the connection, then the address of the new connection. Note that
 		upgraded connections don't get a separate OnConnection() call.*/
 	virtual void OnRequest(void *Connection, HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+		unsigned long long ContentLength, const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
 		unsigned int ResponseCode, unsigned long long ResponseLength, void *UpgradeConn=nullptr)=0;
 	/**Called when a websocket connection is negotiated.
 	@param Connection Original connection, which processed the websocket upgrade request.

@@ -50,7 +50,7 @@ void OStream::OnConnectionFinished(void *Connection)
 }
 
 void OStream::OnRequest(void *Connection, HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
-	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+	unsigned long long ContentLength, const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
 	unsigned int ResponseCode, unsigned long long ResponseLength, void *UpgradeConn)
 {
 	ConnDataHolder &CurrHolder=ConnMap[Connection];
@@ -58,7 +58,7 @@ void OStream::OnRequest(void *Connection, HTTP::METHOD Method, const std::string
 	TargetS <<
 		CurrHolder.SourceAddr << " " <<
 		GetMethodName(Method) << " " <<
-		Resource << " (" << (ContentBuffEnd-ContentBuff) << "): "
+		Resource << " (" << ContentLength << "): "
 		<< ResponseCode << " (" << ResponseLength << ")" <<
 		std::endl;
 

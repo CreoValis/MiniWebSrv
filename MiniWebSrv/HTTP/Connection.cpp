@@ -549,7 +549,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		delete CurrResp;
 
 		MyLog->OnRequest(this,CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,
+			HeaderA,ContentLength,ContentBuff,ContentEndBuff,
 			RespCode,TotalWriteLength,NextConn);
 
 		return RetVal && !NextConn;
@@ -601,7 +601,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		delete CurrResp;
 
 		MyLog->OnRequest(this,CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,
+			HeaderA,ContentLength,ContentBuff,ContentEndBuff,
 			RespCode,TotalWriteLength,NextConn);
 
 		return !NextConn;
