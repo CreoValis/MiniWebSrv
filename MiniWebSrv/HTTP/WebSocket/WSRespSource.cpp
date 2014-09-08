@@ -4,6 +4,7 @@
 
 #include <boost/uuid/sha1.hpp>
 
+#include "../IServerLog.h"
 #include "../ConnectionBase.h"
 #include "../Common/BinUtils.h"
 #include "../Common/StringUtils.h"
@@ -230,9 +231,17 @@ HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Re
 
 		NewHandler=CreateMsgHandler(Resource,Query,
 			SubProtA,OriginHdr ? OriginHdr->Value : nullptr);
+
+		MyServerLog->OnWebSocket(ParentConn,Resource,true,OriginHdr ? OriginHdr->Value : nullptr,
+			SubProtA.size()==1 ? SubProtA.back().data() : nullptr);
 	}
 	else
+	{
 		NewHandler=nullptr;
+
+		MyServerLog->OnWebSocket(ParentConn,Resource,false,OriginHdr ? OriginHdr->Value : nullptr,
+			nullptr);
+	}
 
 	if (NewHandler)
 		return new WSResponse(NewHandler,WSKeyHdr->Value,SubProtA.size()==1 ? SubProtA[0].data() : "");
