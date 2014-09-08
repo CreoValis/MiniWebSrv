@@ -83,6 +83,8 @@ bool Server::Run()
 	{
 		IsRunning=true;
 
+		MyRespSource->SetServerLog(MyLog);
+
 		RestartAccept();
 		RestartTimer();
 

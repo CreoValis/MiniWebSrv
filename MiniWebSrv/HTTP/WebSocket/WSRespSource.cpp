@@ -196,7 +196,7 @@ HTTP::ConnectionBase *WSRespSource::WSResponse::Upgrade(HTTP::ConnectionBase *Cu
 
 HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
 	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-	boost::asio::io_service &ParentIOS)
+	boost::asio::io_service &ParentIOS, void *ParentConn)
 {
 	const Header *UpgradeHdr=nullptr, *ConnHdr=nullptr,
 		*WSKeyHdr=nullptr, *WSVerHdr=nullptr, *WSProtHdr=nullptr,

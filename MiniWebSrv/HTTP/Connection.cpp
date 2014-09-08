@@ -443,18 +443,18 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 	try
 	{
 		CurrResp=MyRespSource->Create(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service());
+			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service(),this);
 	}
 	catch (const std::exception &Ex)
 	{
 		(void)Ex;
 		CurrResp=ErrorRS->CreateFromException(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service(),&Ex);
+			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service(),this,&Ex);
 	}
 	catch (...)
 	{
 		CurrResp=ErrorRS->Create(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service());
+			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service(),this);
 	}
 
 	char *CurrPos=(char *)WriteBuff.Allocate(Config::MaxHeadersLength);

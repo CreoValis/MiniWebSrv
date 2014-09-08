@@ -36,11 +36,12 @@ public:
 	};
 
 	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS)
-	{ return CreateFromException(Method,Resource,Query,HeaderA,ContentBuff,ContentBuffEnd,ParentIOS,NULL); }
+		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS, void *ParentConn)
+	{ return CreateFromException(Method,Resource,Query,HeaderA,ContentBuff,ContentBuffEnd,ParentIOS,this,NULL); }
 
 	IResponse *CreateFromException(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS, const std::exception *Ex);
+		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS, void *ParentConn,
+		const std::exception *Ex);
 };
 
 }; //RespSource

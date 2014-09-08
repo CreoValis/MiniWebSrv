@@ -94,7 +94,7 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 }
 
 IResponse *CommonError::CreateFromException(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS,
+	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, boost::asio::io_service &ParentIOS, void *ParentConn,
 	const std::exception *Ex)
 {
 	return new Response(Resource,HeaderA,Ex);

@@ -43,9 +43,11 @@ public:
 		const std::string &TargetLocation;
 	};
 
+	virtual void SetServerLog(IServerLog *NewLog);
+
 	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
 		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-		boost::asio::io_service &ParentIOS);
+		boost::asio::io_service &ParentIOS, void *ParentConn);
 
 	void AddSimpleRewrite(const std::string &Resource, const std::string &Target) { RewMap[Resource]=RewHolder(Target); }
 	void AddRedirect(const std::string &Resource, const std::string &Target, bool IsPermanent=true) { RewMap[Resource]=RewHolder(Target,IsPermanent); }

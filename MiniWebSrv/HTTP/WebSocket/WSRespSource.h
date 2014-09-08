@@ -17,6 +17,7 @@ override the CreateMsgHandler method. This will be called to create an IMsgHandl
 class WSRespSource : public IRespSource
 {
 public:
+	inline WSRespSource() : MyServerLog(nullptr) { }
 	virtual ~WSRespSource() { }
 
 	class WSResponse : public IResponse
@@ -52,9 +53,11 @@ public:
 		IMsgHandler *MyHandler;
 	};
 
+	virtual void SetServerLog(IServerLog *NewLog) { MyServerLog=NewLog; }
+
 	virtual IResponse *Create(HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
 		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-		boost::asio::io_service &ParentIOS);
+		boost::asio::io_service &ParentIOS, void *ParentConn);
 
 protected:
 	/**Abstract method, which will be called to create a websocket message handler.
@@ -64,6 +67,8 @@ protected:
 		connection can't be upgraded.*/
 	virtual IMsgHandler *CreateMsgHandler(const std::string &Resource, const HTTP::QueryParams &Query, std::vector<std::string> &SubProtocolA,
 		const char *Origin=nullptr)=0;
+
+	IServerLog *MyServerLog;
 
 	static const std::string ConnUpgradeVal;
 	static const std::string WebSocketGUID, UpgradeWebSocketVal;
