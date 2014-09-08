@@ -1,6 +1,9 @@
 #include "FSRespSource.h"
 
+#include <type_traits>
 #include <stdexcept>
+
+#include <boost/locale.hpp>
 
 #include "CommonErrorRespSource.h"
 #include "detail/MimeDB.h"
@@ -80,7 +83,12 @@ IResponse *FS::Create(METHOD Method, const std::string &Resource, const QueryPar
 {
 	boost::filesystem::path Target;
 	try
-	{ Target=boost::filesystem::canonical(Root / Resource); }
+	{
+		if (std::is_same<boost::filesystem::path::value_type,wchar_t>())
+			Target=boost::filesystem::canonical(Root / boost::locale::conv::utf_to_utf<wchar_t,char>(Resource));
+		else
+			Target=boost::filesystem::canonical(Root / Resource);
+	}
 	catch (...)
 	{ return new CommonError::Response(Resource,HeaderA,NULL,RC_NOTFOUND); }
 
