@@ -163,6 +163,8 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 					{
 						PState.ReqHead.MethodEndPos=InBuff-RelevantBuff;
 						CurrState=REQUEST_RES_BEGIN;
+
+						ReqStartTime=boost::chrono::steady_clock::now();
 					}
 					else if (CurrVal=='\n')
 						throw std::runtime_error("Method end not found");
@@ -441,6 +443,8 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 {
 	ResponseCount++;
 
+	boost::chrono::steady_clock::time_point ReqEndTime=boost::chrono::steady_clock::now();
+
 	IResponse *CurrResp;
 	try
 	{
@@ -550,9 +554,14 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		NextConn=CurrResp->Upgrade(this);
 		delete CurrResp;
 
+		boost::chrono::steady_clock::time_point RespEndTime=boost::chrono::steady_clock::now();
+
 		MyLog->OnRequest(this,CurrMethod,CurrResource,CurrQuery,
 			HeaderA,ContentLength,ContentBuff,ContentEndBuff,
-			RespCode,TotalWriteLength,NextConn);
+			RespCode,TotalWriteLength,
+			(ReqEndTime-ReqStartTime).count()/(double)boost::chrono::steady_clock::duration::period::den,
+			(RespEndTime-ReqEndTime).count()/(double)boost::chrono::steady_clock::duration::period::den,
+			NextConn);
 
 		return RetVal && !NextConn;
 	}
@@ -602,9 +611,14 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		NextConn=CurrResp->Upgrade(this);
 		delete CurrResp;
 
+		boost::chrono::steady_clock::time_point RespEndTime=boost::chrono::steady_clock::now();
+
 		MyLog->OnRequest(this,CurrMethod,CurrResource,CurrQuery,
 			HeaderA,ContentLength,ContentBuff,ContentEndBuff,
-			RespCode,TotalWriteLength,NextConn);
+			RespCode,TotalWriteLength,
+			(ReqEndTime-ReqStartTime).count()/(double)boost::chrono::steady_clock::duration::period::den,
+			(RespEndTime-ReqEndTime).count()/(double)boost::chrono::steady_clock::duration::period::den,
+			NextConn);
 
 		return !NextConn;
 	}
