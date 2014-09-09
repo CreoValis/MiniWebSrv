@@ -1,6 +1,7 @@
 #include "OStreamServerLog.h"
 
 #include <iostream>
+#include <iomanip>
 
 using namespace HTTP::ServerLog;
 
@@ -13,6 +14,18 @@ const char *GetMethodName(HTTP::METHOD Method)
 	case HTTP::METHOD_HEAD: return "HEAD";
 	default: return "-";
 	}
+}
+
+void PrintBandwidth(std::ostream &Target, double Value)
+{
+	std::streamsize PrevPrec=Target.precision(1);
+	if (Value>1024*1024*2)
+		Target << std::fixed << Value/(1024*1024) << " MB/s";
+	else if (Value>1024*2)
+		Target << std::fixed << Value/1024 << " kB/s";
+	else
+		Target << std::fixed << Value << " B/s";
+	Target.precision(PrevPrec);
 }
 
 void OStream::OnConnection(void *Connection, unsigned int SourceAddr, bool IsAllowed)
@@ -51,7 +64,9 @@ void OStream::OnConnectionFinished(void *Connection)
 
 void OStream::OnRequest(void *Connection, HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
 	unsigned long long ContentLength, const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-	unsigned int ResponseCode, unsigned long long ResponseLength, void *UpgradeConn)
+	unsigned int ResponseCode, unsigned long long ResponseLength,
+	double ReqTime, double RespTime,
+	void *UpgradeConn)
 {
 	boost::unordered_map<void *,ConnDataHolder>::iterator FindI=ConnMap.find(Connection);
 
@@ -60,8 +75,12 @@ void OStream::OnRequest(void *Connection, HTTP::METHOD Method, const std::string
 		TargetS <<
 			FindI->second.SourceAddr << " " <<
 			GetMethodName(Method) << " " <<
-			Resource << " (" << ContentLength << "): "
-			<< ResponseCode << " (" << ResponseLength << ")" <<
+			Resource << " (" << ContentLength << "; ";
+		PrintBandwidth(TargetS,ContentLength/ReqTime);
+		TargetS << "): "
+			<< ResponseCode << " (" << ResponseLength << "; ";
+		PrintBandwidth(TargetS,ResponseLength/RespTime);
+		TargetS << ")" <<
 			std::endl;
 
 		if ((UpgradeConn) && (FindI->second.IsWebSocket))

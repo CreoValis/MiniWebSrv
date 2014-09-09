@@ -30,7 +30,9 @@ public:
 		upgraded connections don't get a separate OnConnection() call.*/
 	virtual void OnRequest(void *Connection, HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
 		unsigned long long ContentLength, const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-		unsigned int ResponseCode, unsigned long long ResponseLength, void *UpgradeConn=nullptr)=0;
+		unsigned int ResponseCode, unsigned long long ResponseLength,
+		double ReqTime, double RespTime,
+		void *UpgradeConn=nullptr)=0;
 	/**Called when a websocket connection is negotiated.
 	@param Connection Original connection, which processed the websocket upgrade request.
 	@param IsSuccess If true, the websocket handshake succeeded.
