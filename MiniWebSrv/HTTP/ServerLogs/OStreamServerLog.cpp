@@ -16,7 +16,7 @@ const char *GetMethodName(HTTP::METHOD Method)
 	}
 }
 
-void PrintBandwidth(std::ostream &Target, double Value)
+void PrintTransferSpeed(std::ostream &Target, double Value)
 {
 	std::streamsize PrevPrec=Target.precision(1);
 	if (Value>1024*1024*2)
@@ -76,10 +76,10 @@ void OStream::OnRequest(void *Connection, HTTP::METHOD Method, const std::string
 			FindI->second.SourceAddr << " " <<
 			GetMethodName(Method) << " " <<
 			Resource << " (" << ContentLength << "; ";
-		PrintBandwidth(TargetS,ContentLength/ReqTime);
+		PrintTransferSpeed(TargetS,ContentLength/ReqTime);
 		TargetS << "): "
 			<< ResponseCode << " (" << ResponseLength << "; ";
-		PrintBandwidth(TargetS,ResponseLength/RespTime);
+		PrintTransferSpeed(TargetS,ResponseLength/RespTime);
 		TargetS << ")" <<
 			std::endl;
 
