@@ -1,0 +1,6 @@
+wuxtheme.pdb
+Bin/*
+Obj/*
+*.sdf
+*.opensdf
+*.suo
