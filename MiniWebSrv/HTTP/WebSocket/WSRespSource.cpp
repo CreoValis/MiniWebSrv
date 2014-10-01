@@ -199,6 +199,21 @@ HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Re
 	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
 	boost::asio::io_service &ParentIOS, void *ParentConn)
 {
+	//Try to create a websocket response.
+	auto RespPair=CreateWSResponse(Method,Resource,Query,HeaderA,ContentBuff,ContentBuffEnd,ParentIOS,ParentConn,true);
+
+	if (RespPair.second)
+		return RespPair.second;
+	else
+		//Failed to create a websocket response. We don't care about the reasons, just return "forbidden".
+		return new HTTP::RespSource::CommonError::Response(Resource,HeaderA,nullptr,RC_FORBIDDEN);
+}
+
+std::pair<bool, HTTP::IResponse *> WSRespSource::CreateWSResponse(HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query,
+	const std::vector<HTTP::Header> &HeaderA,
+	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+	boost::asio::io_service &ParentIOS, void *ParentConn, bool LogFailed)
+{
 	const Header *UpgradeHdr=nullptr, *ConnHdr=nullptr,
 		*WSKeyHdr=nullptr, *WSVerHdr=nullptr, *WSProtHdr=nullptr,
 		*OriginHdr=nullptr;
@@ -220,6 +235,7 @@ HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Re
 
 	std::vector<std::string> SubProtA;
 	IMsgHandler *NewHandler;
+	bool IsValidWSReq;
 	if ((UpgradeHdr) && (strcmp(UpgradeHdr->Value,UpgradeWebSocketVal.data())==0) &&
 		//(ConnHdr) && (strcmp(ConnHdr->Value,"upgrade")==0) &&
 		(WSKeyHdr) &&
@@ -229,22 +245,28 @@ HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Re
 		if (WSProtHdr)
 			UD::StringUtils::ExtractTrimWSTokens(WSProtHdr->Value,',',StringArrayFiller(SubProtA));
 
+		IsValidWSReq=true;
 		NewHandler=CreateMsgHandler(Resource,Query,
 			SubProtA,OriginHdr ? OriginHdr->Value : nullptr);
-
-		MyServerLog->OnWebSocket(ParentConn,Resource,true,OriginHdr ? OriginHdr->Value : nullptr,
-			SubProtA.size()==1 ? SubProtA.back().data() : nullptr);
 	}
 	else
 	{
+		IsValidWSReq=false;
 		NewHandler=nullptr;
-
-		MyServerLog->OnWebSocket(ParentConn,Resource,false,OriginHdr ? OriginHdr->Value : nullptr,
-			nullptr);
 	}
 
 	if (NewHandler)
-		return new WSResponse(NewHandler,WSKeyHdr->Value,SubProtA.size()==1 ? SubProtA[0].data() : "");
+	{
+		MyServerLog->OnWebSocket(ParentConn,Resource,true,OriginHdr ? OriginHdr->Value : nullptr,
+			SubProtA.size()==1 ? SubProtA.back().data() : nullptr);
+
+		return std::pair<bool, HTTP::IResponse *>(true,new WSResponse(NewHandler,WSKeyHdr->Value,SubProtA.size()==1 ? SubProtA[0].data() : ""));
+	}
 	else
-		return new HTTP::RespSource::CommonError::Response(Resource,HeaderA,nullptr,RC_FORBIDDEN);
+	{
+		if (LogFailed)
+			MyServerLog->OnWebSocket(ParentConn,Resource,false,OriginHdr ? OriginHdr->Value : nullptr,nullptr);
+
+		return std::pair<bool, HTTP::IResponse *>(IsValidWSReq,nullptr);
+	}
 }

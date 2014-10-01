@@ -60,10 +60,18 @@ public:
 		boost::asio::io_service &ParentIOS, void *ParentConn);
 
 protected:
+	/**Creates a WSResponse from the specified request, if possible.
+	@param LogFailed If true, non-websocket requests will be logged as a failed websocket connection attempt.
+	@return The first value of the pair specifies if the request contained a websocket upgrade or not. The second value
+		specifies the response, if the request was a valid valid websocket upgrade request, and CreateMsgHandler returned
+		a valid IMsgHandler object.*/
+	std::pair<bool, IResponse *> CreateWSResponse(HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
+		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+		boost::asio::io_service &ParentIOS, void *ParentConn, bool LogFailed);
 	/**Abstract method, which will be called to create a websocket message handler.
 	@param SubProtocolA A list of subprotocols, which the client claims to support. To select one, leave only the
 		selected subprotocol name in the vector after the call. Otherwise, no subprotocol will be selected.
-	@return A new message handler, which will be used after servicing the upgrade request. If nulptr, then the
+	@return A new message handler, which will be used after servicing the upgrade request. If nullptr, then the
 		connection can't be upgraded.*/
 	virtual IMsgHandler *CreateMsgHandler(const std::string &Resource, const HTTP::QueryParams &Query, std::vector<std::string> &SubProtocolA,
 		const char *Origin=nullptr)=0;
