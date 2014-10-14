@@ -2,12 +2,12 @@
 
 #include <iostream>
 
-#include "Http/Server.h"
-#include "Http/RespSources/FSRespSource.h"
-#include "Http/RespSources/ZipRespSource.h"
-#include "Http/RespSources/WSEchoRespSource.h"
-#include "Http/RespSources/CombinerRespSource.h"
-#include "Http/ServerLogs/OStreamServerLog.h"
+#include "HTTP/Server.h"
+#include "HTTP/RespSources/FSRespSource.h"
+#include "HTTP/RespSources/ZipRespSource.h"
+#include "HTTP/RespSources/WSEchoRespSource.h"
+#include "HTTP/RespSources/CombinerRespSource.h"
+#include "HTTP/ServerLogs/OStreamServerLog.h"
 
 HANDLE MainThreadH=INVALID_HANDLE_VALUE;
 volatile bool IsRunning=true;
