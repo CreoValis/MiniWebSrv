@@ -214,15 +214,13 @@ std::pair<bool, HTTP::IResponse *> WSRespSource::CreateWSResponse(HTTP::METHOD M
 	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
 	boost::asio::io_service &ParentIOS, void *ParentConn, bool LogFailed)
 {
-	const Header *UpgradeHdr=nullptr, *ConnHdr=nullptr,
+	const Header *UpgradeHdr=nullptr,
 		*WSKeyHdr=nullptr, *WSVerHdr=nullptr, *WSProtHdr=nullptr,
 		*OriginHdr=nullptr;
 	for (const Header &CurrHdr : HeaderA)
 	{
 		if (CurrHdr.IntName==HH_UPGRADE)
 			UpgradeHdr=&CurrHdr;
-		else if (CurrHdr.IntName==HN_CONNECTION)
-			ConnHdr=&CurrHdr;
 		else if (CurrHdr.IntName==HH_SEC_WEBSOCKET_KEY)
 			WSKeyHdr=&CurrHdr;
 		else if (CurrHdr.IntName==HH_SEC_WEBSCOKET_VERSION)
