@@ -1,5 +1,7 @@
 #include "Connection.h"
 
+#include "Common/TimeUtils.h"
+
 #include "IRespSource.h"
 #include "IServerLog.h"
 
@@ -482,7 +484,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		//Append the current date.
 		time_t CurrTime=time(NULL);
 		tm TM;
-		if (!gmtime_s(&TM,&CurrTime))
+		if (UD::TimeUtils::GMTime(&CurrTime,&TM))
 			CurrPos+=strftime(CurrPos,40,"Date: %a, %d %b %Y %H:%M:%S GMT\r\n",&TM);
 	}
 

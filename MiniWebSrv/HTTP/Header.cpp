@@ -1,6 +1,7 @@
 #include "Header.h"
 
 #include "Common/StringUtils.h"
+#include "Common/TimeUtils.h"
 
 using namespace HTTP;
 
@@ -293,7 +294,7 @@ time_t Header::GetDateTime() const
 	if ((TM.tm_year==0) || (TM.tm_mon==1))
 		throw FormatException("DateTime is invalid");
 
-	time_t RetTime=_mkgmtime(&TM);
+	time_t RetTime=UD::TimeUtils::TimeGM(&TM);
 	if (RetTime!=-1)
 		return RetTime;
 	else
@@ -408,7 +409,7 @@ char *Header::ExtractHeader(char *LineBegin, char *LineEnd, char **OutName, char
 void Header::FormatDateTime(time_t Timestamp, char *TargetBuff)
 {
 	tm TM;
-	if (!gmtime_s(&TM,&Timestamp))
+	if (!UD::TimeUtils::GMTime(&Timestamp,&TM))
 		strftime(TargetBuff,30,"%a, %d %b %Y %H:%M:%S GMT",&TM);
 	else
 		*TargetBuff='\0';
