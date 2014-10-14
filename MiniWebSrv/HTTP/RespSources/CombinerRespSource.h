@@ -61,7 +61,7 @@ protected:
 		{ }
 
 		std::string Prefix;
-		std::auto_ptr<IRespSource> RespSource;
+		std::unique_ptr<IRespSource> RespSource;
 
 		bool operator()(const std::string &Resource) const;
 	};
