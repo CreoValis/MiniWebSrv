@@ -21,9 +21,9 @@ FS::Response::Response(const boost::filesystem::path &FileName, const char *Mime
 		FileSize=boost::filesystem::file_size(FileName);
 		FilePos=0;
 
-		InS.open(FileName.string(),std::ios_base::binary);
+		InS.open(FileName.string().data(),std::ios_base::binary);
 		if (!InS.is_open())
-			throw std::exception("Cannot open target file");
+			throw std::runtime_error("Cannot open target file");
 	}
 	else
 	{
