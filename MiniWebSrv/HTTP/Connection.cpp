@@ -11,8 +11,8 @@ using namespace HTTP;
 
 Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, const char *NewServerName) : ConnectionBase(MyIOS),
 	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
-	MyRespSource(nullptr), MyLog(nullptr), ContentLength(0), ContentBuff(nullptr), ContentEndBuff(nullptr),
-	ServerName(NewServerName), ErrorRS(NewErrorRS),
+	ContentLength(0), ContentBuff(nullptr), ContentEndBuff(nullptr),
+	ServerName(NewServerName), MyRespSource(nullptr), MyLog(nullptr), ErrorRS(NewErrorRS),
 	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr), PostHeaderBuffPos(nullptr),
 	NextConn(nullptr)
 {

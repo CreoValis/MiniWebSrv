@@ -107,7 +107,7 @@ unsigned int Base64Encode(const unsigned char *SrcBuff, const unsigned char *Src
 
 WSRespSource::WSResponse::WSResponse(IMsgHandler *NewHandler,
 	const char *SecWebSocketKey,
-	const char *SubProtocol) : MyHandler(NewHandler), SubProtocol(SubProtocol)
+	const char *SubProtocol) : SubProtocol(SubProtocol), MyHandler(NewHandler)
 {
 	//Create the accept key.
 	{
