@@ -9,6 +9,7 @@ class EchoMsgHandler : public IMsgHandler
 {
 public:
 	inline EchoMsgHandler() : MySender(nullptr) { }
+	virtual ~EchoMsgHandler() { }
 
 	virtual void RegisterSender(IMsgSender *NewSender)
 	{
