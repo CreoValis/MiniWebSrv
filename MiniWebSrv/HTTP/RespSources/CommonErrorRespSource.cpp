@@ -1,5 +1,7 @@
 #include "CommonErrorRespSource.h"
 
+#include "../Common/StringUtils.h"
+
 using namespace HTTP;
 using namespace HTTP::RespSource;
 
@@ -21,7 +23,7 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 	switch (RespCode)
 	{
 	case RC_BADREQUEST:
-		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
+		OutLength=(unsigned int)sprint_safe((char *)TargetBuff,MaxLength,
 			"<head><title>Err: %d - %s</title></head>\n"
 			"<body>\n"
 			"<h1>401 Bad request</h1>\n"
@@ -31,7 +33,7 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 			Res.data());
 		break;
 	case RC_UNAUTHORIZED:
-		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
+		OutLength=(unsigned int)sprint_safe((char *)TargetBuff,MaxLength,
 			"<head><title>Err: %d - %s</title></head>\n"
 			"<body>\n"
 			"<h1>401 Unauthorized</h1>\n"
@@ -41,7 +43,7 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 			Res.data());
 		break;
 	case RC_FORBIDDEN:
-		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
+		OutLength=(unsigned int)sprint_safe((char *)TargetBuff,MaxLength,
 			"<head><title>Err: %d - %s</title></head>\n"
 			"<body>\n"
 			"<h1>403 Forbidden</h1>\n"
@@ -51,7 +53,7 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 			Res.data());
 		break;
 	case RC_NOTFOUND:
-		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
+		OutLength=(unsigned int)sprint_safe((char *)TargetBuff,MaxLength,
 			"<head><title>Err: %d - %s</title></head>\n"
 			"<body>\n"
 			"<h1>404 Not found</h1>\n"
@@ -61,7 +63,7 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 			Res.data());
 		break;
 	case RC_SERVERERROR:
-		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
+		OutLength=(unsigned int)sprint_safe((char *)TargetBuff,MaxLength,
 			"<head><title>Err: %d - %s</title></head>\n"
 			"<body>\n"
 			"<h1>500 Internal error</h1>\n"
@@ -75,7 +77,7 @@ bool CommonError::Response::Read(unsigned char *TargetBuff, unsigned int MaxLeng
 			Res.data(),ExType.data(),ExMsg.data());
 		break;
 	default:
-		OutLength=(unsigned int)sprintf_s((char *)TargetBuff,MaxLength,
+		OutLength=(unsigned int)sprint_safe((char *)TargetBuff,MaxLength,
 			"<head><title>Err: %d - %s</title></head>\n"
 			"<body>\n"
 			"<h1>[%d]</h1>\n"

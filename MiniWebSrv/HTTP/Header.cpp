@@ -209,7 +209,7 @@ CONTENTTYPE Header::GetContentType(std::string &OutBoundary) const
 	}
 	else
 	{
-		if (_stricmp(Value,"application/x-www-form-urlencoded")==0)
+		if (UD::StringUtils::CmpI(Value,"application/x-www-form-urlencoded")==0)
 			return CT_URL_ENCODED;
 	}
 
