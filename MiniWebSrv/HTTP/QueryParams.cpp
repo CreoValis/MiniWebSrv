@@ -267,6 +267,8 @@ bool QueryParams::AppendToCurrentPart(const char *Begin, const char *End)
 				CurrFileS=nullptr;
 			}
 			return true;
+		default:
+			break;
 		}
 
 		Begin++;
