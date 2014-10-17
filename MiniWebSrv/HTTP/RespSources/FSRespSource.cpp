@@ -73,7 +73,7 @@ bool FS::Response::Read(unsigned char *TargetBuff, unsigned int MaxLength, unsig
 	}
 }
 
-FS::FS(const boost::filesystem::path &NewRoot) : Root(NewRoot)
+FS::FS(const boost::filesystem::path &NewRoot) : Root(boost::filesystem::canonical(NewRoot))
 {
 }
 
