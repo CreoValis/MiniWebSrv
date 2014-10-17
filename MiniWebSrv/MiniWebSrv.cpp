@@ -1,3 +1,8 @@
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <signal.h>
+#endif
 #include "stdafx.h"
 
 #include <iostream>
@@ -9,8 +14,10 @@
 #include "HTTP/RespSources/CombinerRespSource.h"
 #include "HTTP/ServerLogs/OStreamServerLog.h"
 
-HANDLE MainThreadH=INVALID_HANDLE_VALUE;
+
 volatile bool IsRunning=true;
+#ifdef _MSC_VER
+HANDLE MainThreadH=INVALID_HANDLE_VALUE;
 
 BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType)
 {
@@ -27,11 +34,23 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType)
 
 	return TRUE;
 }
+#else
+void SigHandler(int sig)
+{
+	if ((sig==SIGQUIT) || (sig==SIGINT))
+		IsRunning=false;
+}
+#endif
 
 int main(int argc, char* argv[])
 {
+#ifdef _MSC_VER
 	MainThreadH=GetCurrentThread();
 	SetConsoleCtrlHandler(&ConsoleCtrlHandler,TRUE);
+#else
+	signal(SIGQUIT,&SigHandler);
+	signal(SIGINT,&SigHandler);
+#endif
 
 	std::cout << "Starting." << std::endl;
 	HTTP::Server MiniWS(8880);
