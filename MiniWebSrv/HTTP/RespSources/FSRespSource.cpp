@@ -92,31 +92,31 @@ IResponse *FS::Create(METHOD Method, const std::string &Resource, const QueryPar
 	catch (...)
 	{ return new CommonError::Response(Resource,HeaderA,NULL,RC_NOTFOUND); }
 
-  if ( (std::distance(Root.begin(), Root.end())<=std::distance(Target.begin(), Target.end())) &&
+	if ( (std::distance(Root.begin(), Root.end())<=std::distance(Target.begin(), Target.end())) &&
 	  (std::equal(Root.begin(), Root.end(), Target.begin())) &&
 	  (boost::filesystem::exists(Target)) )
-  {
-	  time_t IfModSinceTime=0;
-	  try
-	  {
-		  for (const Header &CurrH : HeaderA)
-		  {
-			  if (CurrH.IntName==HN_IF_MOD_SINCE)
-			  {
-				  IfModSinceTime=CurrH.GetDateTime();
-				  break;
-			  }
-		  }
-	  }
-	  catch (...) { }
+	{
+		time_t IfModSinceTime=0;
+		try
+		{
+			for (const Header &CurrH : HeaderA)
+			{
+				if (CurrH.IntName==HN_IF_MOD_SINCE)
+				{
+					IfModSinceTime=CurrH.GetDateTime();
+					break;
+				}
+			}
+		}
+		catch (...) { }
 
-	  if (!boost::filesystem::is_directory(Target))
-		  return new Response(Target,GetMimeType(Target),IfModSinceTime);
-	  else
-		  return new CommonError::Response(Resource,HeaderA,NULL,RC_FORBIDDEN);
-  }
-  else
-	  return new CommonError::Response(Resource,HeaderA,NULL,RC_NOTFOUND);
+		if (!boost::filesystem::is_directory(Target))
+			return new Response(Target,GetMimeType(Target),IfModSinceTime);
+		else
+			return new CommonError::Response(Resource,HeaderA,NULL,RC_FORBIDDEN);
+	}
+	else
+		return new CommonError::Response(Resource,HeaderA,NULL,RC_NOTFOUND);
 }
 
 const char *FS::GetMimeType(const boost::filesystem::path &FileName)
