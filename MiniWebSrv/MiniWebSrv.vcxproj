@@ -114,8 +114,6 @@
     <ClInclude Include="HTTP\WebSocket\IMsgSender.h" />
     <ClInclude Include="HTTP\WebSocket\WSConnection.h" />
     <ClInclude Include="HTTP\WebSocket\WSRespSource.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Http\Common.cpp" />
@@ -136,7 +134,6 @@
     <ClCompile Include="Http\Server.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NoListing</AssemblerOutput>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

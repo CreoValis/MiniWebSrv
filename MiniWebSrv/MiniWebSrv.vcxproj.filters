@@ -1,8 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="Http\ConnFilters\AllowAllConnFilter.h">
       <Filter>HTTP\ConnFilters</Filter>
     </ClInclude>
@@ -101,7 +99,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Http\RespSources\CommonErrorRespSource.cpp">
       <Filter>HTTP\RespSources</Filter>
     </ClCompile>

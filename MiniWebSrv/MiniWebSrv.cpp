@@ -3,7 +3,6 @@
 #else
 #include <signal.h>
 #endif
-#include "stdafx.h"
 
 #include <iostream>
 
