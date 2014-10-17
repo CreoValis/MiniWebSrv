@@ -1,6 +1,4 @@
-#ifdef _MSC_VER
-#include <windows.h>
-#else
+#ifndef _MSC_VER
 #include <signal.h>
 #endif
 
@@ -13,6 +11,9 @@
 #include "HTTP/RespSources/CombinerRespSource.h"
 #include "HTTP/ServerLogs/OStreamServerLog.h"
 
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
 
 volatile bool IsRunning=true;
 #ifdef _MSC_VER
