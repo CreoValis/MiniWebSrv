@@ -51,12 +51,13 @@ public:
 
 	void AddSimpleRewrite(const std::string &Resource, const std::string &Target) { RewMap[Resource]=RewHolder(Target); }
 	void AddRedirect(const std::string &Resource, const std::string &Target, bool IsPermanent=true) { RewMap[Resource]=RewHolder(Target,IsPermanent); }
-	void AddRespSource(const std::string &Prefix, IRespSource *RespSource) { HolderA.push_back(RSHolder(Prefix,RespSource)); }
+	void AddRespSource(const std::string &Prefix, IRespSource *RespSource) { HolderA.emplace_back(RSHolder(Prefix,RespSource)); }
 
 protected:
 	struct RSHolder
 	{
-		inline RSHolder() { }
+		inline RSHolder() : RespSource(nullptr) { }
+		inline RSHolder(RSHolder &&Src) : Prefix(std::move(Src.Prefix)), RespSource(std::move(Src.RespSource)) { }
 		inline RSHolder(const std::string &NewPrefix, IRespSource *NewRespSource) : Prefix(NewPrefix), RespSource(NewRespSource)
 		{ }
 
