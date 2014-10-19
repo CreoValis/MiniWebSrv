@@ -22,13 +22,71 @@ connections for HTTP/1.0 or on request.
 * GET and POST query parameter parser, with file upload support.
 * Fully customizable response generators, with a few built-in:
   * Static file serving with last modification date support.
-  * Static file serving from zip archives (blindly expects user agents to
-  support gzip content-encoding).
+  * Static file serving from zip archives last modification date support
+  (blindly expects user agents to support gzip content-encoding).
+  * Common error response generator (generates error pages from http error
+  codes or std::exception objects)
 * Easy interface to generate custom responses.
 * WebSocket support with simple interfaces to implement.
 
 ## Documentation
-TODO :)
+Currently, the repository contains the library and a simple demonstration
+application. These are only logically separated: the library does not build
+to a separate object.
+
+### Project layout
+The layout is as follows:
+
+* The `MiniWebSrv/HTTP` directory contains the HTTPd library in it's entirety.
+Copying the files from here and dropping them into your project is the easiest
+way to use it.
+* The `MiniWebSrv/MiniWebSrv.cpp` file contains the demonstration application.
+It shows the basic steps to configure, start and stop the HTTPd server.
+
+### Basic architecture
+The central class in the library is `HTTP::Server`. This class contains the
+single thread used by the HTTPd library to run the protocol parser and create
+responses. It also listens to incoming connection requests, maintains the list
+of active Connection objects, and destroys them when needed. It also contains
+the main customizable objects of the library: the connection filter, response
+source and server log.
+
+Connection filters are derived from `HTTP::IConnFilter`. Objects of this type
+are used to determine if a given client can connect or not. Though the
+interface contains a method which can filter on resources, this is not yet
+used.
+
+Response sources are derived from `HTTP::IRespSource`. These are the main
+workhorses of the library. Instances of this class can create `HTTP::IResponse`
+derived objects, which define the contents of the response.
+
+The server log object receives method calls for each connection attempt, HTTP
+request and websocket connection. These are derived from `HTTP::IServerLog`.
+
+### Websocket support
+Websocket connections are supported through the HTTP connection upgrade
+process, as specified by the standard. The library's architecture mirrors this
+process.
+
+After a request was processed, and the response was generated and fully sent,
+the `HTTP::IResponse` object has a chance to upgrade the current connection. If
+it chooses to do so, it returns a new connection object, which should replace
+the current one in the `HTTP::Server` object's connection list.
+
+Websocket support is implemented through this facility. Websocket upgrade
+responses are served by an IRespSource: derivatives of the
+`HTTP::WebSocket::WSRespSource` class. The derived class should contain a
+method, which can return a `HTTP::WebSocket::IMsgHandler` object. This will
+receive object to send websocket messages with, and it will receive method
+calls when an incoming message arrives.
+The `HTTP::WebSocket::WSRespSource` class creates a simple IResponse object,
+which handles the upgrade process. The connection it upgrades to contains the
+websocket protocol handler code.
+
+The websocket connection class (`HTTP::WebSocket::Connection`) supports the
+whole specification, though without any extensions. It places artificial limits
+on the incoming frames and assembled messages, which can be configured in
+`MiniWebSrv/HTTP/BuildConfig.h`.
 
 ## Supported platforms
  * Windows 7
