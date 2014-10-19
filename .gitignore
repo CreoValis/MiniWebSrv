@@ -1,6 +1,10 @@
 wuxtheme.pdb
 Bin/*
 Obj/*
+Debug/*
+Debug-GCC/*
+Release/*
+Release-GCC/*
 *.sdf
 *.opensdf
 *.suo
