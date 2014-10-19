@@ -73,10 +73,7 @@ int main(int argc, char* argv[])
 	MiniWS.Run();
 	std::cout << "Started." << std::endl;
 	while (IsRunning)
-	{
 		boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-		//std::cout << "\rAct: " << MiniWS.GetConnCount() << "; Total: " << MiniWS.GetTotalConnCount() << "; Resp: " << MiniWS.GetResponseCount();
-	}
 
 	std::cout << "Stopping." << std::endl;
 	if (MiniWS.Stop(boost::posix_time::seconds(4)))
