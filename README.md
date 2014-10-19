@@ -61,7 +61,8 @@ workhorses of the library. Instances of this class can create `HTTP::IResponse`
 derived objects, which define the contents of the response.
 
 The server log object receives method calls for each connection attempt, HTTP
-request and websocket connection. These are derived from `HTTP::IServerLog`.
+request and websocket connection. These classes are derived from
+`HTTP::IServerLog`.
 
 ### Websocket support
 Websocket connections are supported through the HTTP connection upgrade
@@ -75,10 +76,10 @@ the current one in the `HTTP::Server` object's connection list.
 
 Websocket support is implemented through this facility. Websocket upgrade
 responses are served by an IRespSource: derivatives of the
-`HTTP::WebSocket::WSRespSource` class. The derived class should contain a
-method, which can return a `HTTP::WebSocket::IMsgHandler` object. This will
-receive object to send websocket messages with, and it will receive method
-calls when an incoming message arrives.
+`HTTP::WebSocket::WSRespSource` class. The derived class should override a
+specific method, which can return a `HTTP::WebSocket::IMsgHandler` object.
+This will receive an object to send websocket messages with, and it will
+receive method calls when an incoming message arrives.
 The `HTTP::WebSocket::WSRespSource` class creates a simple IResponse object,
 which handles the upgrade process. The connection it upgrades to contains the
 websocket protocol handler code.
