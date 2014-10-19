@@ -32,12 +32,21 @@ TODO :)
 
 ## Supported platforms
  * Windows 7
- * More to come :)
+ * Linux
+ * (probably every platform where the required boost libraries are supported)
 
 ## Compiling
 The following are required to compile the library and the application:
 
 * A C++11 compiler. Tested with the following:
   * MSVC 11
+  * LLVM clang 3.5
+  * GCC 4.8 (4.7 would probably work for now)
 * The Boost C++ libraries.
   * v1.55 and v1.56 are known to work.
+  * The following separately compiled libraries are required:
+     * boost\_system
+     * boost\_filesystem (required only by the static file response generator)
+     * boost\_thread
+     * boost\_coroutine
+     * boost\_chrono
