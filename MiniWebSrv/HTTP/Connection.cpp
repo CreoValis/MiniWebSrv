@@ -131,6 +131,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 			CONTENTTYPE Type;
 
 			void Reset() { RemLength=~(unsigned int)0; Type=CT_NOTUSED; }
+			inline bool IsContentLengthValid() const { return (RemLength!=~(unsigned int)0); }
 			inline bool IsValid() const { return (RemLength!=~(unsigned int)0) && (Type!=CT_NOTUSED); }
 		} Content;
 	} PState;
@@ -319,7 +320,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 										break;
 								}
 
-								if (!PState.Content.IsValid())
+								if (!PState.Content.IsContentLengthValid())
 									throw std::runtime_error("Content-Length header not found");
 								else if (PState.Content.RemLength>Config::MaxPostBodyLength)
 									throw std::runtime_error("Content-Length value too large");
