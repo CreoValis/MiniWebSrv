@@ -206,6 +206,8 @@ CONTENTTYPE Header::GetContentType(std::string &OutBoundary) const
 			ParseDelimitedKeyValue(SCPos,SingleKeyExtractor(BoundaryParamName,OutBoundary));
 			return !OutBoundary.empty() ? CT_FORM_MULTIPART : CT_UNKNOWN;
 		}
+		else if (UD::StringUtils::CmpI("application/x-www-form-urlencoded",Value,SCPos)==0)
+			return CT_URL_ENCODED;
 	}
 	else
 	{
