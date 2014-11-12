@@ -330,6 +330,17 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 								RelevantBuff=ReadBuff.GetRelevantData(RelevantLength);
 
 								CurrState=CONTENT_END;
+
+								if (!PState.Content.RemLength)
+								{
+									//We've fully read this request. Process the response.
+									IsKeepAlive= ResponseHandler(Yield) && IsKeepAlive;
+									CurrQuery.DeleteUploadedFiles();
+									PState.ReqHead.Reset();
+									CurrState=REQUEST_METHOD_END;
+									ContentBuff=nullptr;
+									ContentEndBuff=nullptr;
+								}
 							}
 						}
 					}
