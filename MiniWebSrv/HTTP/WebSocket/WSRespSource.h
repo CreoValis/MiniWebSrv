@@ -74,6 +74,7 @@ protected:
 	@return A new message handler, which will be used after servicing the upgrade request. If nullptr, then the
 		connection can't be upgraded.*/
 	virtual IMsgHandler *CreateMsgHandler(const std::string &Resource, const HTTP::QueryParams &Query, std::vector<std::string> &SubProtocolA,
+		boost::asio::io_service &ParentIOS,
 		const char *Origin=nullptr)=0;
 
 	IServerLog *MyServerLog;

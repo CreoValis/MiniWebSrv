@@ -245,7 +245,7 @@ std::pair<bool, HTTP::IResponse *> WSRespSource::CreateWSResponse(HTTP::METHOD M
 
 		IsValidWSReq=true;
 		NewHandler=CreateMsgHandler(Resource,Query,
-			SubProtA,OriginHdr ? OriginHdr->Value : nullptr);
+			SubProtA,ParentIOS,OriginHdr ? OriginHdr->Value : nullptr);
 	}
 	else
 	{

@@ -34,7 +34,7 @@ private:
 };
 
 IMsgHandler *EchoRespSource::CreateMsgHandler(const std::string &Resource, const HTTP::QueryParams &Query, std::vector<std::string> &SubProtocolA,
-	const char *Origin)
+	boost::asio::io_service &ParentIOS, const char *Origin)
 {
 	bool IsEchoProt=false;
 	for (const std::string &CurrProt : SubProtocolA)
