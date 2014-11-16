@@ -48,7 +48,12 @@ bool Connection::OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn)
 		return SafeStates!=SAFE_ALL;
 	}
 	else
+	{
+		if (MyHandler)
+			MyHandler->OnStep(StepInterval);
+
 		return true;
+	}
 }
 
 unsigned char *Connection::Allocate(MESSAGETYPE Type, unsigned long long Length)
@@ -344,6 +349,8 @@ CLOSEREASON Connection::ProcessControlFrame(OPCODENAME OpCode, const unsigned ch
 {
 	switch (OpCode)
 	{
+	case OCN_PONG:
+		break;
 	case OCN_PING:
 		{
 			boost::unique_lock<boost::mutex> lock(SendBuffMtx);

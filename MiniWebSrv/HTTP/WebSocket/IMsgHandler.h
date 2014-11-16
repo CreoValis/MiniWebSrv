@@ -17,6 +17,8 @@ public:
 	/**Sets the websocket message sender object to be used. The pointer's ownership is not transferred.*/
 	virtual void RegisterSender(IMsgSender *NewSender)=0;
 
+	/**Called periodically from the HTTPd thread.*/
+	virtual void OnStep(unsigned int StepDuration)=0;
 	/**Called when a new message arrives on the websocket connection.
 	As this method will be called on the HTTPd thread, it should not block for long.*/
 	virtual void OnMessage(MESSAGETYPE Type, const unsigned char *Msg, unsigned long long MsgLength)=0;

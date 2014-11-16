@@ -16,6 +16,8 @@ public:
 		MySender=NewSender;
 	}
 
+	virtual void OnStep(unsigned int StepDuration) { }
+
 	virtual void OnMessage(MESSAGETYPE Type, const unsigned char *Msg, unsigned long long MsgLength)
 	{
 		boost::unique_lock<boost::mutex> lock(MySender->GetSendMutex());
