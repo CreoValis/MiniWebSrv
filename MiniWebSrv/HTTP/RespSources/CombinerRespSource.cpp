@@ -46,7 +46,7 @@ void Combiner::SetServerLog(IServerLog *NewLog)
 
 IResponse *Combiner::Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
 	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-	boost::asio::io_service &ParentIOS, void *ParentConn)
+	AsyncHelperHolder AsyncHelpers, void *ParentConn)
 {
 	const std::string *ResPtr=&Resource;
 	{
@@ -65,7 +65,7 @@ IResponse *Combiner::Create(METHOD Method, const std::string &Resource, const Qu
 		if (CurrHolder(*ResPtr))
 			return CurrHolder.RespSource->Create(Method,ResPtr->substr(CurrHolder.Prefix.length()),
 			Query,HeaderA,ContentBuff,ContentBuffEnd,
-			ParentIOS,ParentConn);
+			AsyncHelpers,ParentConn);
 	}
 
 	return new CommonError::Response(*ResPtr,HeaderA,NULL,RC_NOTFOUND);

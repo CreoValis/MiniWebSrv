@@ -460,21 +460,22 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 	boost::chrono::steady_clock::time_point ReqEndTime=boost::chrono::steady_clock::now();
 
 	IResponse *CurrResp;
+	IRespSource::AsyncHelperHolder AsyncHelper(MyStrand,Yield);
 	try
 	{
 		CurrResp=MyRespSource->Create(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service(),this);
+			HeaderA,ContentBuff,ContentEndBuff,AsyncHelper,this);
 	}
 	catch (const std::exception &Ex)
 	{
 		(void)Ex;
 		CurrResp=ErrorRS->CreateFromException(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service(),this,&Ex);
+			HeaderA,ContentBuff,ContentEndBuff,AsyncHelper,this,&Ex);
 	}
 	catch (...)
 	{
 		CurrResp=ErrorRS->Create(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,MySock.get_io_service(),this);
+			HeaderA,ContentBuff,ContentEndBuff,AsyncHelper,this);
 	}
 
 	char *CurrPos=(char *)WriteBuff.Allocate(Config::MaxHeadersLength);

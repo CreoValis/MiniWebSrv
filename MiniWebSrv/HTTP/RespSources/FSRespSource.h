@@ -48,7 +48,7 @@ public:
 
 	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
 		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-		boost::asio::io_service &ParentIOS, void *ParentConn);
+		AsyncHelperHolder AsyncHelpers, void *ParentConn);
 
 private:
 	boost::filesystem::path Root;

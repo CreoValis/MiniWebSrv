@@ -179,7 +179,7 @@ Zip::Zip(const boost::filesystem::path &ArchiveFN) : MyArch(ArchiveFN.string())
 
 IResponse *Zip::Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
 		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-		boost::asio::io_service &ParentIOS, void *ParentConn)
+		AsyncHelperHolder AsyncHelpers, void *ParentConn)
 {
 	const ZipArchive::FileInfo *TargetFI=MyArch.Get(Resource.length() ? Resource.substr(1,Resource.length()-1) : Resource);
 	if (!TargetFI)

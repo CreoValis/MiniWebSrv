@@ -197,10 +197,10 @@ HTTP::ConnectionBase *WSRespSource::WSResponse::Upgrade(HTTP::ConnectionBase *Cu
 
 HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
 	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-	boost::asio::io_service &ParentIOS, void *ParentConn)
+	AsyncHelperHolder AsyncHelpers, void *ParentConn)
 {
 	//Try to create a websocket response.
-	auto RespPair=CreateWSResponse(Method,Resource,Query,HeaderA,ContentBuff,ContentBuffEnd,ParentIOS,ParentConn,true);
+	auto RespPair=CreateWSResponse(Method,Resource,Query,HeaderA,ContentBuff,ContentBuffEnd,AsyncHelpers,ParentConn,true);
 
 	if (RespPair.second)
 		return RespPair.second;
@@ -212,7 +212,7 @@ HTTP::IResponse *WSRespSource::Create(HTTP::METHOD Method, const std::string &Re
 std::pair<bool, HTTP::IResponse *> WSRespSource::CreateWSResponse(HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query,
 	const std::vector<HTTP::Header> &HeaderA,
 	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-	boost::asio::io_service &ParentIOS, void *ParentConn, bool LogFailed)
+	AsyncHelperHolder AsyncHelpers, void *ParentConn, bool LogFailed)
 {
 	const Header *UpgradeHdr=nullptr,
 		*WSKeyHdr=nullptr, *WSVerHdr=nullptr, *WSProtHdr=nullptr,
@@ -245,7 +245,7 @@ std::pair<bool, HTTP::IResponse *> WSRespSource::CreateWSResponse(HTTP::METHOD M
 
 		IsValidWSReq=true;
 		NewHandler=CreateMsgHandler(Resource,Query,
-			SubProtA,ParentIOS,OriginHdr ? OriginHdr->Value : nullptr);
+			SubProtA,AsyncHelpers,OriginHdr ? OriginHdr->Value : nullptr);
 	}
 	else
 	{

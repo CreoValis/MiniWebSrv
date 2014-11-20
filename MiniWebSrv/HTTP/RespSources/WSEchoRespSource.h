@@ -16,7 +16,7 @@ public:
 
 protected:
 	virtual IMsgHandler *CreateMsgHandler(const std::string &Resource, const HTTP::QueryParams &Query, std::vector<std::string> &SubProtocolA,
-		boost::asio::io_service &ParentIOS, const char *Origin=nullptr);
+		AsyncHelperHolder AsyncHelpers, const char *Origin=nullptr);
 
 };
 
