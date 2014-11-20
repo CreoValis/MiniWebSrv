@@ -253,9 +253,9 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 							if (CurrMethod!=METHOD_POST)
 							{
 								HeaderA.push_back(Header((char *)RelevantBuff+PState.Header.HeaderPos,
-									(char *)RelevantBuff+CurrPos));
+									(char *)InBuff));
 
-								ReadBuff.Consume(CurrPos-PState.Header.HeaderPos,true); //Consume the header, but keep as relevant.
+								ReadBuff.Consume(CurrPos-PState.Header.HeaderPos + 1,true); //Consume the header, but keep as relevant.
 
 								//Wait for the next header.
 								PState.Header.HeaderPos=CurrPos + 1;
@@ -263,7 +263,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 							else
 							{
 								char *HeaderPtr=AddPostHeader(RelevantBuff+PState.Header.HeaderPos,
-									RelevantBuff+CurrPos);
+									InBuff);
 
 								if (HeaderPtr)
 									HeaderA.push_back(Header(HeaderPtr,HeaderPtr+CurrPos));
