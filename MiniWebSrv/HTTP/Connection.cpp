@@ -37,7 +37,8 @@ void Connection::Start(IRespSource *NewRespSource, IServerLog *NewLog)
 
 	MyRespSource=NewRespSource;
 	MyLog=NewLog;
-	boost::asio::spawn(MyStrand,boost::bind(&Connection::ProtocolHandler,this,_1));
+	//boost::asio::spawn(MyStrand,boost::bind(&Connection::ProtocolHandler,this,_1));
+	boost::asio::spawn(MyStrand,boost::bind(&Connection::SimpleProtocolHandler,this,_1));
 }
 
 void Connection::Stop()
@@ -453,6 +454,327 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 	IsDeletable=true;
 }
 
+void Connection::SimpleProtocolHandler(boost::asio::yield_context Yield)
+{
+	/**Parser algorithm:
+	- Read as many bytes as possible.
+	- While still reading headers:
+		- Consume and keep every byte, looking for '\n', and recoding the position of the first ':'.
+		- If this is the first line in this request:
+			- Parse as a request line.
+			- Otherwise, parse as a header. If no ':' was found, close the connection.
+		- If the line is empty, then search the headers for content-type and content-length, and switch to content mode.
+	- If this is a POST request, and content should be read:
+		- Save the header's data to a temporary buffer, and modify the current header
+		- Discard the currently kept header data.
+		- If reading form/url-encoded content:
+			- Read the whole content, keep every byte. When finished, give the content to the QueryParams object.
+		- If reading form/multipart content:
+			- Read the whole content in blocks.Give every block to the QueryParams object.
+		- When reading some other content:
+			- Read the whole content, keep every byte.
+	- When the content was read fully (or there was no content), call ResponseHandler.
+	- Discard every content byte, and start reading headers again.
+	*/
+
+	try
+	{
+		bool IsKeepAlive=true;
+
+		//Read new requests while we can.
+		while (IsKeepAlive)
+		{
+			//Reset the request states.
+			ResetRequestData();
+			ReqStartTime=boost::chrono::steady_clock::now();
+
+			if (!HeaderHandler(Yield))
+				//Header parse error. Close the connection.
+				break;
+
+			if (CurrMethod==METHOD_POST)
+			{
+				//Parse request content.
+				if (ContentHandler(Yield))
+					break;
+			}
+
+			//Process the fully parsed response.
+			if (!ResponseHandler(Yield))
+				break;
+
+			//Clear every kept byte in the read buffer.
+			ReadBuff.ResetRelevant();
+
+			if (CurrVersion==VERSION_10)
+				IsKeepAlive=false;
+		}
+	}
+	catch (std::exception &Ex)
+	{
+		(void)Ex;
+	}
+	catch (...)
+	{
+	}
+
+	try { MySock.close(); }
+	catch (...) { }
+	IsDeletable=true;
+}
+
+bool Connection::HeaderHandler(boost::asio::yield_context Yield)
+{
+	//Read the header block.
+
+	bool RequestLineFound=false;
+	unsigned int LineStartPos=0;
+	while (true)
+	{
+		if (!ReadBuff.GetAvailableDataLength())
+			ContinueRead(Yield);
+
+		unsigned int AvailableDataLength;
+		const unsigned char *InBuff=ReadBuff.GetAvailableData(AvailableDataLength), *InBuffEnd=InBuff+AvailableDataLength;
+
+		unsigned int RelevantDataLength;
+		const unsigned char *RelevantBuff=ReadBuff.GetRelevantData(RelevantDataLength);
+
+		//Parse this block of data.
+		while (InBuff!=InBuffEnd)
+		{
+			unsigned char CurrVal=*InBuff;
+			if (CurrVal=='\n')
+			{
+				if (InBuff-RelevantBuff-LineStartPos>1)
+				{
+					//This is a non-empty line.
+					if (RequestLineFound)
+						HeaderA.push_back(Header((char *)RelevantBuff+LineStartPos,(char *)InBuff));
+					else
+					{
+						//This is the request line.
+						if (ParseRequestLine(RelevantBuff,InBuff))
+							RequestLineFound=true;
+						else
+							return false;
+					}
+
+					LineStartPos=InBuff-RelevantBuff+1;
+				}
+				else
+				{
+					//This is an empty line. Consume every byte so far, including this one.
+					ReadBuff.Consume(InBuff-ReadBuff.GetAvailableData(AvailableDataLength)+1,true);
+					return true;
+				}
+			}
+
+			++InBuff;
+		}
+
+		//Consume every byte we've read.
+		ReadBuff.Consume(AvailableDataLength,true);
+		ContinueRead(Yield);
+	}
+
+	return false;
+}
+
+bool Connection::ContentHandler(boost::asio::yield_context Yield)
+{
+	//This is a POST request. Search for a content-type and a content-length header.
+	enum HEADERFLAG
+	{
+		HF_CONTENTTYPE    = 1 << 0,
+		HF_CONTENTLENGTH  = 1 << 1,
+		HF_REQUIRED       = HF_CONTENTTYPE | HF_CONTENTLENGTH,
+	};
+
+	unsigned int HeaderFoundFlags=0;
+	HTTP::CONTENTTYPE ContentType=CT_UNKNOWN;
+	for (const Header &CurrHeader : HeaderA)
+	{
+		if (CurrHeader.IntName==HN_CONTENT_LENGTH)
+		{
+			ContentLength=CurrHeader.GetULongLong();
+			HeaderFoundFlags|=HF_CONTENTLENGTH;
+		}
+		else if (CurrHeader.IntName==HN_CONTENT_TYPE)
+		{
+			ContentType=CurrHeader.GetContentType(CurrQuery.GetBoundaryStr());
+			CurrQuery.OnBoundaryParsed();
+			HeaderFoundFlags|=HF_CONTENTTYPE;
+		}
+
+		if ((HeaderFoundFlags & HF_REQUIRED)==HF_REQUIRED)
+			break;
+	}
+
+	if ((HeaderFoundFlags & HF_REQUIRED)!=HF_REQUIRED)
+		return false;
+
+	if (!ContentLength)
+		//No content to parse.
+		return true;
+	else if (ContentLength>Config::MaxPostBodyLength)
+		//Content too large.
+		return false;
+
+	if ((ContentType==CT_URL_ENCODED) || (ContentType==CT_UNKNOWN))
+	{
+		while (!ReadBuff.RequestData((unsigned int)ContentLength))
+			ContinueRead(Yield);
+
+		//The actual content is the currently available data.
+		unsigned int AvailableLength;
+		ContentBuff=ReadBuff.GetAvailableData(AvailableLength);
+		ContentEndBuff=ContentBuff+AvailableLength;
+
+		if (ContentType==CT_URL_ENCODED)
+			CurrQuery.AddURLEncoded((const char *)ContentBuff,(const char *)ContentEndBuff);
+
+		ReadBuff.Consume(AvailableLength,true);
+		return true;
+	}
+	else if (ContentType==CT_FORM_MULTIPART)
+	{
+		//We have to save the header's contents from the read buffer to a separate buffer.
+		unsigned int RelevantLength;
+		const unsigned char *RelevantBuff=ReadBuff.GetRelevantData(RelevantLength);
+
+		if ((unsigned int)(PostHeaderBuffEnd-PostHeaderBuff)<RelevantLength)
+		{
+			delete[] PostHeaderBuff;
+			PostHeaderBuff=new char[RelevantLength];
+			PostHeaderBuffEnd=PostHeaderBuff+RelevantLength;
+		}
+
+		memcpy(PostHeaderBuff,RelevantBuff,RelevantLength);
+
+		//Now that we have the header's data saved, we have to offset the Header structures' internal pointers.
+		std::ptrdiff_t Offset=PostHeaderBuff-(const char *)RelevantBuff;
+		for (Header &CurrHeader : HeaderA)
+		{
+			CurrHeader.Name+=Offset;
+			CurrHeader.Value+=Offset;
+		}
+
+		//We can now release the buffer space held by the headers' data, and start reading the content in chunks.
+		ReadBuff.ResetRelevant();
+
+		unsigned long long RemLength=ContentLength;
+		while (RemLength)
+		{
+			unsigned int AvailableLength;
+			const unsigned char *AvailableBuff=ReadBuff.GetAvailableData(AvailableLength);
+			if (AvailableLength<RemLength)
+			{
+				CurrQuery.AppendFormMultipart((const char *)AvailableBuff,(const char *)AvailableBuff+AvailableLength);
+				ReadBuff.Consume((unsigned int)AvailableLength);
+				RemLength-=AvailableLength;
+
+				ReadBuff.RequestData(RemLength<Config::ReadBuffSize ? (unsigned int)RemLength : Config::ReadBuffSize);
+				ContinueRead(Yield);
+			}
+			else
+			{
+				CurrQuery.AppendFormMultipart((const char *)AvailableBuff,(const char *)AvailableBuff+RemLength);
+				ReadBuff.Consume((unsigned int)RemLength);
+				RemLength=0;
+			}
+		}
+
+		return true;
+	}
+	else
+		//Unknown ContentType.
+		return false;
+}
+
+bool Connection::ParseRequestLine(const unsigned char *Begin, const unsigned char *End)
+{
+	const unsigned char *CurrPos=Begin;
+	while (true)
+	{
+		if (CurrPos==End)
+			return false;
+
+		if (*CurrPos==' ')
+		{
+			CurrMethod=ParseMethod(Begin,CurrPos);
+			++CurrPos;
+			break;
+		}
+		else
+			++CurrPos;
+	}
+
+	Begin=CurrPos;
+	unsigned char CurrVal;
+	while (true)
+	{
+		if (CurrPos==End)
+			return false;
+
+		CurrVal=*CurrPos;
+		if ((CurrVal==' ') || (CurrVal=='?'))
+		{
+			CurrResource.assign((const char *)Begin,(const char *)CurrPos);
+
+			++CurrPos;
+			break;
+		}
+		else
+			++CurrPos;
+	}
+
+	if (CurrVal=='?')
+	{
+		//We have a query part to parse.
+
+		Begin=CurrPos;
+		while (true)
+		{
+			if (CurrPos==End)
+				return false;
+
+			if (*CurrPos==' ')
+			{
+				CurrQuery.AddURLEncoded((const char *)Begin,(const char *)CurrPos);
+				++CurrPos;
+				break;
+			}
+			else
+				++CurrPos;
+		}
+	}
+
+	Begin=CurrPos;
+	while (true)
+	{
+		if (CurrPos==End)
+			return false;
+
+		if (*CurrPos++=='/')
+		{
+			if (End-CurrPos>=3)
+			{
+				if (memcmp(CurrPos,"1.0",3)==0)
+					CurrVersion=VERSION_10;
+				else
+					CurrVersion=VERSION_11;
+			}
+			else
+			{
+				CurrVersion=VERSION_11;
+			}
+
+			return true;
+		}
+	}
+}
+
 bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 {
 	ResponseCount++;
@@ -637,6 +959,19 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 		return !NextConn;
 	}
+}
+
+void Connection::ResetRequestData()
+{
+	CurrVersion=VERSION_11;
+	CurrMethod=METHOD_UNKNOWN;
+
+	CurrResource.reserve(CurrResource.capacity());
+	CurrQuery=QueryParams();
+	ContentLength=0;
+
+	HeaderA.reserve(HeaderA.capacity());
+	HeaderA.clear();
 }
 
 void Connection::CreatePostHeaderBuff()

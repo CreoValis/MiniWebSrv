@@ -43,6 +43,7 @@ protected:
 	unsigned int SilentTime;
 	bool IsDeletable;
 
+	VERSION CurrVersion;
 	METHOD CurrMethod;
 	std::string CurrResource;
 	QueryParams CurrQuery;
@@ -69,8 +70,16 @@ protected:
 	void WriteAll(boost::asio::yield_context &Yield);
 
 	void ProtocolHandler(boost::asio::yield_context Yield);
+
+	void SimpleProtocolHandler(boost::asio::yield_context Yield);
+	bool HeaderHandler(boost::asio::yield_context Yield);
+	bool ContentHandler(boost::asio::yield_context Yield);
+	bool ParseRequestLine(const unsigned char *Begin, const unsigned char *End);
+
+	/**@return True, if this connection should continue.*/
 	bool ResponseHandler(boost::asio::yield_context &Yield);
 
+	void ResetRequestData();
 	void CreatePostHeaderBuff();
 	char *AddPostHeader(const unsigned char *Begin, const unsigned char *End);
 
