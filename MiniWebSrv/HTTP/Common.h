@@ -3,6 +3,12 @@
 namespace HTTP
 {
 
+enum VERSION
+{
+	VERSION_10,
+	VERSION_11,
+};
+
 enum METHOD
 {
 	METHOD_GET,
