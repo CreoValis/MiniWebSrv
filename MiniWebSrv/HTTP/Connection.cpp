@@ -495,7 +495,7 @@ void Connection::SimpleProtocolHandler(boost::asio::yield_context Yield)
 			if (CurrMethod==METHOD_POST)
 			{
 				//Parse request content.
-				if (ContentHandler(Yield))
+				if (!ContentHandler(Yield))
 					break;
 			}
 
