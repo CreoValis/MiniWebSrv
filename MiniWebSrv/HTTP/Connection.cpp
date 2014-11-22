@@ -233,7 +233,7 @@ bool Connection::ContentHandler(boost::asio::yield_context Yield)
 	{
 		HF_CONTENTTYPE    = 1 << 0,
 		HF_CONTENTLENGTH  = 1 << 1,
-		HF_REQUIRED       = HF_CONTENTTYPE | HF_CONTENTLENGTH,
+		HF_REQUIRED       = HF_CONTENTLENGTH,
 	};
 
 	unsigned int HeaderFoundFlags=0;
