@@ -58,7 +58,7 @@ protected:
 
 	RespSource::CommonError *ErrorRS;
 
-	char *PostHeaderBuff, *PostHeaderBuffEnd, *PostHeaderBuffPos;
+	char *PostHeaderBuff, *PostHeaderBuffEnd;
 
 	UD::Comm::StreamReadBuff<Config::ReadBuffSize> ReadBuff;
 	UD::Comm::WriteBuffQueue<Config::WriteBuffSize,Config::WriteQueueInitSize> WriteBuff;
@@ -70,8 +70,6 @@ protected:
 	void WriteAll(boost::asio::yield_context &Yield);
 
 	void ProtocolHandler(boost::asio::yield_context Yield);
-
-	void SimpleProtocolHandler(boost::asio::yield_context Yield);
 	bool HeaderHandler(boost::asio::yield_context Yield);
 	bool ContentHandler(boost::asio::yield_context Yield);
 	bool ParseRequestLine(const unsigned char *Begin, const unsigned char *End);
@@ -80,8 +78,6 @@ protected:
 	bool ResponseHandler(boost::asio::yield_context &Yield);
 
 	void ResetRequestData();
-	void CreatePostHeaderBuff();
-	char *AddPostHeader(const unsigned char *Begin, const unsigned char *End);
 
 	static METHOD ParseMethod(const unsigned char *Begin, const unsigned char *End);
 };
