@@ -54,7 +54,7 @@ inline int CmpI(const char *Op1, const char *Op2Begin, const char *Op2End)
 inline int CmpI(const char *Op1, const char *Op2)
 {
 	char Op1Val, Op2Val;
-	while ((Op1Val=tolower(*Op1++)) && (Op2Val=tolower(*Op2++)))
+	while (((Op1Val=tolower(*Op1++)), (Op2Val=tolower(*Op2++)), true) && (Op1Val) && (Op2Val))
 	{
 		if (Op1Val<Op2Val)
 			return -1;
