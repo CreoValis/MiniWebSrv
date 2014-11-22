@@ -129,7 +129,11 @@ bool QueryParams::AppendFormMultipart(const char *Begin, const char *End)
 				ParseTmp.clear();
 			}
 
-			BoundaryParseCounter=0;
+			//if (CurrVal!=BoundaryStr[0])
+			if (CurrVal!='\r')
+				BoundaryParseCounter=0;
+			else
+				BoundaryParseCounter=1;
 		}
 
 		Begin++;
