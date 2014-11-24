@@ -411,7 +411,7 @@ char *Header::ExtractHeader(char *LineBegin, char *LineEnd, char **OutName, char
 void Header::FormatDateTime(time_t Timestamp, char *TargetBuff)
 {
 	tm TM;
-	if (!UD::TimeUtils::GMTime(&Timestamp,&TM))
+	if (UD::TimeUtils::GMTime(&Timestamp,&TM))
 		strftime(TargetBuff,30,"%a, %d %b %Y %H:%M:%S GMT",&TM);
 	else
 		*TargetBuff='\0';
