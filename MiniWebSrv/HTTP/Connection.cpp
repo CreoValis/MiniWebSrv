@@ -234,6 +234,7 @@ bool Connection::ContentHandler(boost::asio::yield_context Yield)
 		HF_CONTENTTYPE    = 1 << 0,
 		HF_CONTENTLENGTH  = 1 << 1,
 		HF_REQUIRED       = HF_CONTENTLENGTH,
+		HF_ALL            = HF_CONTENTLENGTH | HF_CONTENTTYPE,
 	};
 
 	unsigned int HeaderFoundFlags=0;
@@ -252,7 +253,7 @@ bool Connection::ContentHandler(boost::asio::yield_context Yield)
 			HeaderFoundFlags|=HF_CONTENTTYPE;
 		}
 
-		if ((HeaderFoundFlags & HF_REQUIRED)==HF_REQUIRED)
+		if ((HeaderFoundFlags & HF_ALL)==HF_ALL)
 			break;
 	}
 
