@@ -35,6 +35,9 @@ public:
 		virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength,
 			boost::asio::yield_context &Ctx);
 
+	protected:
+		void CloseStream() { InS.close(); }
+
 	private:
 		static const unsigned long long NotModifiedSize=~(unsigned long long)0;
 
