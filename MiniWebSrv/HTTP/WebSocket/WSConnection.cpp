@@ -50,9 +50,12 @@ bool Connection::OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn)
 	else
 	{
 		if (MyHandler)
+		{
 			MyHandler->OnStep(StepInterval);
-
-		return true;
+			return true;
+		}
+		else
+			return SafeStates!=SAFE_ALL;
 	}
 }
 
