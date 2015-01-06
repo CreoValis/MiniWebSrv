@@ -234,7 +234,7 @@ std::pair<bool, HTTP::IResponse *> WSRespSource::CreateWSResponse(HTTP::METHOD M
 	std::vector<std::string> SubProtA;
 	IMsgHandler *NewHandler;
 	bool IsValidWSReq;
-	if ((UpgradeHdr) && (strcmp(UpgradeHdr->Value,UpgradeWebSocketVal.data())==0) &&
+	if ((UpgradeHdr) && (UD::StringUtils::CmpI(UpgradeHdr->Value,UpgradeWebSocketVal.data(),UpgradeWebSocketVal.data()+UpgradeWebSocketVal.length())==0) &&
 		//(ConnHdr) && (strcmp(ConnHdr->Value,"upgrade")==0) &&
 		(WSKeyHdr) &&
 		(WSVerHdr) && (atoi(WSVerHdr->Value)==13))
