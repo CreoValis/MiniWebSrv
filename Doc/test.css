@@ -1,0 +1,62 @@
+body
+{
+	background-color: #D0D0D0;
+	color: #000020;
+}
+
+span.testsection
+{
+	display: block;
+	border-bottom: 1px solid #000020;
+	margin-left: 2em;
+	margin-right: 2em;
+}
+
+p.notice
+{
+	font-size: 0.75em;
+}
+
+div.formgroup label
+{
+	display: inline-block;
+	width: 5em;
+}
+
+#gallerytest img
+{
+	width: 150px;
+	margin: 5px;
+}
+
+#wsstatedisp
+{
+	font-style: italic;
+}
+
+#wslogholder
+{
+	font-family: monospace;
+	background-color: #203020;
+	color: #B0F0B0;
+}
+
+#wslogholder span
+{
+	display: block;
+}
+
+#wslogholder span.sys
+{
+	color: #B0B0F0;
+}
+
+#wslogholder span.send
+{
+	color: #B0F0B0;
+}
+
+#wslogholder span.recv
+{
+	color: #F0B0B0;
+}

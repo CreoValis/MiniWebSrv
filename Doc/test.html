@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="MiniWebSrv test." />
+<meta name="author" content="CreoValis" />
+
+<link href="test.css" rel="stylesheet" />
+<script src="test.js" charset="utf-8"></script>
+<title>MiniWebSrv test page</title>
+</head>
+<body>
+<h1>MiniWebSrv test page</h1>
+
+<span class="testsection" id="gallerytest">
+<h2>Zip archive source test</h2>
+<p>The following images are served from a zip file.</p>
+<img src="gallery/applications-internet.png" />
+<img src="gallery/internet.png" />
+<img src="gallery/world-wide-web.png" />
+<p class="notice">All images are from <a href="http://openclipart.org">openclipart.org</a>.</p>
+</span>
+
+<span class="testsection" id="gettest">
+<h2>GET test</h2>
+<form method="GET" action="formtest">
+	<div class="formgroup"><label for="getinputtest">Text:</label><input id="getinputtest" name="getinputtest"></input></div>
+	<div class="formgroup"><button type="submit">Submit</button></div>
+</form>
+</span>
+
+<span class="testsection" id="posttest">
+<h2>POST test</h2>
+<form method="POST" action="formtest" enctype="multipart/form-data">
+	<div class="formgroup"><label for="postfiletest">File:</label><input type="file" id="postfiletest" name="postfiletest" /></div>
+	<div class="formgroup"><label for="postinputtest">Text:</label><input id="postinputtest" name="postinputtest"></input></div>
+	<div class="formgroup"><label for="posttexttest">TextArea:</label><textarea id="posttexttest" name="posttexttest" /></textarea></div>
+	<div class="formgroup"><button type="submit">Submit</button></div>
+</form>
+</span>
+
+<span class="testsection" id="wstest">
+<h2>WebSocket test</h2>
+<form onsubmit="return false;">
+<input id="wslogin" type="submit" value="Connect" onclick="ConnectWS('wsstatedisp','wslogholder');" />
+<span id="wsstatedisp">Press Connect</span>
+<div class="formgroup">
+	<label for="wsmsginput">Message:</label>
+	<input id="wsmsginput" name="wsmsginput"></input>
+	<input id="wssend" type="submit" value="Send" onclick="SendWS('wsmsginput')" />
+</div>
+<div id="wslogholder"></div>
+</form>
+</span>
+
+</body>
+</html>
