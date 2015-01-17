@@ -3,6 +3,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 
 #include "HTTP/Server.h"
 #include "HTTP/RespSources/FSRespSource.h"
@@ -10,6 +11,9 @@
 #include "HTTP/RespSources/WSEchoRespSource.h"
 #include "HTTP/RespSources/CombinerRespSource.h"
 #include "HTTP/ServerLogs/OStreamServerLog.h"
+
+ //////////////////////////////////////
+// OS-specific helpers.
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -41,6 +45,73 @@ void SigHandler(int sig)
 		IsRunning=false;
 }
 #endif
+
+ //////////////////////////////////////
+// Form parameter tester.
+
+class FormTestRS : public HTTP::IRespSource
+{
+public:
+
+	class SStreamResp : public HTTP::IResponse
+	{
+	public:
+		virtual unsigned int GetResponseCode() { return HTTP::RC_OK; }
+		virtual const char *GetContentType() const { return "text/plain"; }
+		virtual const char *GetContentTypeCharset() const { return "utf-8"; }
+
+		virtual unsigned long long GetLength() { return (unsigned long long)MyStream.tellp(); }
+		virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength, boost::asio::yield_context &Ctx)
+		{
+			MyStream.read((char *)TargetBuff,MaxLength);
+			return (OutLength=(unsigned int)(MyStream.gcount()))!=0;
+		}
+
+		inline operator std::stringstream &() { return MyStream; }
+
+	private:
+		std::stringstream MyStream;
+	};
+
+	virtual HTTP::IResponse *Create(HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
+		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn)
+	{
+		SStreamResp *MyResp=new SStreamResp();
+		std::stringstream &RespStream=*MyResp;
+
+		RespStream << "Got method ";
+		switch (Method)
+		{
+		case HTTP::METHOD_GET:
+			RespStream << "GET.\n";
+			break;
+		case HTTP::METHOD_POST:
+			RespStream << "POST.\n";
+			break;
+		case HTTP::METHOD_HEAD:
+			RespStream << "HEAD.\n";
+			break;
+		default:
+			RespStream << "(unknown).\n";
+			break;
+		}
+
+		RespStream << "\nParams:\n";
+		for (const HTTP::QueryParams::ParamMapType::value_type &Param : Query.Params())
+			RespStream << Param.first << ": \"" << Param.second.Value << "\"\n";
+
+		RespStream << "\nFiles:\n";
+		for (const HTTP::QueryParams::FileMapType::value_type &File : Query.Files())
+			RespStream << File.first << ": OrigFileName: \"" << File.second.OrigFileName << "\", "
+				"Path: \"" << File.second.Path.string() << "\", MimeType: \"" << File.second.MimeType << "\", "
+				"[Size]: " << boost::filesystem::file_size(File.second.Path) << "\n";
+
+		return MyResp;
+	}
+};
+
+ //////////////////////////////////////
+// Main entry point.
 
 int main(int argc, char* argv[])
 {
