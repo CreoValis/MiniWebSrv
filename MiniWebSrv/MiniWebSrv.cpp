@@ -58,12 +58,8 @@ int main(int argc, char* argv[])
 
 	{
 		HTTP::RespSource::Combiner *Combiner=new HTTP::RespSource::Combiner();
-		Combiner->AddRespSource("/ziptest",new HTTP::RespSource::Zip("test.zip"));
 		Combiner->AddRespSource("/echo",new HTTP::WebSocket::EchoRespSource());
-		Combiner->AddRespSource("",new HTTP::RespSource::FS("."));
 
-		Combiner->AddRedirect("/ziptest","/ziptest/");
-		Combiner->AddSimpleRewrite("/ziptest/","/ziptest/daloskonyv.htm");
 
 		MiniWS.SetResponseSource(Combiner);
 
