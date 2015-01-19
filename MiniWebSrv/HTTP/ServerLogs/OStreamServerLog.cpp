@@ -1,5 +1,7 @@
 #include "OStreamServerLog.h"
 
+#include <time.h>
+
 #include <iostream>
 #include <iomanip>
 
@@ -53,6 +55,7 @@ void OStream::OnConnectionFinished(void *Connection)
 	{
 		if (FindI->second.IsWebSocket)
 		{
+			PrintNow(TargetS);
 			TargetS <<
 				FindI->second.SourceAddr << " WebSocketClose" <<
 				std::endl;
@@ -72,6 +75,7 @@ void OStream::OnRequest(void *Connection, HTTP::METHOD Method, const std::string
 
 	if (FindI!=ConnMap.end())
 	{
+		PrintNow(TargetS);
 		TargetS <<
 			FindI->second.SourceAddr << " " <<
 			GetMethodName(Method) << " " <<
@@ -97,6 +101,7 @@ void OStream::OnWebSocket(void *Connection, const std::string &Resource, bool Is
 	{
 		ConnDataHolder &CurrHolder=ConnMap[Connection];
 
+		PrintNow(TargetS);
 		TargetS <<
 			CurrHolder.SourceAddr << " WebSocket " <<
 			(Origin ? Origin : "") << ": " <<
@@ -105,4 +110,18 @@ void OStream::OnWebSocket(void *Connection, const std::string &Resource, bool Is
 
 		CurrHolder.IsWebSocket=true;
 	}
+}
+
+void OStream::PrintNow(std::ostream &Target)
+{
+	time_t NowTS=time(nullptr);
+	tm NowT;
+	if (!localtime_s(&NowT,&NowTS))
+	{
+		char TimeStr[32];
+		strftime(TimeStr,sizeof(TimeStr),"%Y.%m.%d. %H:%M:%S  ",&NowT);
+		Target << TimeStr;
+	}
+	else
+		Target << "???  ";
 }

@@ -40,6 +40,8 @@ private:
 	std::ostream &TargetS;
 
 	boost::unordered_map<void *,ConnDataHolder> ConnMap;
+
+	static void PrintNow(std::ostream &Target);
 };
 
 }; //ServerLog
