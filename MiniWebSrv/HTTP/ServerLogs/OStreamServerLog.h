@@ -33,7 +33,7 @@ private:
 	{
 		inline ConnDataHolder() : IsWebSocket(false) { }
 
-		std::string SourceAddr;
+		std::string SourceAddr, WSTarget;
 		bool IsWebSocket;
 	};
 

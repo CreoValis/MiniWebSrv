@@ -57,7 +57,8 @@ void OStream::OnConnectionFinished(void *Connection)
 		{
 			PrintNow(TargetS);
 			TargetS <<
-				FindI->second.SourceAddr << " WebSocketClose" <<
+				FindI->second.SourceAddr << " WSC  " <<
+				FindI->second.WSTarget <<
 				std::endl;
 		}
 
@@ -103,11 +104,12 @@ void OStream::OnWebSocket(void *Connection, const std::string &Resource, bool Is
 
 		PrintNow(TargetS);
 		TargetS <<
-			CurrHolder.SourceAddr << " WebSocket " <<
+			CurrHolder.SourceAddr << " WS   " <<
 			(Origin ? Origin : "") << ": " <<
 			(SubProtocol ? SubProtocol : "-") <<
 			std::endl;
 
+		CurrHolder.WSTarget=Resource;
 		CurrHolder.IsWebSocket=true;
 	}
 }
