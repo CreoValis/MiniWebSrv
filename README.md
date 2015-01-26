@@ -29,6 +29,39 @@ connections for HTTP/1.0 or on request.
 * Easy interface to generate custom responses.
 * WebSocket support with simple interfaces to implement.
 
+## Example
+This simple example serves files straight from a zip file. Accesses are logged
+to stdout.
+
+```c++
+#include <iostream>
+#include "HTTP/Server.h"
+#include "HTTP/RespSources/ZipRespSource.h"
+#include "HTTP/ServerLogs/OStreamServerLog.h"
+
+int main(int argc, char **argv)
+{
+	//Create a server object to listen on *:80 .
+	HTTP::Server MiniWS(80);
+	//Create and set a ResponseSource, which will serve files from "test.zip".
+	MiniWS.SetResponseSource(new HTTP::RespSource::Zip("test.zip"));
+	//Create and set the server log object, with std::cout as it's target.
+	MiniWS.SetServerLog(new HTTP::ServerLog::OStream(std::cout));
+
+	//Start the background thread and open the listener socket.
+	MiniWS.Run();
+	//...
+	//Stop the server, allowing 4 seconds for the background thread to exit.
+	MiniWS.Stop(boost::posix_time::seconds(4));
+
+	return 0;
+}
+```
+
+For a more complete example including a custom ResponseSource demonstrating the
+use of query parameters and file uploads, see
+[MiniWebSrv.cpp](MiniWebSrv/MiniWebSrv.cpp).
+
 ## Documentation
 Currently, the repository contains the library and a simple demonstration
 application. These are only logically separated: the library does not build
@@ -37,11 +70,12 @@ to a separate object.
 ### Project layout
 The layout is as follows:
 
-* The `MiniWebSrv/HTTP` directory contains the HTTPd library in it's entirety.
-Copying the files from here and dropping them into your project is the easiest
-way to use it.
-* The `MiniWebSrv/MiniWebSrv.cpp` file contains the demonstration application.
-It shows the basic steps to configure, start and stop the HTTPd server.
+* The [MiniWebSrv/HTTP](MiniWebSrv/HTTP) directory contains the HTTPd library
+in it's entirety. Copying the files from here and dropping them into your
+project is the easiest way to use it.
+* The [iniWebSrv/MiniWebSrv.cpp](MiniWebSrv/MiniWebSrv.cpp) file contains th
+demonstration application. It shows the basic steps to configure, start and
+stop the HTTPd server.
 
 ### Basic architecture
 The central class in the library is `HTTP::Server`. This class contains the
@@ -63,6 +97,11 @@ derived objects, which define the contents of the response.
 The server log object receives method calls for each connection attempt, HTTP
 request and websocket connection. These classes are derived from
 `HTTP::IServerLog`.
+
+### Configuration
+Some basic parts of the library can be configured in
+[HTTP/BuildConfig.h](MiniWebSrv/HTTP/BuildConfig.h) by modifying the constants
+defined there. These include buffer sizes and silent connection timeout.
 
 ### Websocket support
 Websocket connections are supported through the HTTP connection upgrade
@@ -87,7 +126,7 @@ websocket protocol handler code.
 The websocket connection class (`HTTP::WebSocket::Connection`) supports the
 whole specification, though without any extensions. It places artificial limits
 on the incoming frames and assembled messages, which can be configured in
-`MiniWebSrv/HTTP/BuildConfig.h`.
+[HTTP/BuildConfig.h](MiniWebSrv/HTTP/BuildConfig.h).
 
 ## Supported platforms
  * Windows 7
