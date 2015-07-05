@@ -32,8 +32,9 @@ Zip::Response::Response(ZipArchive::Stream *ArchS, const char *MimeType, time_t 
 		if (SourceS->GetInfo()->Compression==ZipArchive::CM_DEFLATE)
 		{
 			//Compose a Gzip footer.
-			*(unsigned int *)GzipFooterA=SourceS->GetInfo()->CRC32;
-			*((unsigned int *)GzipFooterA+1)=SourceS->GetInfo()->UncompressedSize;
+			unsigned int *FooterFieldA=(unsigned int *)GzipFooterA;
+			FooterFieldA[0]=SourceS->GetInfo()->CRC32;
+			FooterFieldA[1]=SourceS->GetInfo()->UncompressedSize;
 
 			CState=CS_HEADER;
 			CStatePos=0;
