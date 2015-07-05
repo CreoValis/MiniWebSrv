@@ -54,12 +54,19 @@ inline int CmpI(const char *Op1, const char *Op2Begin, const char *Op2End)
 inline int CmpI(const char *Op1, const char *Op2)
 {
 	char Op1Val, Op2Val;
-	while (((Op1Val=tolower(*Op1++)), (Op2Val=tolower(*Op2++)), true) && (Op1Val) && (Op2Val))
+	while (true)
 	{
-		if (Op1Val<Op2Val)
-			return -1;
-		if (Op1Val>Op2Val)
-			return 1;
+		Op1Val=tolower(*Op1++);
+		Op2Val=tolower(*Op2++);
+		if ((Op1Val) && (Op2Val))
+		{
+			if (Op1Val<Op2Val)
+				return -1;
+			if (Op1Val>Op2Val)
+				return 1;
+		}
+		else
+			break;
 	}
 
 	if (!Op1Val)
