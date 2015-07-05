@@ -118,7 +118,11 @@ void OStream::PrintNow(std::ostream &Target)
 {
 	time_t NowTS=time(nullptr);
 	tm NowT;
+#ifdef _MSC_VER
 	if (!localtime_s(&NowT,&NowTS))
+#else
+	if (!localtime_r(&NowTS,&NowT))
+#endif
 	{
 		char TimeStr[32];
 		strftime(TimeStr,sizeof(TimeStr),"%Y.%m.%d. %H:%M:%S  ",&NowT);
