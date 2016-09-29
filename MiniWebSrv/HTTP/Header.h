@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace HTTP
 {
@@ -88,7 +88,7 @@ private:
 	static const std::string BoundaryParamName;
 
 	static bool IsHeaderNameInit;
-	static boost::unordered_map<std::string,HEADERNAME> HeaderNameMap;
+	static std::unordered_map<std::string,HEADERNAME> HeaderNameMap;
 	static bool InitHeaderNameMap();
 	static inline void AddToHeaderMap(HEADERNAME Name) { HeaderNameMap[GetHeaderName(Name)]=Name; }
 };

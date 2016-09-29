@@ -177,7 +177,7 @@ const std::string ContentDisposExtractor::NameKey="name", ContentDisposExtractor
 
 const std::string Header::BoundaryParamName("boundary");
 
-boost::unordered_map<std::string,HEADERNAME> Header::HeaderNameMap;
+std::unordered_map<std::string,HEADERNAME> Header::HeaderNameMap;
 bool Header::IsHeaderNameInit=Header::InitHeaderNameMap();
 
 Header::Header(char *LineBegin, char *LineEnd)
@@ -333,7 +333,7 @@ unsigned long long Header::GetULongLong() const
 
 HEADERNAME Header::ParseHeader(const char *Name)
 {
-	boost::unordered_map<std::string,HEADERNAME>::const_iterator FindI=HeaderNameMap.find(Name);
+	std::unordered_map<std::string,HEADERNAME>::const_iterator FindI=HeaderNameMap.find(Name);
 	if (FindI!=HeaderNameMap.end())
 		return FindI->second;
 	else

@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "../IRespSource.h"
 
@@ -78,7 +78,7 @@ protected:
 	};
 
 	std::vector<RSHolder> HolderA;
-	boost::unordered_map<std::string,RewHolder> RewMap;
+	std::unordered_map<std::string,RewHolder> RewMap;
 };
 
 }; //RespSource

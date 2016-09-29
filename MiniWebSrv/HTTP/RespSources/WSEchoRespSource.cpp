@@ -20,7 +20,7 @@ public:
 
 	virtual void OnMessage(MESSAGETYPE Type, const unsigned char *Msg, unsigned long long MsgLength)
 	{
-		boost::unique_lock<boost::mutex> lock(MySender->GetSendMutex());
+		std::unique_lock<std::mutex> lock(MySender->GetSendMutex());
 
 		unsigned char *SendBuff=MySender->Allocate(Type,MsgLength);
 		memcpy(SendBuff,Msg,(unsigned int)MsgLength);

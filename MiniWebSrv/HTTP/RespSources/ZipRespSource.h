@@ -2,7 +2,6 @@
 
 #include "../IRespSource.h"
 
-#include <boost/unordered_map.hpp>
 #include <boost/filesystem.hpp>
 
 #include "detail/ZipArchive.h"

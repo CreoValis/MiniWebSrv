@@ -131,7 +131,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 		{
 			//Reset the request states.
 			ResetRequestData();
-			ReqStartTime=boost::chrono::steady_clock::now();
+			ReqStartTime=std::chrono::steady_clock::now();
 
 			if (!HeaderHandler(Yield))
 				//Header parse error. Close the connection.
@@ -425,7 +425,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 {
 	ResponseCount++;
 
-	boost::chrono::steady_clock::time_point ReqEndTime=boost::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point ReqEndTime=std::chrono::steady_clock::now();
 
 	IResponse *CurrResp;
 	IRespSource::AsyncHelperHolder AsyncHelper(MyStrand,Yield);
@@ -537,13 +537,13 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		NextConn=CurrResp->Upgrade(this);
 		delete CurrResp;
 
-		boost::chrono::steady_clock::time_point RespEndTime=boost::chrono::steady_clock::now();
+		std::chrono::steady_clock::time_point RespEndTime=std::chrono::steady_clock::now();
 
 		MyLog->OnRequest(this,CurrMethod,CurrResource,CurrQuery,
 			HeaderA,ContentLength,ContentBuff,ContentEndBuff,
 			RespCode,TotalWriteLength,
-			(ReqEndTime-ReqStartTime).count()/(double)boost::chrono::steady_clock::duration::period::den,
-			(RespEndTime-ReqEndTime).count()/(double)boost::chrono::steady_clock::duration::period::den,
+			(ReqEndTime-ReqStartTime).count()/(double)std::chrono::steady_clock::duration::period::den,
+			(RespEndTime-ReqEndTime).count()/(double)std::chrono::steady_clock::duration::period::den,
 			NextConn);
 
 		return RetVal && !NextConn;
@@ -594,13 +594,13 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		NextConn=CurrResp->Upgrade(this);
 		delete CurrResp;
 
-		boost::chrono::steady_clock::time_point RespEndTime=boost::chrono::steady_clock::now();
+		std::chrono::steady_clock::time_point RespEndTime=std::chrono::steady_clock::now();
 
 		MyLog->OnRequest(this,CurrMethod,CurrResource,CurrQuery,
 			HeaderA,ContentLength,ContentBuff,ContentEndBuff,
 			RespCode,TotalWriteLength,
-			(ReqEndTime-ReqStartTime).count()/(double)boost::chrono::steady_clock::duration::period::den,
-			(RespEndTime-ReqEndTime).count()/(double)boost::chrono::steady_clock::duration::period::den,
+			(ReqEndTime-ReqStartTime).count()/(double)std::chrono::steady_clock::duration::period::den,
+			(RespEndTime-ReqEndTime).count()/(double)std::chrono::steady_clock::duration::period::den,
 			NextConn);
 
 		return !NextConn;

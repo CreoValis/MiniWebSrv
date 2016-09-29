@@ -50,7 +50,7 @@ IResponse *Combiner::Create(METHOD Method, const std::string &Resource, const Qu
 {
 	const std::string *ResPtr=&Resource;
 	{
-		boost::unordered_map<std::string,RewHolder>::const_iterator FindI=RewMap.find(*ResPtr);
+		std::unordered_map<std::string,RewHolder>::const_iterator FindI=RewMap.find(*ResPtr);
 		if (FindI!=RewMap.end())
 		{
 			if (FindI->second.IsRedirect)

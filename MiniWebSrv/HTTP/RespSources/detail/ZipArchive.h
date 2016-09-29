@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fstream>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 class ZipArchive
 {
@@ -54,8 +54,8 @@ protected:
 	static const unsigned int EOCDMagic = 0x06054b50;
 
 	//FileName->FileInfo map.
-	typedef boost::unordered_map<std::string,FileInfo> FIMapType;
-	boost::unordered_map<std::string,FileInfo> FileInfoMap;
+	typedef std::unordered_map<std::string,FileInfo> FIMapType;
+	FIMapType FileInfoMap;
 
 	std::string ZipFN;
 	std::ifstream ZipS;

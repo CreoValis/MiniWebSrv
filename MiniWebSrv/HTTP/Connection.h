@@ -1,7 +1,7 @@
 #pragma once
 
+#include <chrono>
 #include <boost/bind.hpp>
-#include <boost/chrono.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
 
@@ -50,7 +50,7 @@ protected:
 	unsigned long long ContentLength; //Only valid when the client sent some data.
 	const unsigned char *ContentBuff, *ContentEndBuff; //Only valid if the current content type is unknown.
 	std::vector<Header> HeaderA;
-	boost::chrono::steady_clock::time_point ReqStartTime;
+	std::chrono::steady_clock::time_point ReqStartTime;
 
 	const char *ServerName;
 	IRespSource *MyRespSource;

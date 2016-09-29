@@ -1,12 +1,12 @@
 #include "MimeDB.h"
 
 const char *HTTP::detail::MimeDB::UnknownMimeType="application/octet-stream";
-boost::unordered_map<std::string,std::string> HTTP::detail::MimeDB::ExtMimeMap;
+std::unordered_map<std::string,std::string> HTTP::detail::MimeDB::ExtMimeMap;
 bool HTTP::detail::MimeDB::IsExtMimeMapInit=InitExtMimeMap();
 
 const char *HTTP::detail::MimeDB::GetMimeType(const std::string &FileExt)
 {
-	boost::unordered_map<std::string,std::string>::const_iterator FindI=ExtMimeMap.find(FileExt);
+	std::unordered_map<std::string,std::string>::const_iterator FindI=ExtMimeMap.find(FileExt);
 	if (FindI!=ExtMimeMap.end())
 		return FindI->second.data();
 	else

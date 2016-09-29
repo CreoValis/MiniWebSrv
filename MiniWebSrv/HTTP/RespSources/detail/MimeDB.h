@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace HTTP
 {
@@ -16,7 +16,7 @@ public:
 
 private:
 	static const char *UnknownMimeType;
-	static boost::unordered_map<std::string,std::string> ExtMimeMap;
+	static std::unordered_map<std::string,std::string> ExtMimeMap;
 	static bool IsExtMimeMapInit;
 
 	static bool InitExtMimeMap();

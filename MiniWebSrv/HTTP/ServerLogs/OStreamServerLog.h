@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "../IServerLog.h"
 
@@ -39,7 +39,7 @@ private:
 
 	std::ostream &TargetS;
 
-	boost::unordered_map<void *,ConnDataHolder> ConnMap;
+	std::unordered_map<void *,ConnDataHolder> ConnMap;
 
 	static void PrintNow(std::ostream &Target);
 };

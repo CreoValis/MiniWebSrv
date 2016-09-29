@@ -1,8 +1,7 @@
 #pragma once
 
 #include <string>
-
-#include <boost/thread.hpp>
+#include <mutex>
 
 #include "../BuildConfig.h"
 #include "../Common/StreamReadBuff.h"
@@ -31,7 +30,7 @@ public:
 	virtual void Stop();
 	virtual bool OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn);
 
-	virtual boost::mutex &GetSendMutex() { return SendBuffMtx; }
+	virtual std::mutex &GetSendMutex() { return SendBuffMtx; }
 	virtual unsigned char *Allocate(MESSAGETYPE Type, unsigned long long Length);
 	virtual bool Deallocate();
 	virtual bool Send();
@@ -69,7 +68,7 @@ private:
 		SAFE_ALL = SAFE_READ | SAFE_WRITE,
 	};
 
-	boost::mutex SendBuffMtx;
+	std::mutex SendBuffMtx;
 	unsigned int SafeStates;
 
 	unsigned int SilentTime;

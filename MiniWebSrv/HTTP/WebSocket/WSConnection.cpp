@@ -160,7 +160,7 @@ void Connection::OnWrite(const boost::system::error_code &error, std::size_t byt
 	SetSafeState<SAFE_WRITE>();
 	if (!error)
 	{
-		boost::unique_lock<boost::mutex> lock(SendBuffMtx);
+		std::unique_lock<std::mutex> lock(SendBuffMtx);
 
 		WriteBuff.Release();
 		StartAsyncWrite();
@@ -356,7 +356,7 @@ CLOSEREASON Connection::ProcessControlFrame(OPCODENAME OpCode, const unsigned ch
 		break;
 	case OCN_PING:
 		{
-			boost::unique_lock<boost::mutex> lock(SendBuffMtx);
+			std::unique_lock<std::mutex> lock(SendBuffMtx);
 			if (SendControlFrame(OCN_PONG))
 				StartAsyncWrite();
 		}
@@ -372,7 +372,7 @@ CLOSEREASON Connection::ProcessControlFrame(OPCODENAME OpCode, const unsigned ch
 
 			MyHandler->OnClose(ReasonCode);
 
-			boost::unique_lock<boost::mutex> lock(SendBuffMtx);
+			std::unique_lock<std::mutex> lock(SendBuffMtx);
 			if (SendCloseInternal(ReasonCode))
 				StartAsyncWrite();
 
@@ -393,7 +393,7 @@ void Connection::OnProtocolError(CLOSEREASON Reason)
 	{
 		MyHandler->OnClose(Reason);
 
-		boost::unique_lock<boost::mutex> lock(SendBuffMtx);
+		std::unique_lock<std::mutex> lock(SendBuffMtx);
 		if (SendCloseInternal(Reason))
 			StartAsyncWrite();
 
@@ -432,14 +432,14 @@ bool Connection::SendCloseInternal(unsigned short Reason)
 
 void Connection::StartAsyncWriteExternal()
 {
-	boost::unique_lock<boost::mutex> lock(SendBuffMtx);
+	std::unique_lock<std::mutex> lock(SendBuffMtx);
 
 	StartAsyncWrite();
 }
 
 void Connection::StartAsyncWriteCloseExternal()
 {
-	boost::unique_lock<boost::mutex> lock(SendBuffMtx);
+	std::unique_lock<std::mutex> lock(SendBuffMtx);
 
 	MyHandler=nullptr;
 	StartAsyncWrite();

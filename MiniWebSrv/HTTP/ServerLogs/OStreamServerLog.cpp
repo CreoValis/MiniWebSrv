@@ -50,7 +50,7 @@ void OStream::OnConnection(void *Connection, unsigned int SourceAddr, bool IsAll
 
 void OStream::OnConnectionFinished(void *Connection)
 {
-	boost::unordered_map<void *,ConnDataHolder>::iterator FindI=ConnMap.find(Connection);
+	std::unordered_map<void *,ConnDataHolder>::iterator FindI=ConnMap.find(Connection);
 	if (FindI!=ConnMap.end())
 	{
 		if (FindI->second.IsWebSocket)
@@ -72,7 +72,7 @@ void OStream::OnRequest(void *Connection, HTTP::METHOD Method, const std::string
 	double ReqTime, double RespTime,
 	void *UpgradeConn)
 {
-	boost::unordered_map<void *,ConnDataHolder>::iterator FindI=ConnMap.find(Connection);
+	std::unordered_map<void *,ConnDataHolder>::iterator FindI=ConnMap.find(Connection);
 
 	if (FindI!=ConnMap.end())
 	{
