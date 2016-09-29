@@ -144,10 +144,10 @@ int main(int argc, char* argv[])
 	MiniWS.Run();
 	std::cout << "Started." << std::endl;
 	while (IsRunning)
-		boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 	std::cout << "Stopping." << std::endl;
-	if (MiniWS.Stop(boost::posix_time::seconds(4)))
+	if (MiniWS.Stop(std::chrono::seconds(4)))
 		std::cout << "Stopped gracefully." << std::endl;
 	else
 		std::cout << "Stopped forcefully." << std::endl;

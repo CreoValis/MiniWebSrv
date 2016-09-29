@@ -7,7 +7,7 @@
 
 using namespace HTTP;
 
-const boost::posix_time::time_duration Server::StepDuration=boost::posix_time::seconds(StepDurationSeconds);
+const std::chrono::steady_clock::duration Server::StepDuration=std::chrono::seconds(StepDurationSeconds);
 ConnFilter::AllowAll Server::DefaultConnFilter;
 RespSource::CommonError Server::CommonErrRespSource;
 ServerLog::Dummy Server::DefaultServerLog;
@@ -30,7 +30,7 @@ Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort) : MyS
 
 Server::~Server()
 {
-	Stop(boost::posix_time::seconds(0));
+	Stop(std::chrono::steady_clock::duration(0));
 	delete MyRespSource;
 
 	if (MyConnF!=&DefaultConnFilter)
@@ -88,30 +88,38 @@ bool Server::Run()
 		RestartAccept();
 		RestartTimer();
 
-		RunTh=new boost::thread(boost::bind(&boost::asio::io_service::run,&MyIOS));
+		RunTh=new std::thread(&Server::ProcessThread, this);
 		return true;
 	}
 	else
 		return false;
 }
 
-bool Server::Stop(boost::posix_time::time_duration Timeout)
+bool Server::Stop(std::chrono::steady_clock::duration Timeout)
 {
 	if (RunTh)
 	{
 		MyIOS.post(boost::bind(&Server::StopInternal,this));
-		bool RetVal;
-		if (!RunTh->timed_join(Timeout))
+		bool RetVal, IsLocked;
+		if (!RunMtx.try_lock_for(Timeout))
 		{
 			//Terminate the threads forcefully.
 			MyIOS.stop();
 			//Wait for the last handler invocation to return.
-			RunTh->timed_join(boost::posix_time::seconds(1));
+			IsLocked=RunMtx.try_lock_for(std::chrono::seconds(1));
 
 			RetVal=false;
 		}
 		else
-			RetVal=true;
+			IsLocked=RetVal=true;
+
+		if (IsLocked)
+			RunMtx.unlock();
+
+		if (RunTh->joinable())
+			RunTh->join();
+		else
+			RunTh->detach();
 
 		delete RunTh;
 		RunTh=nullptr;
@@ -228,4 +236,10 @@ void Server::RestartTimer()
 		MyStepTim.expires_from_now(StepDuration);
 		MyStepTim.async_wait(boost::bind(&Server::OnTimer,this,boost::asio::placeholders::error));
 	}
+}
+
+void Server::ProcessThread()
+{
+	std::unique_lock<std::timed_mutex> lock(RunMtx);
+	MyIOS.run();
 }

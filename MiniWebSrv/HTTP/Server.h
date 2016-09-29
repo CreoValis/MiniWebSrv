@@ -2,8 +2,10 @@
 
 #include <string>
 #include <list>
-#include <boost/date_time.hpp>
-#include <boost/thread.hpp>
+#include <chrono>
+#include <thread>
+#include <mutex>
+
 #include <boost/asio.hpp>
 
 #include "BuildConfig.h"
@@ -34,7 +36,7 @@ public:
 	void SetName(const std::string &NewName);
 
 	bool Run();
-	bool Stop(boost::posix_time::time_duration Timeout);
+	bool Stop(std::chrono::steady_clock::duration Timeout);
 
 	inline unsigned int GetConnCount() { return ConnCount; }
 	inline unsigned int GetTotalConnCount() { return TotalConnCount; }
@@ -42,11 +44,12 @@ public:
 
 protected:
 	boost::asio::io_service MyIOS;
-	boost::asio::deadline_timer MyStepTim;
+	boost::asio::basic_waitable_timer<std::chrono::steady_clock> MyStepTim;
 	boost::asio::ip::tcp::endpoint ListenEndp;
 	boost::asio::ip::tcp::acceptor MyAcceptor;
 
-	boost::thread *RunTh;
+	std::thread *RunTh;
+	std::timed_mutex RunMtx;
 	IConnFilter *MyConnF;
 	IRespSource *MyRespSource;
 	IServerLog *MyLog;
@@ -66,7 +69,7 @@ protected:
 	static ServerLog::Dummy DefaultServerLog;
 
 	static const unsigned int StepDurationSeconds = 1;
-	static const boost::posix_time::time_duration StepDuration;
+	static const std::chrono::steady_clock::duration StepDuration;
 
 	void OnAccept(const boost::system::error_code &error);
 	void OnTimer(const boost::system::error_code &error);
@@ -74,6 +77,8 @@ protected:
 
 	void RestartAccept();
 	void RestartTimer();
+
+	void ProcessThread();
 };
 
 };
