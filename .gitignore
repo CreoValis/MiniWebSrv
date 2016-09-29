@@ -8,3 +8,5 @@ Release-GCC/*
 *.sdf
 *.opensdf
 *.suo
+*.VC.db
+*.VC.opendb
