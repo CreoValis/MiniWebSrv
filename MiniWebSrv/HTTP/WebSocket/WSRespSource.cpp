@@ -119,11 +119,11 @@ WSRespSource::WSResponse::WSResponse(IMsgHandler *NewHandler,
 		Hash.process_bytes(AuthRespBase.data(),AuthRespBase.length());
 		Hash.get_digest(AuthHash);
 
-		AuthHash[0]=FROM_BIGENDIAN4(AuthHash[0]);
-		AuthHash[1]=FROM_BIGENDIAN4(AuthHash[1]);
-		AuthHash[2]=FROM_BIGENDIAN4(AuthHash[2]);
-		AuthHash[3]=FROM_BIGENDIAN4(AuthHash[3]);
-		AuthHash[4]=FROM_BIGENDIAN4(AuthHash[4]);
+		AuthHash[0]=boost::endian::native_to_big(AuthHash[0]);
+		AuthHash[1]=boost::endian::native_to_big(AuthHash[1]);
+		AuthHash[2]=boost::endian::native_to_big(AuthHash[2]);
+		AuthHash[3]=boost::endian::native_to_big(AuthHash[3]);
+		AuthHash[4]=boost::endian::native_to_big(AuthHash[4]);
 
 		unsigned char EncStr[32];
 		EncStr[Base64Encode((const unsigned char *)AuthHash,(const unsigned char *)AuthHash+20,EncStr)]='\0';

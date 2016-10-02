@@ -83,13 +83,13 @@ unsigned char *Connection::Allocate(MESSAGETYPE Type, unsigned long long Length)
 		else if (Length<655356)
 		{
 			*FrameBuff++=126;
-			SET_BIGENDIAN_UNALIGNED2(FrameBuff,(unsigned short)Length);
+			*(unsigned short *)FrameBuff=boost::endian::native_to_big((unsigned short)Length);
 			FrameBuff+=2;
 		}
 		else
 		{
 			*FrameBuff++=127;
-			SET_BIGENDIAN_UNALIGNED8(FrameBuff,Length);
+			*(unsigned long long *)FrameBuff=boost::endian::native_to_big((unsigned long long)Length);
 			FrameBuff+=8;
 		}
 
@@ -202,7 +202,7 @@ CLOSEREASON Connection::ProcessIncoming()
 					return CR_NONE;
 				}
 
-				CurrFrameLength=GET_BIGENDIAN_UNALIGNED2(DataBuff+2) + 2 + 2;
+				CurrFrameLength=boost::endian::big_to_native(*(const unsigned short *)(DataBuff+2)) + 2 + 2;
 			}
 			else //if (LengthMarker==127)
 			{
@@ -213,7 +213,7 @@ CLOSEREASON Connection::ProcessIncoming()
 					return CR_NONE;
 				}
 
-				CurrFrameLength=GET_BIGENDIAN_UNALIGNED8(DataBuff+2) + 2 + 8;
+				CurrFrameLength=boost::endian::big_to_native(*(const unsigned long long *)(DataBuff+2)) + 2 + 2;
 			}
 
 			if (DataBuff[1] & FLAG_MASK)
@@ -366,7 +366,7 @@ CLOSEREASON Connection::ProcessControlFrame(OPCODENAME OpCode, const unsigned ch
 		{
 			unsigned short ReasonCode;
 			if (Length>=2)
-				ReasonCode=GET_BIGENDIAN_UNALIGNED2(PayloadBuff);
+				ReasonCode=boost::endian::big_to_native(*(const unsigned short *)PayloadBuff);
 			else
 				ReasonCode=0;
 
@@ -421,7 +421,7 @@ bool Connection::SendCloseInternal(unsigned short Reason)
 	{
 		*Buff=(unsigned char)(FLAG_FIN | OCN_CLOSE);
 		Buff[1]=2;
-		SET_BIGENDIAN_UNALIGNED2(Buff+2,Reason);
+		*((unsigned short *)Buff+2)=boost::endian::native_to_big(Reason);
 		WriteBuff.Commit(4);
 
 		return true;
