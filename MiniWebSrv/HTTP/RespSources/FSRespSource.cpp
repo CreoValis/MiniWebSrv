@@ -42,7 +42,7 @@ bool FS::Response::GetExtraHeader(unsigned int Index,
 		*OutHeader=HName.data();
 		*OutHeaderEnd=HName.data() + HName.size();
 		*OutHeaderVal=LastModifiedStr;
-		*OutHeaderValEnd=LastModifiedStr+sizeof(LastModifiedStr);
+		*OutHeaderValEnd=LastModifiedStr+strlen(LastModifiedStr);
 
 		return true;
 	}
