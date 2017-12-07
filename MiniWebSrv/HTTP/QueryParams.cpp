@@ -104,44 +104,75 @@ bool QueryParams::AppendFormMultipart(const char *Begin, const char *End)
 	the bytes [content start, end-parse position) are content
 	store the bytes [end-parse position, end) as temporary data*/
 
-	const char *ContentBegin=Begin;
-	while (Begin!=End)
+	const char *Pos = Begin, *ContentBegin = Begin;
+	while (Pos != End)
 	{
-		char CurrVal=*Begin;
-		if (CurrVal==BoundaryStr[BoundaryParseCounter])
+		if (!BoundaryParseCounter)
 		{
-			if (++BoundaryParseCounter==BoundaryStr.length())
+			while (Pos != End)
 			{
-				if (!AppendToCurrentPart(ContentBegin,Begin-BoundaryParseCounter+1))
-					return false;
-				ContentBegin=Begin + 1;
+				if (*Pos != '\r')
+					++Pos;
+				else
+				{
+					++Pos;
+					BoundaryParseCounter = 1;
+					break;
+				}
+			}
 
-				BoundaryParseCounter=0;
+			if (Pos == End)
+				break;
+		}
+
+		if (*Pos == BoundaryStr[BoundaryParseCounter])
+		{
+			//Boundary match; advance the test position.
+			++BoundaryParseCounter;
+			++Pos;
+			if (BoundaryParseCounter == BoundaryStr.length())
+			{
+				//Full boundary match. The currently kept ParseTmp might contain content.
+				if (Pos - Begin<BoundaryParseCounter)
+				{
+					const char *TmpBoundaryStart = (ParseTmp.data() + ParseTmp.length()) - (BoundaryParseCounter - (Pos - Begin));
+					if (TmpBoundaryStart>ParseTmp.data())
+						AppendToCurrentPart(ParseTmp.data(), TmpBoundaryStart);
+				}
+				else if (ContentBegin<Pos - BoundaryParseCounter)
+					AppendToCurrentPart(ContentBegin, Pos - BoundaryParseCounter);
+
+				BoundaryParseCounter = 0;
+				ParseTmp.clear();
+				ContentBegin = Pos;
 				StartNewPart();
 			}
 		}
-		else
+		else if (BoundaryParseCounter)
 		{
+			//Match broken.
 			if (!ParseTmp.empty())
 			{
-				if (!AppendToCurrentPart(ParseTmp.data(),ParseTmp.data()+ParseTmp.length()))
-					return false;
+				//The currently kept ParseTmp is actually content.
+				AppendToCurrentPart(ParseTmp.data(), ParseTmp.data() + ParseTmp.size());
 				ParseTmp.clear();
 			}
 
-			//if (CurrVal!=BoundaryStr[0])
-			if (CurrVal!='\r')
-				BoundaryParseCounter=0;
-			else
-				BoundaryParseCounter=1;
+			AppendToCurrentPart(ContentBegin, Pos);
+			BoundaryParseCounter = 0;
+			ContentBegin = Pos;
 		}
-
-		Begin++;
+		else
+			++Pos;
 	}
 
-	if (!AppendToCurrentPart(ContentBegin,Begin-BoundaryParseCounter))
-		return false;
-	ParseTmp.append(Begin-BoundaryParseCounter,Begin);
+	if (BoundaryParseCounter)
+	{
+		AppendToCurrentPart(ContentBegin, Pos - BoundaryParseCounter);
+		ParseTmp.append(std::max(Pos - BoundaryParseCounter, Begin), Pos);
+	}
+	else if (Pos != Begin)
+		AppendToCurrentPart(ContentBegin, Pos);
 
 	return true;
 }
