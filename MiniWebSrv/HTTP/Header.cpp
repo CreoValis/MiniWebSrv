@@ -154,7 +154,8 @@ private:
 
 struct ContentDisposExtractor
 {
-	ContentDisposExtractor(std::string &NameStr, std::string &FNStr) : NameTarget(NameStr), FNTarget(FNStr)
+	ContentDisposExtractor(std::string &NameStr, std::string &FNStr, bool &OutFileNameExists) : NameTarget(NameStr), FNTarget(FNStr),
+		OutFileNameExists(OutFileNameExists=false)
 	{ }
 
 	void operator()(const char *KeyBegin, const char *KeyEnd, const char *ValueBegin, const char *ValueEnd)
@@ -163,14 +164,18 @@ struct ContentDisposExtractor
 		{
 			if (UD::StringUtils::IsEqual(NameKey,KeyBegin,KeyEnd))
 				NameTarget.assign(ValueBegin,ValueEnd);
-			else if (UD::StringUtils::IsEqual(FNKey,KeyBegin,KeyEnd))
-				FNTarget.assign(ValueBegin,ValueEnd);
+			else if (UD::StringUtils::IsEqual(FNKey, KeyBegin, KeyEnd))
+			{
+				FNTarget.assign(ValueBegin, ValueEnd);
+				OutFileNameExists = true;
+			}
 		}
 	}
 
 private:
 	static const std::string NameKey, FNKey;
 	std::string &NameTarget, &FNTarget;
+	bool &OutFileNameExists;
 };
 
 const std::string ContentDisposExtractor::NameKey="name", ContentDisposExtractor::FNKey="filename";
@@ -218,10 +223,10 @@ CONTENTTYPE Header::GetContentType(std::string &OutBoundary) const
 	return CT_UNKNOWN;
 }
 
-void Header::ParseContentDisposition(std::string &OutName, std::string &OutFileName) const
+void Header::ParseContentDisposition(std::string &OutName, std::string &OutFileName, bool &OutFileNameExists) const
 {
 	if (IntName==HN_CONTENT_DISPOSITION)
-		ParseDelimitedKeyValue(Value,ContentDisposExtractor(OutName,OutFileName));
+		ParseDelimitedKeyValue(Value,ContentDisposExtractor(OutName,OutFileName,OutFileNameExists));
 	else
 	{
 		OutName.clear();

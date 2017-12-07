@@ -66,7 +66,7 @@ struct Header
 
 	/**Parses the header value, as if it were a content-type.*/
 	CONTENTTYPE GetContentType(std::string &OutBoundary) const;
-	void ParseContentDisposition(std::string &OutName, std::string &OutFileName) const;
+	void ParseContentDisposition(std::string &OutName, std::string &OutFileName, bool &OutFileNameExists) const;
 	bool IsConnectionClose() const;
 	/**Parses the header value, as if were a http-date.
 	@throw FormatException
