@@ -1,25 +1,110 @@
 #include "QueryParams.h"
 
-#include <boost/filesystem/fstream.hpp>
-
 #include "Header.h"
 
-using namespace HTTP;
+namespace HTTP
+{
 
-QueryParams::QueryParams() : FMParseState(STATE_HEADERSTART), BoundaryParseCounter(2), CurrFileS(nullptr)
+std::tuple<boost::filesystem::path, bool> QueryParams::TempFileUploadHelper::OnNewFile(const std::string &Name, const std::string &OrigFileName, const std::string &MimeType)
+{
+	if (CurrFileS)
+	{
+		delete CurrFileS;
+		CurrFileS=nullptr;
+	}
+
+	if ((!Params.MaxUploadSize) || (!Params.MaxTotalUploadSize))
+		return std::make_tuple(boost::filesystem::path(), false);
+
+	try
+	{
+		boost::filesystem::path TmpFilePath=
+			(Params.Root.empty() ? boost::filesystem::temp_directory_path() : Params.Root) /
+			boost::filesystem::unique_path();
+
+		CurrFileS=new boost::filesystem::ofstream(TmpFilePath, std::ios_base::binary);
+		return std::make_tuple(TmpFilePath, CurrFileS->is_open());
+	}
+	catch (...)
+	{
+		return std::make_tuple(boost::filesystem::path(), false);
+	}
+}
+
+bool QueryParams::TempFileUploadHelper::OnFileData(const char *Begin, const char *End)
+{
+	if (!CurrFileS)
+		return false;
+
+	uintmax_t PartSize=(uintmax_t)(End-Begin);
+	if ((CurrFileSize+=PartSize)>Params.MaxUploadSize)
+		return false;
+
+	if ((TotalFileSize+=PartSize)>Params.MaxTotalUploadSize)
+		return false;
+
+	CurrFileS->write(Begin, End-Begin);
+	return !CurrFileS->fail();
+}
+
+void QueryParams::TempFileUploadHelper::OnFileEnd()
+{
+	if (CurrFileS)
+	{
+		CurrFileS->close();
+		delete CurrFileS;
+		CurrFileS=nullptr;
+	}
+}
+
+const std::string QueryParams::UnknownFileContentType;
+
+QueryParams::QueryParams() : FMParseState(STATE_HEADERSTART), BoundaryParseCounter(2), CurrPartMode(PARTMODE_STRING),
+	UploadHelper(&TempUploadHelper)
 {
 
 }
 
+QueryParams::QueryParams(QueryParams &&other) :
+	BoundaryParseCounter(other.BoundaryParseCounter), FMParseCounter(other.FMParseCounter),
+	TempUploadHelper(std::move(other.TempUploadHelper)),
+	BoundaryStr(std::move(other.BoundaryStr)),
+	ParseTmp(std::move(other.ParseTmp)), HeaderParseTmp(std::move(other.HeaderParseTmp)),
+	ParamMap(std::move(other.ParamMap)),
+	FileMap(std::move(other.FileMap)),
+	CurrFMPart(other.CurrFMPart),
+	CurrPartMode(other.CurrPartMode),
+	UploadHelper(other.UploadHelper==&other.TempUploadHelper ? &TempUploadHelper : other.UploadHelper)
+{
+
+}
+
+QueryParams::QueryParams(const std::tuple<const char *, const char *> &URLEncodedRange) :
+	FMParseState(STATE_HEADERSTART), BoundaryParseCounter(2), CurrPartMode(PARTMODE_STRING), UploadHelper(&TempUploadHelper)
+{
+	AddURLEncoded(URLEncodedRange);
+}
+
 QueryParams::QueryParams(const FileUploadParams &UploadParams) : FMParseState(STATE_HEADERSTART), BoundaryParseCounter(2),
-	FUParams(UploadParams),
-	CurrFileS(nullptr)
+	TempUploadHelper(UploadParams),
+	CurrPartMode(PARTMODE_STRING),
+	UploadHelper(&TempUploadHelper)
+{
+
+}
+
+QueryParams::QueryParams(IFileUpdloadHelper * UploadHelper) : FMParseState(STATE_HEADERSTART), BoundaryParseCounter(2),
+	CurrPartMode(PARTMODE_STRING),
+	UploadHelper(UploadHelper)
 {
 
 }
 
 bool QueryParams::AddURLEncoded(const char *Begin, const char *End)
 {
+	if ((!Begin) || (!End))
+		return false;
+
 	enum PARSESTATE
 	{
 		PS_PARAM_END,
@@ -51,10 +136,10 @@ bool QueryParams::AddURLEncoded(const char *Begin, const char *End)
 			{
 				if (CurrVal=='=')
 				{
-					Param &CurrParam=ParamMap[ParseTmp];
-					CurrParam.Value.clear();
+					std::string &CurrParam=ParamMap[ParseTmp];
+					CurrParam.clear();
 
-					ValStr=&CurrParam.Value;
+					ValStr=&CurrParam;
 
 					CurrState=PS_VALUE_END;
 					TargetStr=ValStr;
@@ -104,47 +189,47 @@ bool QueryParams::AppendFormMultipart(const char *Begin, const char *End)
 	the bytes [content start, end-parse position) are content
 	store the bytes [end-parse position, end) as temporary data*/
 
-	const char *Pos = Begin, *ContentBegin = Begin;
-	while (Pos != End)
+	const char *Pos=Begin, *ContentBegin=Begin;
+	while (Pos!=End)
 	{
 		if (!BoundaryParseCounter)
 		{
-			while (Pos != End)
+			while (Pos!=End)
 			{
-				if (*Pos != '\r')
+				if (*Pos!='\r')
 					++Pos;
 				else
 				{
 					++Pos;
-					BoundaryParseCounter = 1;
+					BoundaryParseCounter=1;
 					break;
 				}
 			}
 
-			if (Pos == End)
+			if (Pos==End)
 				break;
 		}
 
-		if (*Pos == BoundaryStr[BoundaryParseCounter])
+		if (*Pos==BoundaryStr[BoundaryParseCounter])
 		{
 			//Boundary match; advance the test position.
 			++BoundaryParseCounter;
 			++Pos;
-			if (BoundaryParseCounter == BoundaryStr.length())
+			if (BoundaryParseCounter==BoundaryStr.length())
 			{
 				//Full boundary match. The currently kept ParseTmp might contain content.
-				if (Pos - Begin<BoundaryParseCounter)
+				if ((unsigned int)(Pos-Begin)<BoundaryParseCounter)
 				{
-					const char *TmpBoundaryStart = (ParseTmp.data() + ParseTmp.length()) - (BoundaryParseCounter - (Pos - Begin));
+					const char *TmpBoundaryStart=(ParseTmp.data()+ParseTmp.length()) - (BoundaryParseCounter-(Pos-Begin));
 					if (TmpBoundaryStart>ParseTmp.data())
 						AppendToCurrentPart(ParseTmp.data(), TmpBoundaryStart);
 				}
-				else if (ContentBegin<Pos - BoundaryParseCounter)
-					AppendToCurrentPart(ContentBegin, Pos - BoundaryParseCounter);
+				else if (ContentBegin<Pos-BoundaryParseCounter)
+					AppendToCurrentPart(ContentBegin, Pos-BoundaryParseCounter);
 
-				BoundaryParseCounter = 0;
+				BoundaryParseCounter=0;
 				ParseTmp.clear();
-				ContentBegin = Pos;
+				ContentBegin=Pos;
 				StartNewPart();
 			}
 		}
@@ -159,8 +244,8 @@ bool QueryParams::AppendFormMultipart(const char *Begin, const char *End)
 			}
 
 			AppendToCurrentPart(ContentBegin, Pos);
-			BoundaryParseCounter = 0;
-			ContentBegin = Pos;
+			BoundaryParseCounter=0;
+			ContentBegin=Pos;
 		}
 		else
 			++Pos;
@@ -168,16 +253,16 @@ bool QueryParams::AppendFormMultipart(const char *Begin, const char *End)
 
 	if (BoundaryParseCounter)
 	{
-		AppendToCurrentPart(ContentBegin, Pos - BoundaryParseCounter);
-		ParseTmp.append(std::max(Pos - BoundaryParseCounter, Begin), Pos);
+		AppendToCurrentPart(ContentBegin, Pos-BoundaryParseCounter);
+		ParseTmp.append(std::max(Pos-BoundaryParseCounter, Begin), Pos);
 	}
-	else if (Pos != Begin)
+	else if (Pos!=Begin)
 		AppendToCurrentPart(ContentBegin, Pos);
 
 	return true;
 }
 
-const QueryParams::Param &QueryParams::Get(const std::string &Name) const
+const std::string &QueryParams::Get(const std::string &Name) const
 {
 	ParamMapType::const_iterator FindI=ParamMap.find(Name);
 	if (FindI!=ParamMap.end())
@@ -186,13 +271,36 @@ const QueryParams::Param &QueryParams::Get(const std::string &Name) const
 		throw ParameterNotFound();
 }
 
-const QueryParams::Param QueryParams::Get(const std::string &Name, const std::string &Default) const
+const std::string *QueryParams::GetPtr(const std::string &Name) const
+{
+	ParamMapType::const_iterator FindI=ParamMap.find(Name);
+	if (FindI!=ParamMap.end())
+		return &FindI->second;
+	else
+		return nullptr;
+}
+
+const std::string QueryParams::Get(const std::string &Name, const std::string &Default) const
 {
 	ParamMapType::const_iterator FindI=ParamMap.find(Name);
 	if (FindI!=ParamMap.end())
 		return FindI->second;
 	else
-		return Param(Default);
+		return Default;
+}
+
+QueryParams &QueryParams::operator=(QueryParams &&other)
+{
+	BoundaryParseCounter=other.BoundaryParseCounter; FMParseCounter=other.FMParseCounter;
+	TempUploadHelper=std::move(other.TempUploadHelper);
+	BoundaryStr=std::move(other.BoundaryStr);
+	ParseTmp=std::move(other.ParseTmp); HeaderParseTmp=std::move(other.HeaderParseTmp);
+	ParamMap=std::move(other.ParamMap);
+	FileMap=std::move(other.FileMap);
+	CurrFMPart=other.CurrFMPart;
+	CurrPartMode=other.CurrPartMode;
+	UploadHelper=other.UploadHelper==&other.TempUploadHelper ? &TempUploadHelper : other.UploadHelper;
+	return *this;
 }
 
 void QueryParams::DecodeURLEncoded(std::string &Target, const char *Begin, const char *End)
@@ -225,7 +333,8 @@ void QueryParams::DeleteUploadedFiles()
 	for (FileMapType::value_type &CurrFile : FileMap)
 	{
 		boost::system::error_code DelErr;
-		boost::filesystem::remove(CurrFile.second.Path,DelErr);
+		if (!CurrFile.second.Path.empty())
+			boost::filesystem::remove(CurrFile.second.Path,DelErr);
 	}
 }
 
@@ -264,7 +373,10 @@ bool QueryParams::AppendToCurrentPart(const char *Begin, const char *End)
 					OrigBegin=Begin + 1;
 				}
 				else if (CurrVal=='-')
+				{
 					FMParseState=STATE_FINISHED;
+					UploadHelper->OnFileEnd();
+				}
 				else
 					return false;
 			}
@@ -295,12 +407,7 @@ bool QueryParams::AppendToCurrentPart(const char *Begin, const char *End)
 				FMParseCounter=0;
 			break;
 		case STATE_FINISHED:
-			if (CurrFileS)
-			{
-				CurrFileS->close();
-				delete CurrFileS;
-				CurrFileS=nullptr;
-			}
+			UploadHelper->OnFileEnd();
 			return true;
 		default:
 			break;
@@ -314,13 +421,10 @@ bool QueryParams::AppendToCurrentPart(const char *Begin, const char *End)
 		if (IsCurrPartValid())
 		{
 			if (IsCurrPartFile())
-			{
-				CurrFileS->write(Begin,End-Begin);
-				return !CurrFileS->fail();
-			}
+				return UploadHelper->OnFileData(Begin, End);
 			else
 			{
-				CurrFMPart.TargetParam->Value.append(Begin,End);
+				CurrFMPart.TargetParam->append(Begin,End);
 				return true;
 			}
 		}
@@ -339,6 +443,7 @@ bool QueryParams::AppendToCurrentPart(const char *Begin, const char *End)
 bool QueryParams::ParseFMHeaders(const char *HeadersBegin, const char *HeadersEnd)
 {
 	std::string Name, FileName;
+	bool FileNameExists;
 	const char *ContentTypeVal=nullptr;
 
 	const char *HBegin=HeadersBegin;
@@ -350,7 +455,7 @@ bool QueryParams::ParseFMHeaders(const char *HeadersBegin, const char *HeadersEn
 			//Header in [HBegin,HeadersBegin[ .
 			Header CurrHeader((char *)HBegin,(char *)HeadersBegin);
 			if (CurrHeader.IntName==HN_CONTENT_DISPOSITION)
-				CurrHeader.ParseContentDisposition(Name,FileName);
+				CurrHeader.ParseContentDisposition(Name,FileName, FileNameExists);
 			else if (CurrHeader.IntName==HN_CONTENT_TYPE)
 				ContentTypeVal=CurrHeader.Value;
 
@@ -362,37 +467,38 @@ bool QueryParams::ParseFMHeaders(const char *HeadersBegin, const char *HeadersEn
 
 	if (!Name.empty())
 	{
-		if (CurrFileS)
-		{
-			CurrFileS->close();
-			delete CurrFileS;
-			CurrFileS=nullptr;
-		}
+		if (CurrPartMode==PARTMODE_FILE)
+			UploadHelper->OnFileEnd();
 
-		if (ContentTypeVal)
+		if (FileNameExists)
 		{
-			try
+			CurrPartMode=PARTMODE_FILE;
+
+			auto Res=UploadHelper->OnNewFile(Name, FileName, ContentTypeVal ? ContentTypeVal : UnknownFileContentType);
+			if (std::get<1>(Res))
 			{
-				boost::filesystem::path TmpFilePath=
-					(FUParams.Root.empty() ? boost::filesystem::temp_directory_path() : FUParams.Root) /
-					boost::filesystem::unique_path();
-
-				CurrFileS=new boost::filesystem::ofstream(TmpFilePath,std::ios_base::binary);
-
 				CurrFMPart.TargetFile=&FileMap[Name];
-				CurrFMPart.TargetFile->MimeType=ContentTypeVal;
-				CurrFMPart.TargetFile->OrigFileName=FileName;
-				CurrFMPart.TargetFile->Path=TmpFilePath;
-			}
-			catch (...)
-			{
-				CurrFMPart.TargetFile=NULL;
+				if (!CurrFMPart.TargetFile->Path.empty())
+				{
+					//We've already read a file with this name. Delete the previous file's temp data.
+					boost::system::error_code DelErr;
+					boost::filesystem::remove(CurrFMPart.TargetFile->Path, DelErr);
+				}
 
-				return false;
+				CurrFMPart.TargetFile->MimeType=ContentTypeVal ? ContentTypeVal : UnknownFileContentType;
+				CurrFMPart.TargetFile->OrigFileName=FileName;
+				CurrFMPart.TargetFile->Path=std::get<0>(Res);
 			}
+			else
+				CurrFMPart.TargetFile=NULL;
 		}
 		else
+		{
+			CurrPartMode=PARTMODE_STRING;
 			CurrFMPart.TargetParam=&ParamMap[Name];
+			if (!CurrFMPart.TargetParam->empty())
+				CurrFMPart.TargetParam->clear();
+		}
 
 		return true;
 	}
@@ -402,3 +508,5 @@ bool QueryParams::ParseFMHeaders(const char *HeadersBegin, const char *HeadersEn
 		return false;
 	}
 }
+
+} //HTTP

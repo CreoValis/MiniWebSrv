@@ -98,7 +98,7 @@ public:
 
 		RespStream << "\nParams:\n";
 		for (const HTTP::QueryParams::ParamMapType::value_type &Param : Query.Params())
-			RespStream << Param.first << ": \"" << Param.second.Value << "\"\n";
+			RespStream << Param.first << ": \"" << Param.second << "\"\n";
 
 		RespStream << "\nFiles:\n";
 		for (const HTTP::QueryParams::FileMapType::value_type &File : Query.Files())
