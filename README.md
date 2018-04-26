@@ -141,7 +141,7 @@ The following are required to compile the library and the application:
   * LLVM clang 3.5
   * GCC 4.8 (4.7 would probably work for now)
 * The Boost C++ libraries.
-  * v1.55 and v1.56 are known to work.
+  * At least v1.66
   * The following separately compiled libraries are required:
      * boost\_system
      * boost\_filesystem (required only by the static file response generator)
