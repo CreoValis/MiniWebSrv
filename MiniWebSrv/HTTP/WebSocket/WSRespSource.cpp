@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#include <boost/uuid/sha1.hpp>
+#include <boost/uuid/detail/sha1.hpp>
 
 #include "../IServerLog.h"
 #include "../ConnectionBase.h"

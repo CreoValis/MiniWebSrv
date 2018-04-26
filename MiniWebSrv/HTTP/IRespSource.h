@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <boost/asio.hpp>
+#include <boost/asio/spawn.hpp>
 
 #include "Common.h"
 #include "Header.h"
@@ -24,10 +25,10 @@ public:
 
 	struct AsyncHelperHolder
 	{
-		inline AsyncHelperHolder(boost::asio::strand &NewStrand, boost::asio::yield_context &NewCtx) : Strand(NewStrand), Ctx(NewCtx)
+		inline AsyncHelperHolder(boost::asio::io_service::strand &NewStrand, boost::asio::yield_context &NewCtx) : Strand(NewStrand), Ctx(NewCtx)
 		{ }
 
-		boost::asio::strand &Strand;
+		boost::asio::io_service::strand &Strand;
 		boost::asio::yield_context &Ctx;
 
 		inline boost::asio::io_service &IOService() { return Strand.get_io_service(); }

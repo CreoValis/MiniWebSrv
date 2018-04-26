@@ -3,7 +3,7 @@
 #include <memory>
 
 #include <boost/bind.hpp>
-#include <boost/asio/strand.hpp>
+#include <boost/asio.hpp>
 #include <boost/asio/spawn.hpp>
 
 namespace HTTP
@@ -13,7 +13,7 @@ class CoroAsyncHelper
 {
 public:
 	inline CoroAsyncHelper() : MyStrand(nullptr), MyCtx(nullptr){ }
-	CoroAsyncHelper(boost::asio::strand *NewStrand, boost::asio::yield_context *Ctx) :
+	CoroAsyncHelper(boost::asio::io_service::strand *NewStrand, boost::asio::yield_context *Ctx) :
 		MyStrand(NewStrand), MyCtx(Ctx)
 	{
 		CoroCallee=MyCtx->coro_.lock();
@@ -25,7 +25,7 @@ public:
 	inline void Wait() { MyCtx->ca_(); }
 
 private:
-	boost::asio::strand *MyStrand;
+	boost::asio::io_service::strand *MyStrand;
 	boost::asio::yield_context *MyCtx;
 
 	std::shared_ptr<boost::asio::yield_context::callee_type> CoroCallee;
