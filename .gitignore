@@ -10,3 +10,4 @@ Release-GCC/*
 *.suo
 *.VC.db
 *.VC.opendb
+.vs/
