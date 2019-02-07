@@ -105,6 +105,7 @@
     <ClInclude Include="Http\RespSources\detail\MimeDB.h" />
     <ClInclude Include="Http\RespSources\detail\ZipArchive.h" />
     <ClInclude Include="Http\RespSources\FSRespSource.h" />
+    <ClInclude Include="HTTP\RespSources\Helper\StringResponse.h" />
     <ClInclude Include="HTTP\RespSources\WSEchoRespSource.h" />
     <ClInclude Include="Http\RespSources\ZipRespSource.h" />
     <ClInclude Include="Http\Server.h" />
