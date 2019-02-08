@@ -100,6 +100,9 @@
     <ClInclude Include="HTTP\RespSources\Helper\StringResponse.h">
       <Filter>HTTP\RespSources\Helper</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\RespSources\CORSPreflightRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Http\RespSources\CommonErrorRespSource.cpp">
@@ -147,6 +150,9 @@
     </ClCompile>
     <ClCompile Include="HTTP\ServerLogs\OStreamServerLog.cpp">
       <Filter>HTTP\ServerLogs</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTP\RespSources\CORSPreflightRespSource.cpp">
+      <Filter>HTTP\RespSources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

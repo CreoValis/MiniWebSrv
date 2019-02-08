@@ -10,12 +10,14 @@ using namespace HTTP;
 const std::chrono::steady_clock::duration Server::StepDuration=std::chrono::seconds(StepDurationSeconds);
 ConnFilter::AllowAll Server::DefaultConnFilter;
 RespSource::CommonError Server::CommonErrRespSource;
+RespSource::CORSPreflight Server::CorsPFRespSource;
 ServerLog::Dummy Server::DefaultServerLog;
 
 Server::Server(unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
 	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog), MyName("EmbeddedHTTPd"),
 	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
-	NextConn(nullptr), IsRunning(false)
+	NextConn(nullptr), IsRunning(false),
+	CorsRS(nullptr)
 {
 	
 }
@@ -23,7 +25,8 @@ Server::Server(unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::as
 Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
 	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog),
 	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
-	NextConn(nullptr), IsRunning(false)
+	NextConn(nullptr), IsRunning(false),
+	CorsRS(nullptr)
 {
 
 }
@@ -38,6 +41,14 @@ Server::~Server()
 
 	if (MyLog!=&DefaultServerLog)
 		delete MyLog;
+}
+
+void Server::SetCORS(bool EnableCrossOriginCalls)
+{
+	if (EnableCrossOriginCalls)
+		CorsRS=&CorsPFRespSource;
+	else
+		CorsRS=nullptr;
 }
 
 void Server::SetConnectionFilter(IConnFilter *NewCF)
@@ -222,7 +233,7 @@ void Server::RestartAccept()
 	{
 		if (!NextConn)
 			//Create a new HTTP Connection object.
-			NextConn=new Connection(MyIOS,&CommonErrRespSource,MyName.data());
+			NextConn=new Connection(MyIOS,&CommonErrRespSource,CorsRS,MyName.data());
 
 		MyAcceptor.async_accept(NextConn->GetSocket(),PeerEndp,
 			boost::bind(&Server::OnAccept,this,boost::asio::placeholders::error));

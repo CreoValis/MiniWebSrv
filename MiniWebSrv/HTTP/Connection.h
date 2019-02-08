@@ -23,12 +23,13 @@ class IServerLog;
 namespace RespSource
 {
 class CommonError;
+class CORSPreflight;
 };
 
 class Connection : public ConnectionBase
 {
 public:
-	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, const char *NewServerName);
+	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName);
 	virtual ~Connection();
 
 	virtual void Start(IRespSource *NewRespSource, IServerLog *NewLog);
@@ -57,6 +58,7 @@ protected:
 	IServerLog *MyLog;
 
 	RespSource::CommonError *ErrorRS;
+	RespSource::CORSPreflight *CorsPFRS;
 
 	char *PostHeaderBuff, *PostHeaderBuffEnd;
 
@@ -78,6 +80,8 @@ protected:
 	bool ResponseHandler(boost::asio::yield_context &Yield);
 
 	void ResetRequestData();
+
+	inline bool HandleCORS() const { return CorsPFRS!=nullptr; }
 
 	static METHOD ParseMethod(const unsigned char *Begin, const unsigned char *End);
 };

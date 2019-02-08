@@ -365,6 +365,8 @@ const std::string &Header::GetHeaderName(HEADERNAME Name)
 	case HN_LAST_MODIFIED: { static const std::string HeaderStr("last-modified"); return HeaderStr; }
 	case HN_LOCATION: { static const std::string HeaderStr("location"); return HeaderStr; }
 	case HH_SEC_WEBSOCKET_ACCEPT: { static const std::string HeaderStr("sec-websocket-accept"); return HeaderStr; }
+	case HN_ACCESS_CONTROL_REQUEST_METHOD: { static const std::string HeaderStr("access-control-request-method"); return HeaderStr; }
+	case HN_ACCESS_CONTROL_REQUEST_HEADERS: { static const std::string HeaderStr("access-control-request-headers"); return HeaderStr; }
 	default: { static const std::string HeaderStr(""); return HeaderStr; }
 	}
 }

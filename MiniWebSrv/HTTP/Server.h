@@ -14,6 +14,7 @@
 
 #include "ConnFilters/AllowAllConnFilter.h"
 #include "RespSources/CommonErrorRespSource.h"
+#include "RespSources/CORSPreflightRespSource.h"
 #include "ServerLogs/DummyServerLog.h"
 
 namespace HTTP
@@ -30,6 +31,7 @@ public:
 	Server(boost::asio::ip::address BindAddr, unsigned short BindPort);
 	~Server();
 
+	void SetCORS(bool EnableCrossOriginCalls);
 	void SetConnectionFilter(IConnFilter *NewCF);
 	void SetResponseSource(IRespSource *NewRS);
 	void SetServerLog(IServerLog *NewLog);
@@ -64,8 +66,11 @@ protected:
 	ConnectionBase *NextConn;
 	bool IsRunning;
 
+	RespSource::CORSPreflight *CorsRS;
+
 	static ConnFilter::AllowAll DefaultConnFilter;
 	static RespSource::CommonError CommonErrRespSource;
+	static RespSource::CORSPreflight CorsPFRespSource;
 	static ServerLog::Dummy DefaultServerLog;
 
 	static const unsigned int StepDurationSeconds = 1;
