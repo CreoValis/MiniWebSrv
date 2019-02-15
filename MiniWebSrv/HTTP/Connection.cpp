@@ -6,13 +6,15 @@
 #include "IServerLog.h"
 
 #include "RespSources/CommonErrorRespSource.h"
+#include "RespSources/CORSPreflightRespSource.h"
 
 using namespace HTTP;
 
-Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, const char *NewServerName) : ConnectionBase(MyIOS),
+Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName) :
+	ConnectionBase(MyIOS),
 	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
 	ContentLength(0), ContentBuff(nullptr), ContentEndBuff(nullptr),
-	ServerName(NewServerName), MyRespSource(nullptr), MyLog(nullptr), ErrorRS(NewErrorRS),
+	ServerName(NewServerName), MyRespSource(nullptr), MyLog(nullptr), ErrorRS(NewErrorRS), CorsPFRS(NewCorsPFRS),
 	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr),
 	NextConn(nullptr)
 {
@@ -429,21 +431,41 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 	IResponse *CurrResp;
 	IRespSource::AsyncHelperHolder AsyncHelper(MyStrand,Yield);
+
+	bool WriteCORSHeaders;
 	try
 	{
-		CurrResp=MyRespSource->Create(CurrMethod,CurrResource,CurrQuery,
-			HeaderA,ContentBuff,ContentEndBuff,AsyncHelper,this);
+		if (HandleCORS())
+		{
+			//Try a CORS preflight request.
+			CurrResp=CorsPFRS->Create(CurrMethod, CurrResource, CurrQuery,
+				HeaderA, ContentBuff, ContentEndBuff, AsyncHelper, this);
+
+			if (!CurrResp)
+			{
+				//Not a CORS preflight request.
+				CurrResp=MyRespSource->Create(CurrMethod, CurrResource, CurrQuery,
+					HeaderA, ContentBuff, ContentEndBuff, AsyncHelper, this);
+				WriteCORSHeaders=true;
+			}
+			else
+				WriteCORSHeaders=false;
+		}
+		else
+			CurrResp=MyRespSource->Create(CurrMethod,CurrResource,CurrQuery,
+				HeaderA,ContentBuff,ContentEndBuff,AsyncHelper,this);
 	}
 	catch (const std::exception &Ex)
 	{
-		(void)Ex;
 		CurrResp=ErrorRS->CreateFromException(CurrMethod,CurrResource,CurrQuery,
 			HeaderA,ContentBuff,ContentEndBuff,AsyncHelper,this,&Ex);
+		WriteCORSHeaders=true;
 	}
 	catch (...)
 	{
 		CurrResp=ErrorRS->Create(CurrMethod,CurrResource,CurrQuery,
 			HeaderA,ContentBuff,ContentEndBuff,AsyncHelper,this);
+		WriteCORSHeaders=true;
 	}
 
 	char *CurrPos=(char *)WriteBuff.Allocate(Config::MaxHeadersLength);
@@ -452,14 +474,17 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 	unsigned int RespCode=CurrResp->GetResponseCode();
 	{
-		CurrPos+=sprintf(CurrPos,"HTTP/1.1 %d %s\r\nServer: %s\r\n",
+		CurrPos+=snprintf(CurrPos,CurrPosEnd-CurrPos,"HTTP/1.1 %d %s\r\nServer: %s\r\n",
 			RespCode,GetResponseName((RESPONSECODE)RespCode),ServerName);
 	}
 
 	if (const char *EncodingStr=CurrResp->GetContentTypeCharset())
-		CurrPos+=sprintf(CurrPos,"Content-Type: %s; charset=\"%s\"\r\n",CurrResp->GetContentType(),EncodingStr);
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"Content-Type: %s; charset=\"%s\"\r\n",CurrResp->GetContentType(),EncodingStr);
 	else
-		CurrPos+=sprintf(CurrPos,"Content-Type: %s\r\n",CurrResp->GetContentType());
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"Content-Type: %s\r\n",CurrResp->GetContentType());
+
+	if ((HandleCORS()) && (WriteCORSHeaders))
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos, "Access-Control-Allow-Origin: *\r\n");
 
 	{
 		//Append the current date.
@@ -471,10 +496,10 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 	unsigned long long RespLength=CurrResp->GetLength();
 	if (RespLength!=~(unsigned long long)0)
-		CurrPos+=sprintf(CurrPos,"Content-Length: %llu\r\n",RespLength);
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"Content-Length: %llu\r\n",RespLength);
 	else
 		//Response length not known: use chunked encoding.
-		CurrPos+=sprintf(CurrPos,"Transfer-Encoding: chunked\r\n");
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"Transfer-Encoding: chunked\r\n");
 
 	for (unsigned int HeaderI=0, HeaderCount=CurrResp->GetExtraHeaderCount(); HeaderI!=HeaderCount; ++HeaderI)
 	{
@@ -493,7 +518,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 	}
 
 	//Close the headers, and send them to the client.
-	CurrPos+=sprintf(CurrPos,"\r\n");
+	CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"\r\n");
 	WriteBuff.Commit((unsigned int)(CurrPos-CurrPosBegin));
 	WriteNext(Yield);
 
@@ -565,7 +590,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 				Yield);
 			if (ReadLength)
 			{
-				sprintf(CurrPos,"%08x\r",ReadLength);
+				snprintf(CurrPos, ChunkHeaderLen + 1,"%08x\r",ReadLength);
 				CurrPos[8+1]='\n'; //Replace the '\0' with '\n' in the chunk header.
 
 				CurrPos[ReadLength + ChunkHeaderLen]='\r';
@@ -624,8 +649,10 @@ METHOD Connection::ParseMethod(const unsigned char *Begin, const unsigned char *
 {
 	if ((End-Begin==3) && (memcmp(Begin,"GET",3)==0))
 		return METHOD_GET;
-	if ((End-Begin==4) && (memcmp(Begin,"POST",4)==0))
+	else if ((End-Begin==4) && (memcmp(Begin,"POST",4)==0))
 		return METHOD_POST;
+	else if ((End-Begin==7) && (memcmp(Begin, "OPTIONS", 7)==0))
+		return METHOD_OPTIONS;
 	else
 		return METHOD_UNKNOWN;
 }

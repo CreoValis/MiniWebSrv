@@ -97,6 +97,12 @@
     <ClInclude Include="HTTP\ServerLogs\DummyServerLog.h">
       <Filter>HTTP\ServerLogs</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\RespSources\Helper\StringResponse.h">
+      <Filter>HTTP\RespSources\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\RespSources\CORSPreflightRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Http\RespSources\CommonErrorRespSource.cpp">
@@ -145,6 +151,9 @@
     <ClCompile Include="HTTP\ServerLogs\OStreamServerLog.cpp">
       <Filter>HTTP\ServerLogs</Filter>
     </ClCompile>
+    <ClCompile Include="HTTP\RespSources\CORSPreflightRespSource.cpp">
+      <Filter>HTTP\RespSources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="HTTP">
@@ -167,6 +176,9 @@
     </Filter>
     <Filter Include="HTTP\ServerLogs">
       <UniqueIdentifier>{339aed22-fcb9-450c-b493-324ab8b7af13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HTTP\RespSources\Helper">
+      <UniqueIdentifier>{2ad98080-867c-4e81-b1fe-5180b2ab5038}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
