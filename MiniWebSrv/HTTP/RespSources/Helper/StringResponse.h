@@ -13,13 +13,22 @@ class StringResponse : public IResponse
 public:
 	template<class InputIterator>
 	inline StringResponse(InputIterator Begin, InputIterator End, const char *ContentType="text/plain", const char *ContentTypeCharset="UTF-8", unsigned int ResponseCode=RC_OK) :
-		Response(Begin, End), ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode), ReadPos(0)
+		Response(Begin, End), ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode),
+		ReadPos(Response.data()), EndPos(Response.data() + Response.size())
 	{ }
 	inline StringResponse(const std::string &Source, const char *ContentType="text/plain", const char *ContentTypeCharset="UTF-8", unsigned int ResponseCode=RC_OK) :
-		Response(Source), ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode), ReadPos(0)
+		Response(Source), ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode),
+		ReadPos(Response.data()), EndPos(Response.data() + Response.size())
 	{ }
 	inline StringResponse(std::string &&Source, const char *ContentType="text/plain", const char *ContentTypeCharset="UTF-8", unsigned int ResponseCode=RC_OK) :
-		Response(std::move(Source)), ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode), ReadPos(0)
+		Response(std::move(Source)), ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode),
+		ReadPos(Response.data()), EndPos(Response.data() + Response.size())
+	{ }
+	/**Constructs a StringResponse object, which uses the specified string as it's source. The string must be available
+	and stay constant while the response is alive.*/
+	inline StringResponse(const std::string *Source, const char *ContentType="text/plain", const char *ContentTypeCharset="UTF-8", unsigned int ResponseCode=RC_OK) :
+		ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode),
+		ReadPos(Source->data()), EndPos(Source->data() + Source->size())
 	{ }
 	virtual ~StringResponse() { }
 
@@ -33,21 +42,21 @@ public:
 	virtual unsigned int GetResponseCode() { return ResponseCode; }
 	virtual const char *GetContentType() const { return ContentType; }
 	virtual const char *GetContentTypeCharset() const { return ContentTypeCharset; }
-	virtual unsigned long long GetLength() { return Response.length(); }
+	virtual unsigned long long GetLength() { return EndPos-ReadPos; }
 	virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength,
 		boost::asio::yield_context &Ctx)
 	{
-		if (ReadPos<Response.length())
+		if (ReadPos<EndPos)
 		{
-			auto ReadLen=std::min((std::string::size_type)MaxLength, Response.length()-ReadPos);
-			memcpy(TargetBuff, Response.data() + ReadPos, ReadLen);
+			auto ReadLen=std::min((std::string::size_type)MaxLength, (std::string::size_type)(EndPos-ReadPos));
+			memcpy(TargetBuff, ReadPos, ReadLen);
 			OutLength=(unsigned int)ReadLen;
 			ReadPos+=ReadLen;
 		}
 		else
 			OutLength=0;
 
-		return ReadPos==Response.length();
+		return ReadPos>=EndPos;
 	}
 
 private:
@@ -55,7 +64,7 @@ private:
 	unsigned int ResponseCode;
 	const char *ContentType, *ContentTypeCharset;
 
-	std::string::size_type ReadPos;
+	const std::string::value_type *ReadPos, *EndPos;
 };
 
 } //HTTP
