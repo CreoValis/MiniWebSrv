@@ -474,17 +474,17 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 	unsigned int RespCode=CurrResp->GetResponseCode();
 	{
-		CurrPos+=sprintf(CurrPos,"HTTP/1.1 %d %s\r\nServer: %s\r\n",
+		CurrPos+=snprintf(CurrPos,CurrPosEnd-CurrPos,"HTTP/1.1 %d %s\r\nServer: %s\r\n",
 			RespCode,GetResponseName((RESPONSECODE)RespCode),ServerName);
 	}
 
 	if (const char *EncodingStr=CurrResp->GetContentTypeCharset())
-		CurrPos+=sprintf(CurrPos,"Content-Type: %s; charset=\"%s\"\r\n",CurrResp->GetContentType(),EncodingStr);
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"Content-Type: %s; charset=\"%s\"\r\n",CurrResp->GetContentType(),EncodingStr);
 	else
-		CurrPos+=sprintf(CurrPos,"Content-Type: %s\r\n",CurrResp->GetContentType());
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"Content-Type: %s\r\n",CurrResp->GetContentType());
 
 	if ((HandleCORS()) && (WriteCORSHeaders))
-		CurrPos+=sprintf(CurrPos, "Access-Control-Allow-Origin: *\r\n");
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos, "Access-Control-Allow-Origin: *\r\n");
 
 	{
 		//Append the current date.
@@ -496,10 +496,10 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 
 	unsigned long long RespLength=CurrResp->GetLength();
 	if (RespLength!=~(unsigned long long)0)
-		CurrPos+=sprintf(CurrPos,"Content-Length: %llu\r\n",RespLength);
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"Content-Length: %llu\r\n",RespLength);
 	else
 		//Response length not known: use chunked encoding.
-		CurrPos+=sprintf(CurrPos,"Transfer-Encoding: chunked\r\n");
+		CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"Transfer-Encoding: chunked\r\n");
 
 	for (unsigned int HeaderI=0, HeaderCount=CurrResp->GetExtraHeaderCount(); HeaderI!=HeaderCount; ++HeaderI)
 	{
@@ -518,7 +518,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 	}
 
 	//Close the headers, and send them to the client.
-	CurrPos+=sprintf(CurrPos,"\r\n");
+	CurrPos+=snprintf(CurrPos, CurrPosEnd-CurrPos,"\r\n");
 	WriteBuff.Commit((unsigned int)(CurrPos-CurrPosBegin));
 	WriteNext(Yield);
 
@@ -590,7 +590,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 				Yield);
 			if (ReadLength)
 			{
-				sprintf(CurrPos,"%08x\r",ReadLength);
+				snprintf(CurrPos, ChunkHeaderLen + 1,"%08x\r",ReadLength);
 				CurrPos[8+1]='\n'; //Replace the '\0' with '\n' in the chunk header.
 
 				CurrPos[ReadLength + ChunkHeaderLen]='\r';
