@@ -107,6 +107,7 @@
     <ClInclude Include="Http\RespSources\detail\ZipArchive.h" />
     <ClInclude Include="Http\RespSources\FSRespSource.h" />
     <ClInclude Include="HTTP\RespSources\Helper\StringResponse.h" />
+    <ClInclude Include="HTTP\RespSources\StaticRespSource.h" />
     <ClInclude Include="HTTP\RespSources\WSEchoRespSource.h" />
     <ClInclude Include="Http\RespSources\ZipRespSource.h" />
     <ClInclude Include="Http\Server.h" />
@@ -123,6 +124,7 @@
     <ClCompile Include="Http\Connection.cpp" />
     <ClCompile Include="HTTP\Header.cpp" />
     <ClCompile Include="HTTP\RespSources\CORSPreflightRespSource.cpp" />
+    <ClCompile Include="HTTP\RespSources\StaticRespSource.cpp" />
     <ClCompile Include="HTTP\RespSources\WSEchoRespSource.cpp" />
     <ClCompile Include="HTTP\ServerLogs\OStreamServerLog.cpp" />
     <ClCompile Include="HTTP\WebSocket\WSConnection.cpp" />
