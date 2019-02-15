@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <utility>
 
 #include "../../IResponse.h"
 
@@ -29,6 +30,12 @@ public:
 	inline StringResponse(const std::string *Source, const char *ContentType="text/plain", const char *ContentTypeCharset="UTF-8", unsigned int ResponseCode=RC_OK) :
 		ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode),
 		ReadPos(Source->data()), EndPos(Source->data() + Source->size())
+	{ }
+	/**Constructs a StringResponse object, which uses the specified (begin, end) pair as it's source. The buffer must
+	be available and stay constant while the response is alive.*/
+	inline StringResponse(std::pair<const char *, const char *> Source, const char *ContentType = "text/plain", const char *ContentTypeCharset = "UTF-8", unsigned int ResponseCode = RC_OK) :
+		ContentType(ContentType), ContentTypeCharset(ContentTypeCharset), ResponseCode(ResponseCode),
+		ReadPos(Source.first), EndPos(Source.second)
 	{ }
 	virtual ~StringResponse() { }
 
