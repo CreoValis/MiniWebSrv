@@ -10,6 +10,7 @@
 #include "HTTP/RespSources/ZipRespSource.h"
 #include "HTTP/RespSources/WSEchoRespSource.h"
 #include "HTTP/RespSources/CombinerRespSource.h"
+#include "HTTP/RespSources/StaticRespSource.h"
 #include "HTTP/ServerLogs/OStreamServerLog.h"
 
  //////////////////////////////////////
@@ -123,6 +124,8 @@ int main(int argc, char* argv[])
 	signal(SIGINT,&SigHandler);
 #endif
 
+	std::string StaticRespStr("<h1>Static response, resource embedded in executable</h1>");
+
 	std::cout << "Starting." << std::endl;
 	HTTP::Server MiniWS(8880);
 	MiniWS.SetName("MiniWebServer/v0.2.0");
@@ -132,6 +135,7 @@ int main(int argc, char* argv[])
 		Combiner->AddRespSource("/gallery",new HTTP::RespSource::Zip("../Doc/gallery.zip"));
 		Combiner->AddRespSource("/formtest",new FormTestRS());
 		Combiner->AddRespSource("/echo",new HTTP::WebSocket::EchoRespSource());
+		Combiner->AddRespSource("/static", new HTTP::RespSource::StaticRespSource(&StaticRespStr, "text/html"));
 		Combiner->AddRespSource("",new HTTP::RespSource::FS("../Doc"));
 
 		Combiner->AddRedirect("/","/test.html");
