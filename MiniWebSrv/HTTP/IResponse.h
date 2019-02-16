@@ -26,11 +26,11 @@ public:
 	/**Queries the response length, in bytes.
 	@return The length of the response, or ~0, if it's unknown.*/
 	virtual unsigned long long GetLength()=0;
-	/**@return True, if there's more data to read.*/
+	/**@return True, if the response is finished.*/
 	virtual bool Read(unsigned char *TargetBuff, unsigned int MaxLength, unsigned int &OutLength,
 		boost::asio::yield_context &Ctx)=0;
 
-	/**Upgrades the speified connection to another type.
+	/**Upgrades the specified connection to another type.
 	This method will be called after the response was successfully sent.
 	@param CurrConn The connection to upgrade. This is the connection that sent this response.
 	@return A new ConnectionBase object, or nullptr, if the connection shouldn't be upgraded.*/
