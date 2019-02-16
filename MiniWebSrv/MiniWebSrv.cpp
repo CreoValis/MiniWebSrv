@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 		Combiner->AddRespSource("/gallery",new HTTP::RespSource::Zip("../Doc/gallery.zip"));
 		Combiner->AddRespSource("/formtest",new FormTestRS());
 		Combiner->AddRespSource("/echo",new HTTP::WebSocket::EchoRespSource());
-		Combiner->AddRespSource("/static", new HTTP::RespSource::StaticRespSource(&StaticRespStr, "text/html"));
+		Combiner->AddRespSource("/static", new HTTP::RespSource::StaticRespSource(&StaticRespStr, "text/html"), true);
 		Combiner->AddRespSource("",new HTTP::RespSource::FS("../Doc"));
 
 		Combiner->AddRedirect("/","/test.html");
