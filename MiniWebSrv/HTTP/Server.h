@@ -11,6 +11,8 @@
 #include "BuildConfig.h"
 #include "Common.h"
 #include "ConnectionBase.h"
+#include "ConnectionConfig.h"
+#include "FileUploadConfig.h"
 
 #include "ConnFilters/AllowAllConnFilter.h"
 #include "RespSources/CommonErrorRespSource.h"
@@ -36,6 +38,7 @@ public:
 	void SetResponseSource(IRespSource *NewRS);
 	void SetServerLog(IServerLog *NewLog);
 	void SetName(const std::string &NewName);
+	void SetConfig(const Config::Connection &ConnConf, const Config::FileUpload &FUConf);
 
 	bool Run();
 	bool Stop(std::chrono::steady_clock::duration Timeout);
@@ -67,6 +70,9 @@ protected:
 	bool IsRunning;
 
 	RespSource::CORSPreflight *CorsRS;
+
+	Config::Connection ConnConf;
+	Config::FileUpload FUConf;
 
 	static ConnFilter::AllowAll DefaultConnFilter;
 	static RespSource::CommonError CommonErrRespSource;

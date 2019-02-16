@@ -106,6 +106,12 @@
     <ClInclude Include="HTTP\RespSources\StaticRespSource.h">
       <Filter>HTTP\RespSources</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\FileUploadConfig.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\ConnectionConfig.h">
+      <Filter>HTTP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Http\RespSources\CommonErrorRespSource.cpp">

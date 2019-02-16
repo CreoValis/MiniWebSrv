@@ -91,8 +91,10 @@
     <ClInclude Include="Http\Common\StringUtils.h" />
     <ClInclude Include="Http\Common\WriteBuffQueue.h" />
     <ClInclude Include="Http\Connection.h" />
+    <ClInclude Include="HTTP\ConnectionConfig.h" />
     <ClInclude Include="Http\ConnFilters\AllowAllConnFilter.h" />
     <ClInclude Include="Http\ConnFilters\LoopbackOnlyConnFilter.h" />
+    <ClInclude Include="HTTP\FileUploadConfig.h" />
     <ClInclude Include="HTTP\Header.h" />
     <ClInclude Include="HTTP\ConnectionBase.h" />
     <ClInclude Include="Http\IConnFilter.h" />

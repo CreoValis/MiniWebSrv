@@ -9,6 +9,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include "FileUploadConfig.h"
+
 namespace HTTP
 {
 
@@ -32,30 +34,12 @@ public:
 		virtual void OnFileEnd()=0;
 	};
 
-	/**Parameters for the default temp file upload handler.*/
-	struct FileUploadParams
-	{
-		inline FileUploadParams() : MaxUploadSize(~(uintmax_t)0), MaxTotalUploadSize(~(uintmax_t)0)
-		{ }
-
-		inline FileUploadParams(uintmax_t MaxUploadSize, uintmax_t MaxTotalUploadSize) : MaxUploadSize(MaxUploadSize), MaxTotalUploadSize(MaxTotalUploadSize)
-		{ }
-
-		///Target directory to save uploaded files to. If not specified, the files will be saved to the temp directory.
-		boost::filesystem::path Root;
-		///Maximum uploaded file size. If a single file's size grows beyond this limit, the parsing will be aborted.
-		uintmax_t MaxUploadSize;
-		/**Maximum cumulative uploaded file size. If the total size of all uploaded files grow beyond this limit, the
-		parsing will be aborted.*/
-		uintmax_t MaxTotalUploadSize;
-	};
-
 	QueryParams();
 	QueryParams(QueryParams &&other);
 	QueryParams(const std::tuple<const char *, const char *> &URLEncodedRange);
 	/**Constructs the object with the default file upload handler. It will save the uploaded files into the system's
 	temp directory, or the one specified by UploadParams.Root .*/
-	QueryParams(const FileUploadParams &UploadParams);
+	QueryParams(const Config::FileUpload &UploadParams);
 	/**Constructs the object with a custom file upload handler. The handler object will not be owned by this object.*/
 	QueryParams(IFileUpdloadHelper *UploadHelper);
 
@@ -109,7 +93,7 @@ protected:
 		{ }
 		inline TempFileUploadHelper(const TempFileUploadHelper &other) : Params(other.Params), CurrFileS(nullptr), CurrFileSize(0), TotalFileSize(0)
 		{ }
-		inline TempFileUploadHelper(FileUploadParams Params) : Params(Params), CurrFileS(nullptr), CurrFileSize(0), TotalFileSize(0)
+		inline TempFileUploadHelper(Config::FileUpload Params) : Params(Params), CurrFileS(nullptr), CurrFileSize(0), TotalFileSize(0)
 		{ }
 
 		virtual std::tuple<boost::filesystem::path, bool> OnNewFile(const std::string &Name, const std::string &OrigFileName, const std::string &MimeType) override;
@@ -117,7 +101,7 @@ protected:
 		virtual void OnFileEnd() override;
 
 	private:
-		FileUploadParams Params;
+		Config::FileUpload Params;
 
 		boost::filesystem::path CurrFN;
 		boost::filesystem::ofstream *CurrFileS;

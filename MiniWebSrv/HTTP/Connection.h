@@ -13,6 +13,8 @@
 #include "Header.h"
 #include "QueryParams.h"
 #include "ConnectionBase.h"
+#include "ConnectionConfig.h"
+#include "FileUploadConfig.h"
 
 namespace HTTP
 {
@@ -29,7 +31,8 @@ class CORSPreflight;
 class Connection : public ConnectionBase
 {
 public:
-	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName);
+	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
+		Config::Connection Conf=Config::Connection(), Config::FileUpload FUConf=Config::FileUpload());
 	virtual ~Connection();
 
 	virtual void Start(IRespSource *NewRespSource, IServerLog *NewLog);
@@ -62,10 +65,12 @@ protected:
 
 	char *PostHeaderBuff, *PostHeaderBuffEnd;
 
-	UD::Comm::StreamReadBuff<Config::ReadBuffSize> ReadBuff;
-	UD::Comm::WriteBuffQueue<Config::WriteBuffSize,Config::WriteQueueInitSize> WriteBuff;
+	UD::Comm::StreamReadBuff<BuildConfig::ReadBuffSize> ReadBuff;
+	UD::Comm::WriteBuffQueue<BuildConfig::WriteBuffSize, BuildConfig::WriteQueueInitSize> WriteBuff;
 
 	ConnectionBase *NextConn;
+
+	const Config::Connection Conf;
 
 	void ContinueRead(boost::asio::yield_context &Yield);
 	void WriteNext(boost::asio::yield_context &Yield);

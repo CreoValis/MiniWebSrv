@@ -88,6 +88,12 @@ void Server::SetName(const std::string &NewName)
 	MyName=NewName;
 }
 
+void Server::SetConfig(const Config::Connection &ConnConf, const Config::FileUpload &FUConf)
+{
+	this->ConnConf = ConnConf;
+	this->FUConf = FUConf;
+}
+
 bool Server::Run()
 {
 	if (!RunTh)
@@ -233,7 +239,7 @@ void Server::RestartAccept()
 	{
 		if (!NextConn)
 			//Create a new HTTP Connection object.
-			NextConn=new Connection(MyIOS,&CommonErrRespSource,CorsRS,MyName.data());
+			NextConn=new Connection(MyIOS,&CommonErrRespSource,CorsRS,MyName.data(), ConnConf, FUConf);
 
 		MyAcceptor.async_accept(NextConn->GetSocket(),PeerEndp,
 			boost::bind(&Server::OnAccept,this,boost::asio::placeholders::error));

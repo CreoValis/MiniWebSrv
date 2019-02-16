@@ -85,7 +85,7 @@ QueryParams::QueryParams(const std::tuple<const char *, const char *> &URLEncode
 	AddURLEncoded(URLEncodedRange);
 }
 
-QueryParams::QueryParams(const FileUploadParams &UploadParams) : FMParseState(STATE_HEADERSTART), BoundaryParseCounter(2),
+QueryParams::QueryParams(const Config::FileUpload &UploadParams) : FMParseState(STATE_HEADERSTART), BoundaryParseCounter(2),
 	TempUploadHelper(UploadParams),
 	CurrPartMode(PARTMODE_STRING),
 	UploadHelper(&TempUploadHelper)

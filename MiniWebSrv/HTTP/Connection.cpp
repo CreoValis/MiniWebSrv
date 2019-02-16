@@ -10,13 +10,15 @@
 
 using namespace HTTP;
 
-Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName) :
+Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
+	Config::Connection Conf, Config::FileUpload FUConf) :
 	ConnectionBase(MyIOS),
 	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
+	CurrQuery(FUConf),
 	ContentLength(0), ContentBuff(nullptr), ContentEndBuff(nullptr),
 	ServerName(NewServerName), MyRespSource(nullptr), MyLog(nullptr), ErrorRS(NewErrorRS), CorsPFRS(NewCorsPFRS),
 	PostHeaderBuff(nullptr), PostHeaderBuffEnd(nullptr),
-	NextConn(nullptr)
+	NextConn(nullptr), Conf(Conf)
 {
 
 }
@@ -55,11 +57,11 @@ bool Connection::OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn)
 		//Release our "next" connection, and immediately time out.
 		*OutNextConn=NextConn;
 		NextConn=nullptr;
-		SilentTime=Config::MaxSilentTime;
+		SilentTime=Conf.MaxSilentTime;
 	}
 
 	SilentTime+=StepInterval;
-	if (SilentTime>Config::MaxSilentTime)
+	if (SilentTime>Conf.MaxSilentTime)
 	{
 		try { MySock.close(); }
 		catch (...) { }
@@ -265,7 +267,7 @@ bool Connection::ContentHandler(boost::asio::yield_context Yield)
 	if (!ContentLength)
 		//No content to parse.
 		return true;
-	else if (ContentLength>Config::MaxPostBodyLength)
+	else if (ContentLength>Conf.MaxPostBodyLength)
 		//Content too large.
 		return false;
 
@@ -322,7 +324,7 @@ bool Connection::ContentHandler(boost::asio::yield_context Yield)
 				ReadBuff.Consume((unsigned int)AvailableLength);
 				RemLength-=AvailableLength;
 
-				ReadBuff.RequestData(RemLength<Config::ReadBuffSize ? (unsigned int)RemLength : Config::ReadBuffSize);
+				ReadBuff.RequestData(RemLength<BuildConfig::ReadBuffSize ? (unsigned int)RemLength : BuildConfig::ReadBuffSize);
 				ContinueRead(Yield);
 			}
 			else
@@ -468,9 +470,9 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		WriteCORSHeaders=true;
 	}
 
-	char *CurrPos=(char *)WriteBuff.Allocate(Config::MaxHeadersLength);
+	char *CurrPos=(char *)WriteBuff.Allocate(Conf.MaxHeadersLength);
 	char *CurrPosBegin=CurrPos;
-	char *CurrPosEnd=CurrPos+Config::MaxHeadersLength - 2; //Leave room for the final "\r\n".
+	char *CurrPosEnd=CurrPos+Conf.MaxHeadersLength - 2; //Leave room for the final "\r\n".
 
 	unsigned int RespCode=CurrResp->GetResponseCode();
 	{
@@ -530,10 +532,10 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		while (RespLength)
 		{
 			SilentTime=0;
-			CurrPos=(char *)WriteBuff.Allocate(Config::WriteBuffSize);
+			CurrPos=(char *)WriteBuff.Allocate(BuildConfig::WriteBuffSize);
 
 			unsigned int ReadLength;
-			bool IsFinished=CurrResp->Read((unsigned char *)CurrPos,Config::WriteBuffSize,ReadLength,
+			bool IsFinished=CurrResp->Read((unsigned char *)CurrPos,BuildConfig::WriteBuffSize,ReadLength,
 				Yield);
 
 			if (ReadLength<=RespLength)
@@ -583,10 +585,10 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 		while (true)
 		{
 			SilentTime=0;
-			CurrPos=(char *)WriteBuff.Allocate(Config::WriteBuffSize);
+			CurrPos=(char *)WriteBuff.Allocate(BuildConfig::WriteBuffSize);
 
 			unsigned int ReadLength;
-			bool IsFinished=CurrResp->Read((unsigned char *)CurrPos + ChunkHeaderLen,Config::WriteBuffSize - ChunkHeaderLen - ChunkFooterLength,ReadLength,
+			bool IsFinished=CurrResp->Read((unsigned char *)CurrPos + ChunkHeaderLen,BuildConfig::WriteBuffSize - ChunkHeaderLen - ChunkFooterLength,ReadLength,
 				Yield);
 			if (ReadLength)
 			{
