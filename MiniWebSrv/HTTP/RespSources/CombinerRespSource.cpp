@@ -32,7 +32,7 @@ bool Combiner::RedirectResponse::GetExtraHeader(unsigned int Index,
 
 bool Combiner::RSHolder::operator()(const std::string &Resource) const
 {
-	if (Resource.length() > Prefix.length())
+	if ((!ExactMatchOnly) && (Resource.length() > Prefix.length()))
 		return (Resource.find(Prefix) == 0) && (Resource[Prefix.length()] == '/');
 	else if (Resource.length() == Prefix.length())
 		return Resource == Prefix;

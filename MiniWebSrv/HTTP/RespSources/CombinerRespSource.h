@@ -51,18 +51,21 @@ public:
 
 	void AddSimpleRewrite(const std::string &Resource, const std::string &Target) { RewMap[Resource]=RewHolder(Target); }
 	void AddRedirect(const std::string &Resource, const std::string &Target, bool IsPermanent=true) { RewMap[Resource]=RewHolder(Target,IsPermanent); }
-	void AddRespSource(const std::string &Prefix, IRespSource *RespSource) { HolderA.emplace_back(RSHolder(Prefix,RespSource)); }
+	void AddRespSource(const std::string &Prefix, IRespSource *RespSource, bool ExactMatchOnly=false) { HolderA.emplace_back(RSHolder(Prefix,RespSource,ExactMatchOnly)); }
 
 protected:
 	struct RSHolder
 	{
-		inline RSHolder() : RespSource(nullptr) { }
-		inline RSHolder(RSHolder &&Src) : Prefix(std::move(Src.Prefix)), RespSource(std::move(Src.RespSource)) { }
-		inline RSHolder(const std::string &NewPrefix, IRespSource *NewRespSource) : Prefix(NewPrefix), RespSource(NewRespSource)
+		inline RSHolder() : RespSource(nullptr), ExactMatchOnly(false) { }
+		inline RSHolder(RSHolder &&Src) : Prefix(std::move(Src.Prefix)), RespSource(std::move(Src.RespSource)), ExactMatchOnly(Src.ExactMatchOnly)
+		{ }
+		inline RSHolder(const std::string &NewPrefix, IRespSource *NewRespSource, bool ExactMatchOnly) :
+			Prefix(NewPrefix), RespSource(NewRespSource), ExactMatchOnly(ExactMatchOnly)
 		{ }
 
 		std::string Prefix;
 		std::unique_ptr<IRespSource> RespSource;
+		bool ExactMatchOnly;
 
 		bool operator()(const std::string &Resource) const;
 	};
