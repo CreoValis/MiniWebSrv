@@ -159,13 +159,9 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 				IsKeepAlive=false;
 		}
 	}
-	catch (std::exception &Ex)
-	{
-		(void)Ex;
-	}
+	catch (boost::coroutines::detail::forced_unwind &) { throw; }
 	catch (...)
-	{
-	}
+	{ }
 
 	try { MySock.close(); }
 	catch (...) { }
