@@ -135,7 +135,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 		{
 			//Reset the request states.
 			ResetRequestData();
-			ReqStartTime=std::chrono::steady_clock::now();
+			ReqStartTime=std::chrono::steady_clock::time_point(std::chrono::steady_clock::duration(0));
 
 			if (!HeaderHandler(Yield))
 				//Header parse error. Close the connection.
@@ -178,6 +178,10 @@ bool Connection::HeaderHandler(boost::asio::yield_context Yield)
 	{
 		if (!ReadBuff.GetAvailableDataLength())
 			ContinueRead(Yield);
+
+		if (!ReqStartTime.time_since_epoch().count())
+			//Start counting the request time from the point we received the first bytes.
+			ReqStartTime=std::chrono::steady_clock::now();
 
 		unsigned int AvailableDataLength;
 		const unsigned char *InBuff=ReadBuff.GetAvailableData(AvailableDataLength), *InBuffEnd=InBuff+AvailableDataLength;
