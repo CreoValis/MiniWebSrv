@@ -31,7 +31,7 @@ public:
 		boost::asio::io_service::strand &Strand;
 		boost::asio::yield_context &Ctx;
 
-		inline boost::asio::io_service &IOService() { return Strand.get_io_service(); }
+		inline boost::asio::io_service &IOService() { return Strand.context(); }
 	};
 
 	/**Called before any other interface calls to set the server log instance.

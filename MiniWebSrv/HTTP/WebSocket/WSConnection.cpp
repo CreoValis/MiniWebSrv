@@ -471,10 +471,10 @@ void Connection::StartAsyncWrite()
 
 void Connection::PostWriteReq()
 {
-	MySock.get_io_service().post(boost::bind(&Connection::StartAsyncWriteExternal,this));
+	boost::asio::post(MySock.get_executor(), boost::bind(&Connection::StartAsyncWriteExternal,this));
 }
 
 void Connection::PostCloseReq()
 {
-	MySock.get_io_service().post(boost::bind(&Connection::StartAsyncWriteCloseExternal,this));
+	boost::asio::post(MySock.get_executor(), boost::bind(&Connection::StartAsyncWriteCloseExternal,this));
 }
