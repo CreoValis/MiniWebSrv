@@ -1,6 +1,6 @@
 #include "WSConnection.h"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "../Common/BinUtils.h"
 
