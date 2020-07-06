@@ -95,6 +95,13 @@ public:
 			//ReqDataEndPos-=ReadPos;
 			//ReadPos=0;
 			RelevantLength=0;
+
+			if (ReadPos==DataEndPos)
+			{
+				//No more data to be reaed from the buffer: reset the read positions.
+				ReadPos=0;
+				DataEndPos=0;
+			}
 		}
 	}
 
