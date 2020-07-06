@@ -180,7 +180,13 @@ bool Connection::HeaderHandler(boost::asio::yield_context Yield)
 	while (true)
 	{
 		if (!ReadBuff.GetAvailableDataLength())
+		{
 			ContinueRead(Yield);
+
+			if (!ReadBuff.GetAvailableDataLength())
+				//Headers longer than static read buffer.
+				return false;
+		}
 
 		if (!ReqStartTime.time_since_epoch().count())
 			//Start counting the request time from the point we received the first bytes.
