@@ -76,9 +76,12 @@ void Connection::ContinueRead(boost::asio::yield_context &Yield)
 	unsigned int FreeLength;
 	unsigned char *ReadPos=ReadBuff.GetReadInfo(FreeLength);
 
-	std::size_t ReadCount=MySock.async_read_some(boost::asio::buffer(ReadPos,FreeLength),Yield);
-	ReadBuff.OnNewData(ReadCount);
-	SilentTime=0;
+	if (FreeLength)
+	{
+		std::size_t ReadCount=MySock.async_read_some(boost::asio::buffer(ReadPos, FreeLength), Yield);
+		ReadBuff.OnNewData(ReadCount);
+		SilentTime=0;
+	}
 }
 
 void Connection::WriteNext(boost::asio::yield_context &Yield)
