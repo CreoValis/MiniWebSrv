@@ -89,6 +89,7 @@ protected:
 	inline bool HandleCORS() const { return CorsPFRS!=nullptr; }
 
 	static METHOD ParseMethod(const unsigned char *Begin, const unsigned char *End);
+	static bool CompareLowercaseSimple(const char *TestStr, const char *LowerCaseStr);
 };
 
 };

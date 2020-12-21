@@ -160,6 +160,11 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 
 			if (CurrVersion==VERSION_10)
 				IsKeepAlive=false;
+			else if (CurrVersion==VERSION_11)
+				//We keep the connection alive by default, unless the client asks otherwise.
+				for (const auto &Header : HeaderA)
+					if ((Header.IntName==HTTP::HN_CONNECTION) && (CompareLowercaseSimple(Header.Value, "close")))
+						IsKeepAlive=false;
 		}
 	}
 	catch (boost::coroutines::detail::forced_unwind &) { throw; }
@@ -666,4 +671,19 @@ METHOD Connection::ParseMethod(const unsigned char *Begin, const unsigned char *
 		return METHOD_OPTIONS;
 	else
 		return METHOD_UNKNOWN;
+}
+
+bool Connection::CompareLowercaseSimple(const char *TestStr, const char *LowerCaseStr)
+{
+	while (char Val=*TestStr++)
+	{
+		if ((Val>='A') && (Val<='Z'))
+			Val=Val-'A'+'a';
+
+		auto TestVal=*LowerCaseStr++;
+		if (Val!=TestVal)
+			return false;
+	}
+
+	return !*LowerCaseStr;
 }
