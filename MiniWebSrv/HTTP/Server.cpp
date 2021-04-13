@@ -162,7 +162,7 @@ void Server::OnAccept(const boost::system::error_code &error)
 		{
 			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_ulong(),true);
 
-			TotalConnCount++;
+			TotalConnCount.fetch_add(1, std::memory_order_acq_rel);
 			NextConn->Start(MyRespSource,MyLog);
 			ConnLst.push_back(NextConn);
 			NextConn=nullptr;
@@ -214,8 +214,8 @@ void Server::OnTimer(const boost::system::error_code &error)
 	//Append the new connections to the connection list.
 	ConnLst.splice(ConnLst.end(),std::move(NextConnLst));
 
-	ConnCount=ActiveConnCount;
-	TotalRespCount=BaseRespCount + CurrRespCount;
+	ConnCount.store(ActiveConnCount, std::memory_order_release);
+	TotalRespCount.store(BaseRespCount + CurrRespCount, std::memory_order_release);
 
 	RestartTimer();
 }
