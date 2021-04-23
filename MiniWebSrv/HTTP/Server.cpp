@@ -13,7 +13,7 @@ RespSource::CommonError Server::CommonErrRespSource;
 RespSource::CORSPreflight Server::CorsPFRespSource;
 ServerLog::Dummy Server::DefaultServerLog;
 
-Server::Server(unsigned short BindPort, boost::asio::io_service *Target=nullptr) :
+Server::Server(unsigned short BindPort, boost::asio::io_service *Target) :
 	MyIOS(Target ? *Target : OwnIOS),
 	MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
 	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog), MyName("EmbeddedHTTPd"),
@@ -24,7 +24,7 @@ Server::Server(unsigned short BindPort, boost::asio::io_service *Target=nullptr)
 	
 }
 
-Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_service *Target=nullptr) :
+Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_service *Target) :
 	MyIOS(Target ? *Target : OwnIOS),
 	MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
 	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog),
