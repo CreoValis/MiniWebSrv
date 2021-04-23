@@ -13,7 +13,7 @@ using namespace HTTP;
 Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
 	Config::Connection Conf, Config::FileUpload FUConf) :
 	ConnectionBase(MyIOS),
-	MyStrand(MyIOS), SilentTime(0), IsDeletable(true),
+	MyIOS(MyIOS), MyStrand(MyIOS.get_executor()), SilentTime(0), IsDeletable(true),
 	CurrQuery(FUConf),
 	ContentLength(0), ContentBuff(nullptr), ContentEndBuff(nullptr),
 	ServerName(NewServerName), MyRespSource(nullptr), MyLog(nullptr), ErrorRS(NewErrorRS), CorsPFRS(NewCorsPFRS),
@@ -446,7 +446,7 @@ bool Connection::ResponseHandler(boost::asio::yield_context &Yield)
 	std::chrono::steady_clock::time_point ReqEndTime=std::chrono::steady_clock::now();
 
 	IResponse *CurrResp;
-	IRespSource::AsyncHelperHolder AsyncHelper(MyStrand,Yield);
+	IRespSource::AsyncHelperHolder AsyncHelper(MyStrand, MyIOS,Yield);
 
 	bool WriteCORSHeaders;
 	try

@@ -42,7 +42,8 @@ public:
 	virtual bool OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn);
 
 protected:
-	boost::asio::io_service::strand MyStrand;
+	boost::asio::io_service &MyIOS;
+	boost::asio::strand<boost::asio::io_context::executor_type> MyStrand;
 
 	unsigned int SilentTime;
 	bool IsDeletable;
