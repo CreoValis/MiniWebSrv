@@ -92,6 +92,8 @@ protected:
 	void RestartTimer();
 
 	void ProcessThread();
+
+	inline const bool IsOwnIOS() const { return &MyIOS==&OwnIOS; }
 };
 
 };
