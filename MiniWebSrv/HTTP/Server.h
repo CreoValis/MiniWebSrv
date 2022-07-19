@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 #include <boost/asio.hpp>
 
@@ -29,8 +30,8 @@ class IServerLog;
 class Server
 {
 public:
-	Server(unsigned short BindPort);
-	Server(boost::asio::ip::address BindAddr, unsigned short BindPort);
+	Server(unsigned short BindPort, boost::asio::io_service *Target=nullptr);
+	Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_service *Target=nullptr);
 	~Server();
 
 	void SetCORS(bool EnableCrossOriginCalls);
@@ -43,12 +44,13 @@ public:
 	bool Run();
 	bool Stop(std::chrono::steady_clock::duration Timeout);
 
-	inline unsigned int GetConnCount() { return ConnCount; }
-	inline unsigned int GetTotalConnCount() { return TotalConnCount; }
-	inline unsigned int GetResponseCount() { return TotalRespCount; }
+	inline unsigned int GetConnCount() { return ConnCount.load(std::memory_order_consume); }
+	inline unsigned int GetTotalConnCount() { return TotalConnCount.load(std::memory_order_consume); }
+	inline unsigned int GetResponseCount() { return TotalRespCount.load(std::memory_order_consume); }
 
 protected:
-	boost::asio::io_service MyIOS;
+	boost::asio::io_service &MyIOS;
+	boost::asio::io_service OwnIOS;
 	boost::asio::basic_waitable_timer<std::chrono::steady_clock> MyStepTim;
 	boost::asio::ip::tcp::endpoint ListenEndp;
 	boost::asio::ip::tcp::acceptor MyAcceptor;
@@ -60,8 +62,8 @@ protected:
 	IServerLog *MyLog;
 	std::string MyName;
 
-	volatile unsigned int ConnCount;
-	volatile unsigned int TotalConnCount, TotalRespCount;
+	std::atomic_uint32_t ConnCount;
+	std::atomic_uint32_t TotalConnCount, TotalRespCount;
 	unsigned int BaseRespCount;
 	std::list<ConnectionBase *> ConnLst;
 
@@ -90,6 +92,8 @@ protected:
 	void RestartTimer();
 
 	void ProcessThread();
+
+	inline const bool IsOwnIOS() const { return &MyIOS==&OwnIOS; }
 };
 
 };

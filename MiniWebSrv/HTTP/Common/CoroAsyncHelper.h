@@ -13,7 +13,7 @@ class CoroAsyncHelper
 {
 public:
 	inline CoroAsyncHelper() : MyStrand(nullptr), MyCtx(nullptr){ }
-	CoroAsyncHelper(boost::asio::io_service::strand *NewStrand, boost::asio::yield_context *Ctx) :
+	CoroAsyncHelper(boost::asio::strand<boost::asio::io_context::executor_type> *NewStrand, boost::asio::yield_context *Ctx) :
 		MyStrand(NewStrand), MyCtx(Ctx)
 	{
 		CoroCallee=MyCtx->coro_.lock();
@@ -21,11 +21,11 @@ public:
 
 	inline operator char() { return MyCtx!=nullptr; }
 
-	inline void Wake() { MyStrand->post(boost::bind(&CoroAsyncHelper::WakeInternal,CoroCallee)); }
+	inline void Wake() { MyStrand->post(boost::bind(&CoroAsyncHelper::WakeInternal,CoroCallee), boost::asio::get_associated_allocator(MyStrand)); }
 	inline void Wait() { MyCtx->ca_(); }
 
 private:
-	boost::asio::io_service::strand *MyStrand;
+	boost::asio::strand<boost::asio::io_context::executor_type> *MyStrand;
 	boost::asio::yield_context *MyCtx;
 
 	std::shared_ptr<boost::asio::yield_context::callee_type> CoroCallee;

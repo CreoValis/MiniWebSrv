@@ -13,7 +13,9 @@ RespSource::CommonError Server::CommonErrRespSource;
 RespSource::CORSPreflight Server::CorsPFRespSource;
 ServerLog::Dummy Server::DefaultServerLog;
 
-Server::Server(unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
+Server::Server(unsigned short BindPort, boost::asio::io_service *Target) :
+	MyIOS(Target ? *Target : OwnIOS),
+	MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
 	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog), MyName("EmbeddedHTTPd"),
 	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
 	NextConn(nullptr), IsRunning(false),
@@ -22,7 +24,9 @@ Server::Server(unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::as
 	
 }
 
-Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort) : MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
+Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_service *Target) :
+	MyIOS(Target ? *Target : OwnIOS),
+	MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
 	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog),
 	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
 	NextConn(nullptr), IsRunning(false),
@@ -162,7 +166,7 @@ void Server::OnAccept(const boost::system::error_code &error)
 		{
 			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_ulong(),true);
 
-			TotalConnCount++;
+			TotalConnCount.fetch_add(1, std::memory_order_acq_rel);
 			NextConn->Start(MyRespSource,MyLog);
 			ConnLst.push_back(NextConn);
 			NextConn=nullptr;
@@ -214,8 +218,8 @@ void Server::OnTimer(const boost::system::error_code &error)
 	//Append the new connections to the connection list.
 	ConnLst.splice(ConnLst.end(),std::move(NextConnLst));
 
-	ConnCount=ActiveConnCount;
-	TotalRespCount=BaseRespCount + CurrRespCount;
+	ConnCount.store(ActiveConnCount, std::memory_order_release);
+	TotalRespCount.store(BaseRespCount + CurrRespCount, std::memory_order_release);
 
 	RestartTimer();
 }
