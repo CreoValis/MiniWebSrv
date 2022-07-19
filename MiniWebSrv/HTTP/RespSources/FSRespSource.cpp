@@ -75,6 +75,8 @@ bool FS::Response::Read(unsigned char *TargetBuff, unsigned int MaxLength, unsig
 
 FS::FS(const boost::filesystem::path &NewRoot) : Root(boost::filesystem::canonical(NewRoot))
 {
+	if (!Root.empty() && Root.filename_is_dot())
+		Root=Root.parent_path();
 }
 
 IResponse *FS::Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
