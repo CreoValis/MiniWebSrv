@@ -117,6 +117,9 @@ WSRespSource::WSResponse::WSResponse(IMsgHandler *NewHandler,
 		unsigned int AuthHash[5];
 		boost::uuids::detail::sha1 Hash;
 		Hash.process_bytes(AuthRespBase.data(),AuthRespBase.length());
+#if BOOST_VERSION>=108600
+		Hash.get_digest((boost::uuids::detail::sha1::digest_type &)AuthHash);
+#else
 		Hash.get_digest(AuthHash);
 
 		AuthHash[0]=boost::endian::native_to_big(AuthHash[0]);
@@ -124,6 +127,7 @@ WSRespSource::WSResponse::WSResponse(IMsgHandler *NewHandler,
 		AuthHash[2]=boost::endian::native_to_big(AuthHash[2]);
 		AuthHash[3]=boost::endian::native_to_big(AuthHash[3]);
 		AuthHash[4]=boost::endian::native_to_big(AuthHash[4]);
+#endif
 
 		unsigned char EncStr[32];
 		EncStr[Base64Encode((const unsigned char *)AuthHash,(const unsigned char *)AuthHash+20,EncStr)]='\0';
