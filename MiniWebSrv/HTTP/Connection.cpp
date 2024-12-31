@@ -41,7 +41,7 @@ void Connection::Start(IRespSource *NewRespSource, IServerLog *NewLog)
 
 	MyRespSource=NewRespSource;
 	MyLog=NewLog;
-	boost::asio::spawn(MyStrand,boost::bind(&Connection::ProtocolHandler,this,boost::placeholders::_1));
+	boost::asio::spawn(MyStrand, boost::bind(&Connection::ProtocolHandler, this, boost::placeholders::_1), boost::asio::detached);
 }
 
 void Connection::Stop()
