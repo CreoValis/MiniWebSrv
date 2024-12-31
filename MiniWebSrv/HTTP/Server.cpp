@@ -120,7 +120,7 @@ bool Server::Stop(std::chrono::steady_clock::duration Timeout)
 {
 	if (RunTh)
 	{
-		MyIOS.post(boost::bind(&Server::StopInternal,this));
+		boost::asio::post(MyIOS, boost::bind(&Server::StopInternal, this));
 		bool RetVal, IsLocked;
 		if (!RunMtx.try_lock_for(Timeout))
 		{
