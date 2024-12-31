@@ -254,7 +254,7 @@ void Server::RestartTimer()
 {
 	if (IsRunning)
 	{
-		MyStepTim.expires_from_now(StepDuration);
+		MyStepTim.expires_after(StepDuration);
 		MyStepTim.async_wait(boost::bind(&Server::OnTimer,this,boost::asio::placeholders::error));
 	}
 }
