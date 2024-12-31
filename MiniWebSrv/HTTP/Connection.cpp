@@ -167,7 +167,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 						IsKeepAlive=false;
 		}
 	}
-	catch (boost::coroutines::detail::forced_unwind &) { throw; }
+	catch (boost::context::detail::forced_unwind &) { throw; }
 	catch (...)
 	{ }
 
