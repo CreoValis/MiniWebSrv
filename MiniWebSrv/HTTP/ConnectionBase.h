@@ -15,7 +15,7 @@ class IServerLog;
 class ConnectionBase
 {
 public:
-	inline ConnectionBase(boost::asio::io_service &MyIOS) : MySock(MyIOS), ResponseCount(0) { }
+	inline ConnectionBase(boost::asio::io_context &MyIOS) : MySock(MyIOS), ResponseCount(0) { }
 	inline ConnectionBase(boost::asio::ip::tcp::socket &&SrcSocket) : MySock(std::move(SrcSocket)), ResponseCount(0) { }
 	virtual ~ConnectionBase()
 	{

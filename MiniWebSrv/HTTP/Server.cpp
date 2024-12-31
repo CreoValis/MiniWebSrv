@@ -13,24 +13,16 @@ RespSource::CommonError Server::CommonErrRespSource;
 RespSource::CORSPreflight Server::CorsPFRespSource;
 ServerLog::Dummy Server::DefaultServerLog;
 
-Server::Server(unsigned short BindPort, boost::asio::io_service *Target) :
+Server::Server(unsigned short BindPort, boost::asio::io_context *Target) :
 	MyIOS(Target ? *Target : OwnIOS),
-	MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
-	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog), MyName("EmbeddedHTTPd"),
-	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
-	NextConn(nullptr), IsRunning(false),
-	CorsRS(nullptr)
+	MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp)
 {
 	
 }
 
-Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_service *Target) :
+Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_context *Target) :
 	MyIOS(Target ? *Target : OwnIOS),
-	MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
-	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog),
-	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
-	NextConn(nullptr), IsRunning(false),
-	CorsRS(nullptr)
+	MyStepTim(MyIOS), ListenEndp(BindAddr,BindPort), MyAcceptor(MyIOS,ListenEndp)
 {
 
 }
@@ -120,7 +112,7 @@ bool Server::Stop(std::chrono::steady_clock::duration Timeout)
 {
 	if (RunTh)
 	{
-		MyIOS.post(boost::bind(&Server::StopInternal,this));
+		boost::asio::post(MyIOS, boost::bind(&Server::StopInternal, this));
 		bool RetVal, IsLocked;
 		if (!RunMtx.try_lock_for(Timeout))
 		{
@@ -164,7 +156,7 @@ void Server::OnAccept(const boost::system::error_code &error)
 	{
 		if ((*MyConnF)(PeerEndp.address()))
 		{
-			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_ulong(),true);
+			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_uint(), true);
 
 			TotalConnCount.fetch_add(1, std::memory_order_acq_rel);
 			NextConn->Start(MyRespSource,MyLog);
@@ -173,7 +165,7 @@ void Server::OnAccept(const boost::system::error_code &error)
 		}
 		else
 		{
-			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_ulong(),false);
+			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_uint(),false);
 
 			NextConn->GetSocket().close();
 			delete NextConn; //Lazy.
@@ -254,7 +246,7 @@ void Server::RestartTimer()
 {
 	if (IsRunning)
 	{
-		MyStepTim.expires_from_now(StepDuration);
+		MyStepTim.expires_after(StepDuration);
 		MyStepTim.async_wait(boost::bind(&Server::OnTimer,this,boost::asio::placeholders::error));
 	}
 }

@@ -10,7 +10,7 @@
 
 using namespace HTTP;
 
-Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
+Connection::Connection(boost::asio::io_context &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
 	Config::Connection Conf, Config::FileUpload FUConf) :
 	ConnectionBase(MyIOS),
 	MyIOS(MyIOS), MyStrand(MyIOS.get_executor()), SilentTime(0), IsDeletable(true),
@@ -41,7 +41,7 @@ void Connection::Start(IRespSource *NewRespSource, IServerLog *NewLog)
 
 	MyRespSource=NewRespSource;
 	MyLog=NewLog;
-	boost::asio::spawn(MyStrand,boost::bind(&Connection::ProtocolHandler,this,boost::placeholders::_1));
+	boost::asio::spawn(MyStrand, boost::bind(&Connection::ProtocolHandler, this, boost::placeholders::_1), boost::asio::detached);
 }
 
 void Connection::Stop()
@@ -167,7 +167,7 @@ void Connection::ProtocolHandler(boost::asio::yield_context Yield)
 						IsKeepAlive=false;
 		}
 	}
-	catch (boost::coroutines::detail::forced_unwind &) { throw; }
+	catch (boost::context::detail::forced_unwind &) { throw; }
 	catch (...)
 	{ }
 

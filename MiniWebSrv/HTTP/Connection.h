@@ -31,7 +31,7 @@ class CORSPreflight;
 class Connection : public ConnectionBase
 {
 public:
-	Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
+	Connection(boost::asio::io_context &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
 		Config::Connection Conf=Config::Connection(), Config::FileUpload FUConf=Config::FileUpload());
 	virtual ~Connection();
 
@@ -42,7 +42,7 @@ public:
 	virtual bool OnStep(unsigned int StepInterval, ConnectionBase **OutNextConn);
 
 protected:
-	boost::asio::io_service &MyIOS;
+	boost::asio::io_context &MyIOS;
 	boost::asio::strand<boost::asio::io_context::executor_type> MyStrand;
 
 	unsigned int SilentTime;

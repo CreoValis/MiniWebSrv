@@ -30,8 +30,8 @@ class IServerLog;
 class Server
 {
 public:
-	Server(unsigned short BindPort, boost::asio::io_service *Target=nullptr);
-	Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_service *Target=nullptr);
+	Server(unsigned short BindPort, boost::asio::io_context *Target=nullptr);
+	Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_context *Target=nullptr);
 	~Server();
 
 	void SetCORS(bool EnableCrossOriginCalls);
@@ -49,29 +49,29 @@ public:
 	inline unsigned int GetResponseCount() { return TotalRespCount.load(std::memory_order_consume); }
 
 protected:
-	boost::asio::io_service &MyIOS;
-	boost::asio::io_service OwnIOS;
+	boost::asio::io_context &MyIOS;
+	boost::asio::io_context OwnIOS;
 	boost::asio::basic_waitable_timer<std::chrono::steady_clock> MyStepTim;
 	boost::asio::ip::tcp::endpoint ListenEndp;
 	boost::asio::ip::tcp::acceptor MyAcceptor;
 
-	std::thread *RunTh;
+	std::thread *RunTh = nullptr;
 	std::timed_mutex RunMtx;
-	IConnFilter *MyConnF;
-	IRespSource *MyRespSource;
-	IServerLog *MyLog;
-	std::string MyName;
+	IConnFilter *MyConnF = &DefaultConnFilter;
+	IRespSource *MyRespSource = nullptr;
+	IServerLog *MyLog = &DefaultServerLog;
+	std::string MyName = "EmbeddedHTTPd";
 
-	std::atomic_uint32_t ConnCount;
-	std::atomic_uint32_t TotalConnCount, TotalRespCount;
-	unsigned int BaseRespCount;
+	std::atomic_uint32_t ConnCount = 0;
+	std::atomic_uint32_t TotalConnCount = 0, TotalRespCount = 0;
+	unsigned int BaseRespCount = 0;
 	std::list<ConnectionBase *> ConnLst;
 
 	boost::asio::ip::tcp::endpoint PeerEndp;
-	ConnectionBase *NextConn;
-	bool IsRunning;
+	ConnectionBase *NextConn = nullptr;
+	bool IsRunning = false;
 
-	RespSource::CORSPreflight *CorsRS;
+	RespSource::CORSPreflight *CorsRS = nullptr;
 
 	Config::Connection ConnConf;
 	Config::FileUpload FUConf;
