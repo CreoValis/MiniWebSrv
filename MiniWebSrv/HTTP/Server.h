@@ -55,23 +55,23 @@ protected:
 	boost::asio::ip::tcp::endpoint ListenEndp;
 	boost::asio::ip::tcp::acceptor MyAcceptor;
 
-	std::thread *RunTh;
+	std::thread *RunTh = nullptr;
 	std::timed_mutex RunMtx;
-	IConnFilter *MyConnF;
-	IRespSource *MyRespSource;
-	IServerLog *MyLog;
-	std::string MyName;
+	IConnFilter *MyConnF = &DefaultConnFilter;
+	IRespSource *MyRespSource = nullptr;
+	IServerLog *MyLog = &DefaultServerLog;
+	std::string MyName = "EmbeddedHTTPd";
 
-	std::atomic_uint32_t ConnCount;
-	std::atomic_uint32_t TotalConnCount, TotalRespCount;
-	unsigned int BaseRespCount;
+	std::atomic_uint32_t ConnCount = 0;
+	std::atomic_uint32_t TotalConnCount = 0, TotalRespCount = 0;
+	unsigned int BaseRespCount = 0;
 	std::list<ConnectionBase *> ConnLst;
 
 	boost::asio::ip::tcp::endpoint PeerEndp;
-	ConnectionBase *NextConn;
-	bool IsRunning;
+	ConnectionBase *NextConn = nullptr;
+	bool IsRunning = false;
 
-	RespSource::CORSPreflight *CorsRS;
+	RespSource::CORSPreflight *CorsRS = nullptr;
 
 	Config::Connection ConnConf;
 	Config::FileUpload FUConf;
