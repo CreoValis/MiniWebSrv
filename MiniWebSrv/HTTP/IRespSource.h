@@ -25,15 +25,15 @@ public:
 
 	struct AsyncHelperHolder
 	{
-		inline AsyncHelperHolder(boost::asio::strand<boost::asio::io_context::executor_type> &NewStrand, boost::asio::io_service &MyIOS, boost::asio::yield_context &NewCtx) :
+		inline AsyncHelperHolder(boost::asio::strand<boost::asio::io_context::executor_type> &NewStrand, boost::asio::io_context &MyIOS, boost::asio::yield_context &NewCtx) :
 			Strand(NewStrand), MyIOS(MyIOS), Ctx(NewCtx)
 		{ }
 
 		boost::asio::strand<boost::asio::io_context::executor_type> &Strand;
-		boost::asio::io_service &MyIOS;
+		boost::asio::io_context &MyIOS;
 		boost::asio::yield_context &Ctx;
 
-		inline boost::asio::io_service &IOService() { return MyIOS; }
+		inline boost::asio::io_context &IOService() { return MyIOS; }
 	};
 
 	/**Called before any other interface calls to set the server log instance.

@@ -30,8 +30,8 @@ class IServerLog;
 class Server
 {
 public:
-	Server(unsigned short BindPort, boost::asio::io_service *Target=nullptr);
-	Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_service *Target=nullptr);
+	Server(unsigned short BindPort, boost::asio::io_context *Target=nullptr);
+	Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_context *Target=nullptr);
 	~Server();
 
 	void SetCORS(bool EnableCrossOriginCalls);
@@ -49,8 +49,8 @@ public:
 	inline unsigned int GetResponseCount() { return TotalRespCount.load(std::memory_order_consume); }
 
 protected:
-	boost::asio::io_service &MyIOS;
-	boost::asio::io_service OwnIOS;
+	boost::asio::io_context &MyIOS;
+	boost::asio::io_context OwnIOS;
 	boost::asio::basic_waitable_timer<std::chrono::steady_clock> MyStepTim;
 	boost::asio::ip::tcp::endpoint ListenEndp;
 	boost::asio::ip::tcp::acceptor MyAcceptor;

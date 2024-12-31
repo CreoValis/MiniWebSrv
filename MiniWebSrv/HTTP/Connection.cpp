@@ -10,7 +10,7 @@
 
 using namespace HTTP;
 
-Connection::Connection(boost::asio::io_service &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
+Connection::Connection(boost::asio::io_context &MyIOS, RespSource::CommonError *NewErrorRS, RespSource::CORSPreflight *NewCorsPFRS, const char *NewServerName,
 	Config::Connection Conf, Config::FileUpload FUConf) :
 	ConnectionBase(MyIOS),
 	MyIOS(MyIOS), MyStrand(MyIOS.get_executor()), SilentTime(0), IsDeletable(true),
