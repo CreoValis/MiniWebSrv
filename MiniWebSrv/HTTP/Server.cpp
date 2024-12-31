@@ -164,7 +164,7 @@ void Server::OnAccept(const boost::system::error_code &error)
 	{
 		if ((*MyConnF)(PeerEndp.address()))
 		{
-			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_ulong(),true);
+			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_uint(), true);
 
 			TotalConnCount.fetch_add(1, std::memory_order_acq_rel);
 			NextConn->Start(MyRespSource,MyLog);
@@ -173,7 +173,7 @@ void Server::OnAccept(const boost::system::error_code &error)
 		}
 		else
 		{
-			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_ulong(),false);
+			MyLog->OnConnection(NextConn,(unsigned int)PeerEndp.address().to_v4().to_uint(),false);
 
 			NextConn->GetSocket().close();
 			delete NextConn; //Lazy.
