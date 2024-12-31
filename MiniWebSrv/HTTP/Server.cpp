@@ -26,7 +26,7 @@ Server::Server(unsigned short BindPort, boost::asio::io_context *Target) :
 
 Server::Server(boost::asio::ip::address BindAddr, unsigned short BindPort, boost::asio::io_context *Target) :
 	MyIOS(Target ? *Target : OwnIOS),
-	MyStepTim(MyIOS), ListenEndp(boost::asio::ip::tcp::v4(),BindPort), MyAcceptor(MyIOS,ListenEndp),
+	MyStepTim(MyIOS), ListenEndp(BindAddr,BindPort), MyAcceptor(MyIOS,ListenEndp),
 	RunTh(nullptr), MyConnF(&DefaultConnFilter), MyRespSource(nullptr), MyLog(&DefaultServerLog),
 	ConnCount(0), TotalConnCount(0), TotalRespCount(0), BaseRespCount(0),
 	NextConn(nullptr), IsRunning(false),
