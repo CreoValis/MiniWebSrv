@@ -115,6 +115,9 @@
     <ClInclude Include="HTTP\RespSources\GenericRespSource.h">
       <Filter>HTTP\RespSources</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\RespSources\SimpleResponse.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Http\RespSources\CommonErrorRespSource.cpp">
