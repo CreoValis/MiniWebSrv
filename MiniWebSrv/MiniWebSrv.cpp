@@ -160,31 +160,19 @@ int main(int argc, char* argv[])
 				RParams.Finalize(OutS);
 
 				//Send 9 bytes in 3 Write() calls.
-				memcpy(OutS.GetBuff(), "abc", 3);
-				OutS.Write(3);
-
-				if (SleepTim)
+				char Response[]="abcdefghi";
+				constexpr unsigned int StepSize=3, ResponseSize=sizeof(Response)-1;
+				for (unsigned int x=0; x<ResponseSize; x+=StepSize)
 				{
-					SleepTim->expires_after(SleepDuration);
-					SleepTim->async_wait(OutS.GetContext());
-				}
+					const auto CopyLen=std::min(StepSize, ResponseSize-x);
+					memcpy(OutS.GetBuff(), Response + x, CopyLen);
+					OutS.Write(CopyLen);
 
-				memcpy(OutS.GetBuff(), "def", 3);
-				OutS.Write(3);
-
-				if (SleepTim)
-				{
-					SleepTim->expires_after(SleepDuration);
-					SleepTim->async_wait(OutS.GetContext());
-				}
-
-				memcpy(OutS.GetBuff(), "ghi", 3);
-				OutS.Write(3);
-
-				if (SleepTim)
-				{
-					SleepTim->expires_after(SleepDuration);
-					SleepTim->async_wait(OutS.GetContext());
+					if (SleepTim)
+					{
+						SleepTim->expires_after(SleepDuration);
+						SleepTim->async_wait(OutS.GetContext());
+					}
 				}
 
 				//Exiting the coroutine will finalize the response.
