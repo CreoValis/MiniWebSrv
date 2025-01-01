@@ -10,6 +10,7 @@ HTTP/1.1 . It only supports a subset of the specification which allows common
 clients (Firefox, Chrome, curl, etc.) to interact with it.
 
 ## Features
+
 The library provides the following features:
 
 * Separate worker thread: all requests are served on a single worker thread.
@@ -30,6 +31,7 @@ connections for HTTP/1.0 or on request.
 * WebSocket support with simple interfaces to implement.
 
 ## Example
+
 This simple example serves files straight from a zip file. Accesses are logged
 to stdout.
 
@@ -41,20 +43,20 @@ to stdout.
 
 int main(int argc, char **argv)
 {
-	//Create a server object to listen on *:80 .
-	HTTP::Server MiniWS(80);
-	//Create and set a ResponseSource, which will serve files from "test.zip".
-	MiniWS.SetResponseSource(new HTTP::RespSource::Zip("test.zip"));
-	//Create and set the server log object, with std::cout as it's target.
-	MiniWS.SetServerLog(new HTTP::ServerLog::OStream(std::cout));
+    //Create a server object to listen on *:80 .
+    HTTP::Server MiniWS(80);
+    //Create and set a ResponseSource, which will serve files from "test.zip".
+    MiniWS.SetResponseSource(new HTTP::RespSource::Zip("test.zip"));
+    //Create and set the server log object, with std::cout as it's target.
+    MiniWS.SetServerLog(new HTTP::ServerLog::OStream(std::cout));
 
-	//Start the background thread and open the listener socket.
-	MiniWS.Run();
-	//...
-	//Stop the server, allowing 4 seconds for the background thread to exit.
-	MiniWS.Stop(boost::posix_time::seconds(4));
+    //Start the background thread and open the listener socket.
+    MiniWS.Run();
+    //...
+    //Stop the server, allowing 4 seconds for the background thread to exit.
+    MiniWS.Stop(boost::posix_time::seconds(4));
 
-	return 0;
+    return 0;
 }
 ```
 
@@ -62,12 +64,18 @@ For a more complete example including a custom ResponseSource demonstrating the
 use of query parameters and file uploads, see
 [MiniWebSrv.cpp](MiniWebSrv/MiniWebSrv.cpp).
 
-## Documentation
+The library supports response generation with **coroutines**, using the
+**Boost.Context** library. This is described in
+[README.Coro.md](README.Coro.md).
+
+## Usage
+
 Currently, the repository contains the library and a simple demonstration
 application. These are only logically separated: the library does not build
 to a separate object.
 
 ### Project layout
+
 The layout is as follows:
 
 * The [MiniWebSrv/HTTP](MiniWebSrv/HTTP) directory contains the HTTPd library
@@ -78,6 +86,7 @@ demonstration application. It shows the basic steps to configure, start and
 stop the HTTPd server.
 
 ### Basic architecture
+
 The central class in the library is `HTTP::Server`. This class contains the
 single thread used by the HTTPd library to run the protocol parser and create
 responses. It also listens to incoming connection requests, maintains the list
@@ -99,11 +108,13 @@ request and websocket connection. These classes are derived from
 `HTTP::IServerLog`.
 
 ### Configuration
+
 Some basic parts of the library can be configured in
 [HTTP/BuildConfig.h](MiniWebSrv/HTTP/BuildConfig.h) by modifying the constants
 defined there. These include buffer sizes and silent connection timeout.
 
 ### Websocket support
+
 Websocket connections are supported through the HTTP connection upgrade
 process, as specified by the standard. The library's architecture mirrors this
 process.
@@ -129,11 +140,13 @@ on the incoming frames and assembled messages, which can be configured in
 [HTTP/BuildConfig.h](MiniWebSrv/HTTP/BuildConfig.h).
 
 ## Supported platforms
- * Windows 7
+
+ * Windows 7+
  * Linux
  * (probably every platform where the required boost libraries are supported)
 
 ## Compiling
+
 The following are required to compile the library and the application:
 
 * A C++11 compiler. Tested with the following:
