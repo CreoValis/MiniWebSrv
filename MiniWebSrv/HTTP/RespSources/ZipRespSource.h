@@ -59,9 +59,9 @@ public:
 		static unsigned char GZipHeaderA[10];
 	};
 
-	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-		AsyncHelperHolder AsyncHelpers, void *ParentConn);
+	virtual IResponse *Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+		unsigned char *ContentBuff, unsigned char *ContentBuffEnd,
+		AsyncHelperHolder AsyncHelpers, void *ParentConn) override;
 
 private:
 	ZipArchive MyArch;

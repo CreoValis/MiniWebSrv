@@ -16,17 +16,17 @@ public:
 
 	struct CallParams
 	{
-		inline CallParams(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-			const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+		inline CallParams(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+			unsigned char *ContentBuff, unsigned char *ContentBuffEnd,
 			AsyncHelperHolder AsyncHelpers, void *ParentConn) :
 			Method(Method), Resource(Resource), Query(Query), HeaderA(HeaderA), Content((const char *)ContentBuff, ContentBuffEnd-ContentBuff),
 			AsyncHelpers(AsyncHelpers), ParentConn(ParentConn)
 		{ }
 
 		METHOD Method;
-		const std::string &Resource;
-		const QueryParams &Query;
-		const std::vector<Header> &HeaderA;
+		std::string &Resource;
+		QueryParams &Query;
+		std::vector<Header> &HeaderA;
 
 		std::string_view Content;
 
@@ -46,8 +46,8 @@ public:
 
 	virtual void SetServerLog(IServerLog *NewLog)  override { }
 
-	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+	virtual IResponse *Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+		unsigned char *ContentBuff, unsigned char *ContentBuffEnd,
 		AsyncHelperHolder AsyncHelpers, void *ParentConn) override
 	{
 		return target(CallParams(Method, Resource, Query, HeaderA, ContentBuff, ContentBuffEnd, AsyncHelpers, ParentConn));

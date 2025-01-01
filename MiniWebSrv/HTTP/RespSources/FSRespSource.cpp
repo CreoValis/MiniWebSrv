@@ -79,8 +79,8 @@ FS::FS(const boost::filesystem::path &NewRoot) : Root(boost::filesystem::canonic
 		Root=Root.parent_path();
 }
 
-IResponse *FS::Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+IResponse *FS::Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+		unsigned char *ContentBuff, unsigned char *ContentBuffEnd,
 		AsyncHelperHolder AsyncHelpers, void *ParentConn)
 {
 	boost::filesystem::path Target;

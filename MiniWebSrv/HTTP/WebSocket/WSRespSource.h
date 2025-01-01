@@ -55,9 +55,9 @@ public:
 
 	virtual void SetServerLog(IServerLog *NewLog) { MyServerLog=NewLog; }
 
-	virtual IResponse *Create(HTTP::METHOD Method, const std::string &Resource, const HTTP::QueryParams &Query, const std::vector<HTTP::Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
-		AsyncHelperHolder AsyncHelpers, void *ParentConn);
+	virtual IResponse *Create(HTTP::METHOD Method, std::string &Resource, HTTP::QueryParams &Query, std::vector<HTTP::Header> &HeaderA,
+		unsigned char *ContentBuff, unsigned char *ContentBuffEnd,
+		AsyncHelperHolder AsyncHelpers, void *ParentConn) override;
 
 protected:
 	/**Creates a WSResponse from the specified request, if possible.

@@ -35,8 +35,8 @@ public:
 		std::string ServerName;
 	};
 
-	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn)
+	virtual IResponse *Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+		unsigned char *ContentBuff, unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn) override
 	{ return CreateFromException(Method,Resource,Query,HeaderA,ContentBuff,ContentBuffEnd,AsyncHelpers,this,NULL); }
 
 	IResponse *CreateFromException(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,

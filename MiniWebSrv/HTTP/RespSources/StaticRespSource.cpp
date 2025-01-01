@@ -21,8 +21,8 @@ StaticRespSource::StaticRespSource(const char *ExtData, const char *ExtDataEnd, 
 	ContentType(ContentType), Charset(Charset), RespCode(RespCode)
 {}
 
-IResponse *StaticRespSource::Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn)
+IResponse *StaticRespSource::Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+	unsigned char *ContentBuff, unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn)
 {
 	return new StringResponse(std::make_pair(Data, DataEnd), ContentType, Charset, RespCode);
 }

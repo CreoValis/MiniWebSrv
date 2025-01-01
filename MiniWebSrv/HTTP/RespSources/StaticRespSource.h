@@ -22,8 +22,8 @@ public:
 	stay constant and alive while any response object is alive.*/
 	StaticRespSource(const char *ExtData, const char *ExtDataEnd, const char *ContentType = "text/plain", const char *Charset = "utf-8", RESPONSECODE RespCode = RC_OK);
 
-	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn) override;
+	virtual IResponse *Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+		unsigned char *ContentBuff, unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn) override;
 
 protected:
 	std::string RespStr;

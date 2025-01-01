@@ -40,8 +40,10 @@ public:
 	The default implementation is a stub.*/
 	virtual void SetServerLog(IServerLog *NewLog) { }
 
-	virtual IResponse *Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-		const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+	/**Creates a new IResponse object, which will be used to generate the response. The objects passed to this method
+	can be modified, and will stay valid until the returned object is destroyed.*/
+	virtual IResponse *Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+		unsigned char *ContentBuff, unsigned char *ContentBuffEnd,
 		AsyncHelperHolder AsyncHelpers, void *ParentConn)=0;
 };
 

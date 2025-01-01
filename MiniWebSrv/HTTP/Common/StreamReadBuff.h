@@ -45,14 +45,14 @@ public:
 	inline unsigned int GetRelevantDataLength() const { return RelevantLength; }
 	/**Queries the buffer of currently kept, "relevant" data. This does not
 	include data not yet consumed.*/
-	inline const unsigned char *GetRelevantData(unsigned int &OutLength) const //From the start of relevant data to ReadPos.
+	inline unsigned char *GetRelevantData(unsigned int &OutLength) const //From the start of relevant data to ReadPos.
 	{
 		OutLength=RelevantLength;
 		return ReadBuff+ReadPos-RelevantLength;
 	}
 
 	/**Queries the buffer of bytes available to be consumed.*/
-	inline const unsigned char *GetAvailableData(unsigned int &OutLength) const //From ReadPos to DataEndPos.
+	inline unsigned char *GetAvailableData(unsigned int &OutLength) const //From ReadPos to DataEndPos.
 	{
 		OutLength=DataEndPos-ReadPos;
 		return ReadBuff+ReadPos;

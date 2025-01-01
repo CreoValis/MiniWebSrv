@@ -42,8 +42,8 @@ bool CORSPreflight::Response::GetExtraHeader(unsigned int Index,
 		return false;
 }
 
-IResponse *CORSPreflight::Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn)
+IResponse *CORSPreflight::Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+	unsigned char *ContentBuff, unsigned char *ContentBuffEnd, AsyncHelperHolder AsyncHelpers, void *ParentConn)
 {
 	if (Method==HTTP::METHOD_OPTIONS)
 	{

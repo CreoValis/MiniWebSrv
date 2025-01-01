@@ -46,8 +46,8 @@ void Combiner::SetServerLog(IServerLog *NewLog)
 		CurrHolder.RespSource->SetServerLog(NewLog);
 }
 
-IResponse *Combiner::Create(METHOD Method, const std::string &Resource, const QueryParams &Query, const std::vector<Header> &HeaderA,
-	const unsigned char *ContentBuff, const unsigned char *ContentBuffEnd,
+IResponse *Combiner::Create(METHOD Method, std::string &Resource, QueryParams &Query, std::vector<Header> &HeaderA,
+	unsigned char *ContentBuff, unsigned char *ContentBuffEnd,
 	AsyncHelperHolder AsyncHelpers, void *ParentConn)
 {
 	const std::string *ResPtr=&Resource;
