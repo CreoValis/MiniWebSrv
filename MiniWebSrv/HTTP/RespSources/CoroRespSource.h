@@ -150,6 +150,18 @@ private:
 	}
 };
 
+
+/**Creates a ResponseSource which uses a coroutine-based response.
+@param RespGen Callable with (const GenericBase::CallParams &CParams, CoroResponse::ResponseParams &RParams, CoroResponse::OutStream &OutS) .*/
+template<class Callable>
+auto make_coro_respsource(Callable &&RespGen)
+{
+	return HTTP::RespSource::make_generic([&](const HTTP::RespSource::GenericBase::CallParams &CallParams) {
+		using namespace HTTP::RespSource;
+		return new CoroResponse(std::forward<Callable>(RespGen), CallParams);
+	});
+}
+
 } //RespSource
 
 } //HTTP

@@ -139,44 +139,42 @@ int main(int argc, char* argv[])
 		Combiner->AddRespSource("/formtest",new FormTestRS());
 		Combiner->AddRespSource("/echo",new HTTP::WebSocket::EchoRespSource());
 		Combiner->AddRespSource("/static", new HTTP::RespSource::StaticRespSource(&StaticRespStr, "text/html"), true);
-		Combiner->AddRespSource("/corotest", HTTP::RespSource::make_generic([](const HTTP::RespSource::GenericBase::CallParams &CallParams) {
-			using namespace HTTP::RespSource;
-			return new CoroResponse([](const GenericBase::CallParams &CParams, CoroResponse::ResponseParams &RParams, CoroResponse::OutStream &OutS) {
+		Combiner->AddRespSource("/corotest", HTTP::RespSource::make_coro_respsource(
+			[](const HTTP::RespSource::GenericBase::CallParams &CParams, HTTP::RespSource::CoroResponse::ResponseParams &RParams, HTTP::RespSource::CoroResponse::OutStream &OutS) {
 
-				std::chrono::steady_clock::duration SleepDuration;
-				std::optional<boost::asio::steady_timer> SleepTim;
-				if (auto SleepMs=CParams.Query.GetPtr("sleep"))
+			std::chrono::steady_clock::duration SleepDuration;
+			std::optional<boost::asio::steady_timer> SleepTim;
+			if (auto SleepMs=CParams.Query.GetPtr("sleep"))
+			{
+				SleepDuration=std::chrono::milliseconds(strtoul(SleepMs->data(), nullptr, 10));
+				if (SleepDuration>std::chrono::steady_clock::duration::zero())
+					SleepTim.emplace(CParams.AsyncHelpers.MyIOS);
+			}
+			else
+				SleepDuration=std::chrono::steady_clock::duration::zero();
+
+			RParams.SetResponseCode(200);
+			RParams.SetContentType("text/plain");
+			RParams.GetResponseHeaders().emplace_back("X-Custom", "Custom header value");
+			RParams.Finalize(OutS);
+
+			//Send 9 bytes in 3 Write() calls.
+			char Response[]="abcdefghi";
+			constexpr unsigned int StepSize=3, ResponseSize=sizeof(Response)-1;
+			for (unsigned int x=0; x<ResponseSize; x+=StepSize)
+			{
+				const auto CopyLen=std::min(StepSize, ResponseSize-x);
+				memcpy(OutS.GetBuff(), Response + x, CopyLen);
+				OutS.Write(CopyLen);
+
+				if (SleepTim)
 				{
-					SleepDuration=std::chrono::milliseconds(strtoul(SleepMs->data(), nullptr, 10));
-					if (SleepDuration>std::chrono::steady_clock::duration::zero())
-						SleepTim.emplace(CParams.AsyncHelpers.MyIOS);
+					SleepTim->expires_after(SleepDuration);
+					SleepTim->async_wait(OutS.GetContext());
 				}
-				else
-					SleepDuration=std::chrono::steady_clock::duration::zero();
+			}
 
-				RParams.SetResponseCode(200);
-				RParams.SetContentType("text/plain");
-				RParams.GetResponseHeaders().emplace_back("X-Custom", "Custom header value");
-				RParams.Finalize(OutS);
-
-				//Send 9 bytes in 3 Write() calls.
-				char Response[]="abcdefghi";
-				constexpr unsigned int StepSize=3, ResponseSize=sizeof(Response)-1;
-				for (unsigned int x=0; x<ResponseSize; x+=StepSize)
-				{
-					const auto CopyLen=std::min(StepSize, ResponseSize-x);
-					memcpy(OutS.GetBuff(), Response + x, CopyLen);
-					OutS.Write(CopyLen);
-
-					if (SleepTim)
-					{
-						SleepTim->expires_after(SleepDuration);
-						SleepTim->async_wait(OutS.GetContext());
-					}
-				}
-
-				//Exiting the coroutine will finalize the response.
-			}, CallParams);
+			//Exiting the coroutine will finalize the response.
 		}));
 
 		Combiner->AddRespSource("", new HTTP::RespSource::FS("../Doc"));
