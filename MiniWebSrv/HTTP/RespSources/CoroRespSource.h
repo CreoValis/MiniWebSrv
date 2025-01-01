@@ -35,7 +35,7 @@ Simple example:
 
 new CoroResponse([](const GenericBase::CallParams &CParams, ResponseParams &RParams, OutStream &Stream) {
 	RParams.SetResponseLength(6);
-	RParams.Finalize();
+	RParams.Finalize(Stream);
 
 	memcpy(Stream.GetBuff(), "abc", 3);
 	Stream.Write(3);
