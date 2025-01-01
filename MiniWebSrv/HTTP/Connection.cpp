@@ -278,6 +278,9 @@ bool Connection::ContentHandler(boost::asio::yield_context Yield)
 	if ((HeaderFoundFlags & HF_REQUIRED)!=HF_REQUIRED)
 		return false;
 
+	ContentBuff=nullptr;
+	ContentEndBuff=nullptr;
+
 	if (!ContentLength)
 		//No content to parse.
 		return true;
