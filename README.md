@@ -145,6 +145,4 @@ The following are required to compile the library and the application:
   * The following separately compiled libraries are required:
      * boost\_system
      * boost\_filesystem (required only by the static file response generator)
-     * boost\_thread
-     * boost\_coroutine
-     * boost\_chrono
+     * boost\_context

@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <optional>
 
 #include "HTTP/Server.h"
 #include "HTTP/RespSources/FSRespSource.h"
@@ -11,6 +12,8 @@
 #include "HTTP/RespSources/WSEchoRespSource.h"
 #include "HTTP/RespSources/CombinerRespSource.h"
 #include "HTTP/RespSources/StaticRespSource.h"
+#include "HTTP/RespSources/GenericRespSource.h"
+#include "HTTP/RespSources/CoroRespSource.h"
 #include "HTTP/ServerLogs/OStreamServerLog.h"
 
  //////////////////////////////////////
@@ -136,7 +139,45 @@ int main(int argc, char* argv[])
 		Combiner->AddRespSource("/formtest",new FormTestRS());
 		Combiner->AddRespSource("/echo",new HTTP::WebSocket::EchoRespSource());
 		Combiner->AddRespSource("/static", new HTTP::RespSource::StaticRespSource(&StaticRespStr, "text/html"), true);
-		Combiner->AddRespSource("",new HTTP::RespSource::FS("../Doc"));
+		Combiner->AddRespSource("/corotest", HTTP::RespSource::make_coro_respsource(
+			[](const HTTP::RespSource::GenericBase::CallParams &CParams, HTTP::RespSource::CoroResponse::ResponseParams &RParams, HTTP::RespSource::CoroResponse::OutStream &OutS) {
+
+			std::chrono::steady_clock::duration SleepDuration;
+			std::optional<boost::asio::steady_timer> SleepTim;
+			if (auto SleepMs=CParams.Query.GetPtr("sleep"))
+			{
+				SleepDuration=std::chrono::milliseconds(strtoul(SleepMs->data(), nullptr, 10));
+				if (SleepDuration>std::chrono::steady_clock::duration::zero())
+					SleepTim.emplace(CParams.AsyncHelpers.MyIOS);
+			}
+			else
+				SleepDuration=std::chrono::steady_clock::duration::zero();
+
+			RParams.SetResponseCode(200);
+			RParams.SetContentType("text/plain");
+			RParams.GetResponseHeaders().emplace_back("X-Custom", "Custom header value");
+			RParams.Finalize(OutS);
+
+			//Send 9 bytes in 3 Write() calls.
+			char Response[]="abcdefghi";
+			constexpr unsigned int StepSize=3, ResponseSize=sizeof(Response)-1;
+			for (unsigned int x=0; x<ResponseSize; x+=StepSize)
+			{
+				const auto CopyLen=std::min(StepSize, ResponseSize-x);
+				memcpy(OutS.GetBuff(), Response + x, CopyLen);
+				OutS.Write(CopyLen);
+
+				if (SleepTim)
+				{
+					SleepTim->expires_after(SleepDuration);
+					SleepTim->async_wait(OutS.GetContext());
+				}
+			}
+
+			//Exiting the coroutine will finalize the response.
+		}));
+
+		Combiner->AddRespSource("", new HTTP::RespSource::FS("../Doc"));
 
 		Combiner->AddRedirect("/","/test.html");
 

@@ -106,11 +106,14 @@
     <ClInclude Include="Http\QueryParams.h" />
     <ClInclude Include="Http\RespSources\CombinerRespSource.h" />
     <ClInclude Include="Http\RespSources\CommonErrorRespSource.h" />
+    <ClInclude Include="HTTP\RespSources\CoroRespSource.h" />
     <ClInclude Include="HTTP\RespSources\CORSPreflightRespSource.h" />
     <ClInclude Include="Http\RespSources\detail\MimeDB.h" />
     <ClInclude Include="Http\RespSources\detail\ZipArchive.h" />
     <ClInclude Include="Http\RespSources\FSRespSource.h" />
+    <ClInclude Include="HTTP\RespSources\GenericRespSource.h" />
     <ClInclude Include="HTTP\RespSources\Helper\StringResponse.h" />
+    <ClInclude Include="HTTP\RespSources\SimpleResponse.h" />
     <ClInclude Include="HTTP\RespSources\StaticRespSource.h" />
     <ClInclude Include="HTTP\RespSources\WSEchoRespSource.h" />
     <ClInclude Include="Http\RespSources\ZipRespSource.h" />
@@ -144,6 +147,10 @@
     <ClCompile Include="Http\Server.cpp">
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NoListing</AssemblerOutput>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.Coro.md" />
+    <None Include="..\README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

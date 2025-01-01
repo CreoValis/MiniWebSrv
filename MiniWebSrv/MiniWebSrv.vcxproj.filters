@@ -112,6 +112,15 @@
     <ClInclude Include="HTTP\ConnectionConfig.h">
       <Filter>HTTP</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\RespSources\CoroRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\RespSources\GenericRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTP\RespSources\SimpleResponse.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Http\RespSources\CommonErrorRespSource.cpp">
@@ -192,5 +201,16 @@
     <Filter Include="HTTP\RespSources\Helper">
       <UniqueIdentifier>{2ad98080-867c-4e81-b1fe-5180b2ab5038}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Doc">
+      <UniqueIdentifier>{35dfcc63-9d08-4172-a7ca-b3dccf69a0ad}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Filter>Doc</Filter>
+    </None>
+    <None Include="..\README.Coro.md">
+      <Filter>Doc</Filter>
+    </None>
   </ItemGroup>
 </Project>
