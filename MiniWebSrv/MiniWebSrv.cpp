@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <optional>
 
 #include "HTTP/Server.h"
 #include "HTTP/RespSources/FSRespSource.h"
@@ -141,6 +142,18 @@ int main(int argc, char* argv[])
 		Combiner->AddRespSource("/corotest", HTTP::RespSource::make_generic([](const HTTP::RespSource::GenericBase::CallParams &CallParams) {
 			using namespace HTTP::RespSource;
 			return new CoroResponse([](const GenericBase::CallParams &CParams, CoroResponse::ResponseParams &RParams, CoroResponse::OutStream &OutS) {
+
+				std::chrono::steady_clock::duration SleepDuration;
+				std::optional<boost::asio::steady_timer> SleepTim;
+				if (auto SleepMs=CParams.Query.GetPtr("sleep"))
+				{
+					SleepDuration=std::chrono::milliseconds(strtoul(SleepMs->data(), nullptr, 10));
+					if (SleepDuration>std::chrono::steady_clock::duration::zero())
+						SleepTim.emplace(CParams.AsyncHelpers.MyIOS);
+				}
+				else
+					SleepDuration=std::chrono::steady_clock::duration::zero();
+
 				RParams.SetResponseCode(200);
 				RParams.SetContentType("text/plain");
 				RParams.GetResponseHeaders().emplace_back("X-Custom", "Custom header value");
@@ -150,11 +163,29 @@ int main(int argc, char* argv[])
 				memcpy(OutS.GetBuff(), "abc", 3);
 				OutS.Write(3);
 
+				if (SleepTim)
+				{
+					SleepTim->expires_after(SleepDuration);
+					SleepTim->async_wait(OutS.GetContext());
+				}
+
 				memcpy(OutS.GetBuff(), "def", 3);
 				OutS.Write(3);
 
+				if (SleepTim)
+				{
+					SleepTim->expires_after(SleepDuration);
+					SleepTim->async_wait(OutS.GetContext());
+				}
+
 				memcpy(OutS.GetBuff(), "ghi", 3);
 				OutS.Write(3);
+
+				if (SleepTim)
+				{
+					SleepTim->expires_after(SleepDuration);
+					SleepTim->async_wait(OutS.GetContext());
+				}
 
 				//Exiting the coroutine will finalize the response.
 			}, CallParams);
