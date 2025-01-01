@@ -11,6 +11,8 @@
 #include "HTTP/RespSources/WSEchoRespSource.h"
 #include "HTTP/RespSources/CombinerRespSource.h"
 #include "HTTP/RespSources/StaticRespSource.h"
+#include "HTTP/RespSources/GenericRespSource.h"
+#include "HTTP/RespSources/CoroRespSource.h"
 #include "HTTP/ServerLogs/OStreamServerLog.h"
 
  //////////////////////////////////////
@@ -136,7 +138,29 @@ int main(int argc, char* argv[])
 		Combiner->AddRespSource("/formtest",new FormTestRS());
 		Combiner->AddRespSource("/echo",new HTTP::WebSocket::EchoRespSource());
 		Combiner->AddRespSource("/static", new HTTP::RespSource::StaticRespSource(&StaticRespStr, "text/html"), true);
-		Combiner->AddRespSource("",new HTTP::RespSource::FS("../Doc"));
+		Combiner->AddRespSource("/corotest", HTTP::RespSource::make_generic([](const HTTP::RespSource::GenericBase::CallParams &CallParams) {
+			using namespace HTTP::RespSource;
+			return new CoroResponse([](const GenericBase::CallParams &CParams, CoroResponse::ResponseParams &RParams, CoroResponse::OutStream &OutS) {
+				RParams.SetResponseCode(200);
+				RParams.SetContentType("text/plain");
+				RParams.GetResponseHeaders().emplace_back("X-Custom", "Custom header value");
+				RParams.Finalize(OutS);
+
+				//Send 9 bytes in 3 Write() calls.
+				memcpy(OutS.GetBuff(), "abc", 3);
+				OutS.Write(3);
+
+				memcpy(OutS.GetBuff(), "def", 3);
+				OutS.Write(3);
+
+				memcpy(OutS.GetBuff(), "ghi", 3);
+				OutS.Write(3);
+
+				//Exiting the coroutine will finalize the response.
+			}, CallParams);
+		}));
+
+		Combiner->AddRespSource("", new HTTP::RespSource::FS("../Doc"));
 
 		Combiner->AddRedirect("/","/test.html");
 
