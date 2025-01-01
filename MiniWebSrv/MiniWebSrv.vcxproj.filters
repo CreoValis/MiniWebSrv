@@ -112,6 +112,9 @@
     <ClInclude Include="HTTP\ConnectionConfig.h">
       <Filter>HTTP</Filter>
     </ClInclude>
+    <ClInclude Include="HTTP\RespSources\CoroRespSource.h">
+      <Filter>HTTP\RespSources</Filter>
+    </ClInclude>
     <ClInclude Include="HTTP\RespSources\GenericRespSource.h">
       <Filter>HTTP\RespSources</Filter>
     </ClInclude>

@@ -106,6 +106,7 @@
     <ClInclude Include="Http\QueryParams.h" />
     <ClInclude Include="Http\RespSources\CombinerRespSource.h" />
     <ClInclude Include="Http\RespSources\CommonErrorRespSource.h" />
+    <ClInclude Include="HTTP\RespSources\CoroRespSource.h" />
     <ClInclude Include="HTTP\RespSources\CORSPreflightRespSource.h" />
     <ClInclude Include="Http\RespSources\detail\MimeDB.h" />
     <ClInclude Include="Http\RespSources\detail\ZipArchive.h" />
