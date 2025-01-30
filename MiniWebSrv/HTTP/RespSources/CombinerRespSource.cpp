@@ -65,9 +65,12 @@ IResponse *Combiner::Create(METHOD Method, std::string &Resource, QueryParams &Q
 	for (const RSHolder &CurrHolder : HolderA)
 	{
 		if (CurrHolder(*ResPtr))
-			return CurrHolder.RespSource->Create(Method,ResPtr->substr(CurrHolder.Prefix.length()),
-			Query,HeaderA,ContentBuff,ContentBuffEnd,
-			AsyncHelpers,ParentConn);
+		{
+			auto Res=ResPtr->substr(CurrHolder.Prefix.length());
+			return CurrHolder.RespSource->Create(Method, Res,
+				Query, HeaderA, ContentBuff, ContentBuffEnd,
+				AsyncHelpers, ParentConn);
+		}
 	}
 
 	return new CommonError::Response(*ResPtr,HeaderA,NULL,RC_NOTFOUND);
